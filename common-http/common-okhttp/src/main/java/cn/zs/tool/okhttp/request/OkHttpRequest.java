@@ -1,0 +1,111 @@
+package cn.zs.tool.okhttp.request;
+
+import cn.zs.tool.core.text.StringUtil;
+import cn.zs.tool.http.core.constant.HttpMethodEnum;
+import okhttp3.MediaType;
+import okhttp3.RequestBody;
+
+import java.io.File;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+
+/**
+ * okhttp请求
+ *
+ * @author sheng
+ */
+public class OkHttpRequest extends OkHttpBaseRequest<OkHttpRequest> {
+    /**
+     * 请求体
+     */
+    private RequestBody requestBody;
+
+    public OkHttpRequest(final String url, final HttpMethodEnum method) {
+        super(url, method);
+    }
+
+    /**
+     * 创建请求
+     *
+     * @param url    url
+     * @param method 方法
+     */
+    public static OkHttpRequest create(String url, HttpMethodEnum method) {
+        return new OkHttpRequest(url, method);
+    }
+
+    // region 请求体
+
+    /**
+     * 设置请求体
+     */
+    public OkHttpRequest body(String body) {
+        return body(body, StandardCharsets.UTF_8);
+    }
+
+    /**
+     * 设置请求体
+     */
+    public OkHttpRequest body(String body, Charset charset) {
+        return body(body, charset, null);
+    }
+
+    /**
+     * 设置请求体
+     */
+    public OkHttpRequest body(String body, Charset charset, MediaType mediaType) {
+        RequestBody requestBody = RequestBody.create(body.getBytes(charset), mediaType);
+        return body(requestBody);
+    }
+
+    /**
+     * 设置请求体
+     */
+    public OkHttpRequest body(byte[] body) {
+        return body(body, null);
+    }
+
+    /**
+     * 设置请求体
+     */
+    public OkHttpRequest body(byte[] body, MediaType mediaType) {
+        RequestBody requestBody = RequestBody.create(body, mediaType);
+        return body(requestBody);
+    }
+
+    /**
+     * 设置请求体
+     */
+    public OkHttpRequest body(File file, MediaType mediaType) {
+        RequestBody requestBody = RequestBody.create(file, mediaType);
+        return body(requestBody);
+    }
+
+    /**
+     * 设置请求体
+     */
+    public OkHttpRequest body(RequestBody requestBody) {
+        this.requestBody = requestBody;
+        return this;
+    }
+
+    /**
+     * 获取请求体类型
+     */
+    private MediaType getMediaType() {
+        String contentType = getHeaders().getContentType();
+        return StringUtil.isNotBlank(contentType) ? MediaType.parse(contentType) : null;
+    }
+
+    // endregion
+
+    @Override
+    public OkHttpRequest self() {
+        return this;
+    }
+
+    @Override
+    public RequestBody getRequestBody() {
+        return requestBody;
+    }
+}
