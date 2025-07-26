@@ -17,7 +17,7 @@
         <dependency>
             <groupId>cn.zs</groupId>
             <artifactId>common-core</artifactId>
-            <version>${parent.version}</version>
+            <version>${project.version}</version>
         </dependency>
     </dependencies>
 

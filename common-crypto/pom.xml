@@ -6,37 +6,28 @@
 
     <parent>
         <groupId>cn.zs</groupId>
-        <artifactId>common-http</artifactId>
+        <artifactId>common-tool</artifactId>
         <version>1.0.0</version>
     </parent>
 
-    <artifactId>common-okhttp</artifactId>
+    <artifactId>common-crypto</artifactId>
     <packaging>jar</packaging>
 
     <dependencies>
         <dependency>
             <groupId>cn.zs</groupId>
-            <artifactId>common-http-core</artifactId>
+            <artifactId>common-core</artifactId>
             <version>${project.version}</version>
         </dependency>
 
         <dependency>
-            <groupId>cn.zs</groupId>
-            <artifactId>common-log</artifactId>
-            <version>${project.version}</version>
+            <groupId>org.bouncycastle</groupId>
+            <artifactId>bcprov-jdk18on</artifactId>
         </dependency>
 
-        <!-- okhttp  -->
         <dependency>
-            <groupId>com.squareup.okhttp3</groupId>
-            <artifactId>okhttp</artifactId>
+            <groupId>org.bouncycastle</groupId>
+            <artifactId>bcpkix-jdk18on</artifactId>
         </dependency>
-
-        <!-- 日志拦截器 -->
-        <dependency>
-            <groupId>com.squareup.okhttp3</groupId>
-            <artifactId>logging-interceptor</artifactId>
-        </dependency>
-        <!-- okhttp  -->
     </dependencies>
 </project>
