@@ -10,7 +10,6 @@ import com.fasterxml.jackson.databind.json.JsonMapper;
 
 import java.util.Locale;
 import java.util.Objects;
-import java.util.function.Consumer;
 
 /**
  * Json 工具类
@@ -114,10 +113,6 @@ public class JsonTool implements JacksonTool {
      * json 处理器
      */
     private final ObjectMapper mapper;
-    /**
-     * 错误处理器
-     */
-    private final Consumer<Throwable> errorHandler;
 
     /**
      * 创建 JsonTool
@@ -125,32 +120,16 @@ public class JsonTool implements JacksonTool {
      * @param mapper {@link ObjectMapper}
      */
     public static JsonTool create(ObjectMapper mapper) {
-        return new JsonTool(mapper, null);
+        return new JsonTool(mapper);
     }
 
-    /**
-     * 创建 JsonTool
-     *
-     * @param mapper       {@link ObjectMapper}
-     * @param errorHandler 错误处理器
-     */
-    public static JsonTool create(ObjectMapper mapper, Consumer<Throwable> errorHandler) {
-        return new JsonTool(mapper, errorHandler);
-    }
-
-    public JsonTool(ObjectMapper mapper, Consumer<Throwable> errorHandler) {
+    public JsonTool(ObjectMapper mapper) {
         this.mapper = Objects.requireNonNull(mapper, "ObjectMapper require not null");
-        this.errorHandler = Objects.nonNull(errorHandler) ? errorHandler : ERROR_HANDLER;
     }
 
     @Override
     public ObjectMapper mapper() {
         return mapper;
-    }
-
-    @Override
-    public Consumer<Throwable> errorHandler() {
-        return errorHandler;
     }
 
     /**

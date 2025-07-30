@@ -10,7 +10,6 @@ import com.fasterxml.jackson.dataformat.xml.ser.ToXmlGenerator;
 
 import java.util.Locale;
 import java.util.Objects;
-import java.util.function.Consumer;
 
 /**
  * xml 工具类
@@ -75,10 +74,6 @@ public class XmlTool implements JacksonTool {
      * xml 处理器
      */
     private final ObjectMapper mapper;
-    /**
-     * 错误处理器
-     */
-    private final Consumer<Throwable> errorHandler;
 
     /**
      * 创建 XmlTool
@@ -86,32 +81,16 @@ public class XmlTool implements JacksonTool {
      * @param mapper {@link ObjectMapper}
      */
     public static XmlTool create(ObjectMapper mapper) {
-        return new XmlTool(mapper, null);
+        return new XmlTool(mapper);
     }
 
-    /**
-     * 创建 XmlTool
-     *
-     * @param mapper       {@link ObjectMapper}
-     * @param errorHandler 错误处理器
-     */
-    public static XmlTool create(ObjectMapper mapper, Consumer<Throwable> errorHandler) {
-        return new XmlTool(mapper, errorHandler);
-    }
-
-    public XmlTool(ObjectMapper mapper, Consumer<Throwable> errorHandler) {
+    public XmlTool(ObjectMapper mapper) {
         this.mapper = Objects.requireNonNull(mapper, "ObjectMapper require not null");
-        this.errorHandler = Objects.nonNull(errorHandler) ? errorHandler : ERROR_HANDLER;
     }
 
     @Override
     public ObjectMapper mapper() {
         return mapper;
-    }
-
-    @Override
-    public Consumer<Throwable> errorHandler() {
-        return errorHandler;
     }
 
     /**
