@@ -1,5 +1,6 @@
 package cn.zs.tool.okhttp.response;
 
+import cn.zs.tool.core.fuction.throwing.ThrowingConsumer;
 import cn.zs.tool.http.core.converter.HttpMsgConverter;
 import cn.zs.tool.okhttp.executor.OkHttpAsyncExecutor;
 import lombok.extern.slf4j.Slf4j;
@@ -10,7 +11,6 @@ import okhttp3.Response;
 import java.io.IOException;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
-import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
@@ -29,7 +29,7 @@ public class OkHttpAsyncResponseFuture<R> extends CompletableFuture<OkHttpAsyncE
     /**
      * 错误处理器
      */
-    private final Consumer<Throwable> errHandler;
+    private final ThrowingConsumer<Throwable, Throwable> errHandler;
 
     /**
      * 成功判断
@@ -50,12 +50,12 @@ public class OkHttpAsyncResponseFuture<R> extends CompletableFuture<OkHttpAsyncE
      * @param okPredicate  成功判断
      */
     public static <R> OkHttpAsyncResponseFuture<R> create(Supplier<Call> callSupplier, HttpMsgConverter<R> msgConverter,
-                                                          Consumer<Throwable> errHandler,
+                                                          ThrowingConsumer<Throwable, Throwable> errHandler,
                                                           Predicate<Integer> okPredicate, Boolean mustHandleResult) {
         return new OkHttpAsyncResponseFuture<>(callSupplier, msgConverter, errHandler, okPredicate, mustHandleResult);
     }
 
-    public OkHttpAsyncResponseFuture(Supplier<Call> callSupplier, HttpMsgConverter<R> msgConverter, Consumer<Throwable> errHandler,
+    public OkHttpAsyncResponseFuture(Supplier<Call> callSupplier, HttpMsgConverter<R> msgConverter, ThrowingConsumer<Throwable, Throwable> errHandler,
                                      Predicate<Integer> okPredicate, Boolean mustHandleResult) {
         this.msgConverter = Objects.requireNonNull(msgConverter, "msgConverter must not be null");
         this.errHandler = errHandler;

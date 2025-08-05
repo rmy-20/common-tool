@@ -1,5 +1,6 @@
 package cn.zs.tool.okhttp.decorator;
 
+import cn.zs.tool.core.fuction.throwing.ThrowingConsumer;
 import cn.zs.tool.http.core.HttpHeaders;
 import cn.zs.tool.http.core.constant.HttpMethodEnum;
 import cn.zs.tool.http.core.converter.ByteArrayHttpMsgConverter;
@@ -19,7 +20,6 @@ import okhttp3.RequestBody;
 import java.nio.charset.Charset;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
-import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 /**
@@ -147,7 +147,8 @@ public interface OkHttpExecuteDecorator {
      * 异步执行获取{@link String}类型结果包装器
      */
     default CompletableFuture<OkHttpAsyncExecutor<String>> executeAsyncForString(HttpMsgConverter<String> msgConverter,
-                                                                                 Consumer<Throwable> errHandler, Predicate<Integer> okPredicate,
+                                                                                 ThrowingConsumer<Throwable, Throwable> errHandler,
+                                                                                 Predicate<Integer> okPredicate,
                                                                                  Boolean mustHandleResult) {
         return executeAsync(msgConverter, errHandler, okPredicate, mustHandleResult);
     }
@@ -169,7 +170,8 @@ public interface OkHttpExecuteDecorator {
     /**
      * 异步执行获取 json 反序列化类型结果包装器
      */
-    default <R> CompletableFuture<OkHttpAsyncExecutor<R>> executeAsyncForJson(JsonHttpMsgConverter<R> msgConverter, Consumer<Throwable> errHandler,
+    default <R> CompletableFuture<OkHttpAsyncExecutor<R>> executeAsyncForJson(JsonHttpMsgConverter<R> msgConverter,
+                                                                              ThrowingConsumer<Throwable, Throwable> errHandler,
                                                                               Predicate<Integer> okPredicate, Boolean mustHandleResult) {
         return executeAsync(msgConverter, errHandler, okPredicate, mustHandleResult);
     }
@@ -191,7 +193,8 @@ public interface OkHttpExecuteDecorator {
     /**
      * 异步执行获取 xml 反序列化类型结果包装器
      */
-    default <R> CompletableFuture<OkHttpAsyncExecutor<R>> executeAsyncForXml(XmlHttpMsgConverter<R> msgConverter, Consumer<Throwable> errHandler,
+    default <R> CompletableFuture<OkHttpAsyncExecutor<R>> executeAsyncForXml(XmlHttpMsgConverter<R> msgConverter,
+                                                                             ThrowingConsumer<Throwable, Throwable> errHandler,
                                                                              Predicate<Integer> okPredicate, Boolean mustHandleResult) {
         return executeAsync(msgConverter, errHandler, okPredicate, mustHandleResult);
     }
@@ -213,7 +216,8 @@ public interface OkHttpExecuteDecorator {
     /**
      * 异步执行获取字节数组结果包装器
      */
-    default CompletableFuture<OkHttpAsyncExecutor<byte[]>> executeAsyncForBytes(HttpMsgConverter<byte[]> msgConverter, Consumer<Throwable> errHandler,
+    default CompletableFuture<OkHttpAsyncExecutor<byte[]>> executeAsyncForBytes(HttpMsgConverter<byte[]> msgConverter,
+                                                                                ThrowingConsumer<Throwable, Throwable> errHandler,
                                                                                 Predicate<Integer> okPredicate, Boolean mustHandleResult) {
         return executeAsync(msgConverter, errHandler, okPredicate, mustHandleResult);
     }
@@ -246,7 +250,8 @@ public interface OkHttpExecuteDecorator {
      * @param errHandler       异常处理器
      * @param mustHandleResult 是否必须处理结果，默认为false
      */
-    default <R> CompletableFuture<OkHttpAsyncExecutor<R>> executeAsync(HttpMsgConverter<R> msgConverter, Consumer<Throwable> errHandler,
+    default <R> CompletableFuture<OkHttpAsyncExecutor<R>> executeAsync(HttpMsgConverter<R> msgConverter,
+                                                                       ThrowingConsumer<Throwable, Throwable> errHandler,
                                                                        Predicate<Integer> okPredicate, Boolean mustHandleResult) {
         return OkHttpAsyncResponseFuture.create(this::call, msgConverter, errHandler, okPredicate, mustHandleResult);
     }

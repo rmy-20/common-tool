@@ -1,12 +1,12 @@
 package cn.zs.tool.http.core.execute;
 
+import cn.zs.tool.core.fuction.throwing.ThrowingConsumer;
 import cn.zs.tool.http.core.HttpHeaders;
 import cn.zs.tool.http.core.constant.HttpConstant;
 import cn.zs.tool.http.core.converter.HttpMsgConverter;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.Objects;
-import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 /**
@@ -19,7 +19,7 @@ public abstract class HttpExecuteProcessor<R, T extends HttpExecuteProcessor<R, 
     /**
      * 默认异常处理器
      */
-    protected static final Consumer<Throwable> HTTP_ERR_HANDLE = e -> log.error("http请求异常", e);
+    protected static final ThrowingConsumer<Throwable, ?> HTTP_ERR_HANDLE = e -> log.error("http请求异常", e);
 
     /**
      * 响应结果处理器
@@ -34,7 +34,7 @@ public abstract class HttpExecuteProcessor<R, T extends HttpExecuteProcessor<R, 
     /**
      * 错误处理器
      */
-    protected Consumer<Throwable> errHandler;
+    protected ThrowingConsumer<Throwable, ?> errHandler;
 
     /**
      * 响应状态信息
@@ -104,16 +104,23 @@ public abstract class HttpExecuteProcessor<R, T extends HttpExecuteProcessor<R, 
     }
 
     /**
-     * 获取错误处理器
+     * 异常处理
+     *
+     * @param ex 异常
      */
-    public Consumer<Throwable> getErrHandler() {
-        return Objects.nonNull(errHandler) ? errHandler : HTTP_ERR_HANDLE;
+    @SuppressWarnings("unchecked")
+    protected void errorHandler(Throwable ex) {
+        if (Objects.nonNull(errHandler)) {
+            ((ThrowingConsumer<Throwable, RuntimeException>) errHandler).accept(ex);
+        } else {
+            ((ThrowingConsumer<Throwable, RuntimeException>) HTTP_ERR_HANDLE).accept(ex);
+        }
     }
 
     /**
      * 错误处理器
      */
-    public T errHandler(Consumer<Throwable> errHandler) {
+    public T errHandler(ThrowingConsumer<Throwable, Throwable> errHandler) {
         this.errHandler = errHandler;
         return self();
     }

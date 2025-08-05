@@ -2,6 +2,7 @@ package cn.zs.tool.jackson;
 
 import cn.zs.tool.core.date.DateConstants;
 import cn.zs.tool.core.date.DateTool;
+import cn.zs.tool.core.fuction.throwing.ThrowingConsumer;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -85,7 +86,7 @@ public class XmlTool implements JacksonTool {
     }
 
     public XmlTool(ObjectMapper mapper) {
-        this.mapper = Objects.requireNonNull(mapper, "ObjectMapper require not null");
+        this.mapper = Objects.requireNonNull(mapper, "mapper require not null");
     }
 
     @Override
@@ -100,6 +101,17 @@ public class XmlTool implements JacksonTool {
      * @return XML 字符串
      */
     public String toXml(Object bean) {
-        return writeValueAsString(bean);
+        return writeValueAsString(bean, e -> log.error("bean [{}] to xml 异常", bean, e));
+    }
+
+    /**
+     * 将 Java Bean 转化为 XML
+     *
+     * @param bean         {@link Object}
+     * @param errorHandler 异常处理
+     * @return XML 字符串
+     */
+    public String toXml(Object bean, ThrowingConsumer<Throwable, Throwable> errorHandler) {
+        return writeValueAsString(bean, errorHandler);
     }
 }

@@ -57,7 +57,7 @@ public class OkHttpExecutor<R> extends HttpExecuteProcessor<R, OkHttpExecutor<R>
                 }
             } catch (Throwable e) {
                 statusMsg = e.getMessage();
-                getErrHandler().accept(e);
+                errorHandler(e);
             }
         }
     }

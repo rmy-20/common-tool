@@ -1,12 +1,12 @@
 package cn.zs.tool.http.core.execute;
 
+import cn.zs.tool.core.fuction.throwing.ThrowingConsumer;
 import cn.zs.tool.http.core.HttpHeaders;
 import cn.zs.tool.http.core.constant.HttpConstant;
 import cn.zs.tool.http.core.converter.HttpMsgConverter;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.Objects;
-import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 /**
@@ -19,7 +19,7 @@ public abstract class HttpAsyncExecuteProcessor<R> {
     /**
      * 默认异常处理器
      */
-    protected static final Consumer<Throwable> HTTP_ERR_HANDLE = e -> log.error("http异步请求异常", e);
+    protected static final ThrowingConsumer<Throwable, Throwable> HTTP_ERR_HANDLE = e -> log.error("http异步请求异常", e);
 
     /**
      * 响应处理器
@@ -34,7 +34,7 @@ public abstract class HttpAsyncExecuteProcessor<R> {
     /**
      * 错误处理器
      */
-    protected final Consumer<Throwable> errHandler;
+    protected final ThrowingConsumer<Throwable, ?> errHandler;
 
     /**
      * true 为必须处理结果
@@ -60,11 +60,21 @@ public abstract class HttpAsyncExecuteProcessor<R> {
      * @param mustHandleResult 是否必须处理结果
      */
     public HttpAsyncExecuteProcessor(HttpMsgConverter<R> msgConverter, Predicate<Integer> okPredicate,
-                                     Consumer<Throwable> errHandler, boolean mustHandleResult) {
+                                     ThrowingConsumer<Throwable, Throwable> errHandler, boolean mustHandleResult) {
         this.msgConverter = Objects.requireNonNull(msgConverter, "msgConverter must not be null");
         this.okPredicate = Objects.nonNull(okPredicate) ? okPredicate : HttpConstant.HTTP_OK_PREDICATE;
         this.errHandler = Objects.nonNull(errHandler) ? errHandler : HTTP_ERR_HANDLE;
         this.mustHandleResult = mustHandleResult;
+    }
+
+    /**
+     * 异常处理
+     *
+     * @param ex 异常
+     */
+    @SuppressWarnings("unchecked")
+    protected void errorHandler(Throwable ex) {
+        ((ThrowingConsumer<Throwable, RuntimeException>) errHandler).accept(ex);
     }
 
     /**

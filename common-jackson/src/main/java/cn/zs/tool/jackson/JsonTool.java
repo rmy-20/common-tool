@@ -2,6 +2,7 @@ package cn.zs.tool.jackson;
 
 import cn.zs.tool.core.date.DateConstants;
 import cn.zs.tool.core.date.DateTool;
+import cn.zs.tool.core.fuction.throwing.ThrowingConsumer;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -124,7 +125,7 @@ public class JsonTool implements JacksonTool {
     }
 
     public JsonTool(ObjectMapper mapper) {
-        this.mapper = Objects.requireNonNull(mapper, "ObjectMapper require not null");
+        this.mapper = Objects.requireNonNull(mapper, "mapper require not null");
     }
 
     @Override
@@ -139,6 +140,17 @@ public class JsonTool implements JacksonTool {
      * @return Json 字符串
      */
     public String toJson(Object o) {
-        return writeValueAsString(o);
+        return writeValueAsString(o, e -> log.error("bean [{}] to json 异常", o, e));
+    }
+
+    /**
+     * 将 Java Bean o 转化为 字符串
+     *
+     * @param o            Java Bean
+     * @param errorHandler 异常处理
+     * @return Json 字符串
+     */
+    public String toJson(Object o, ThrowingConsumer<Throwable, Throwable> errorHandler) {
+        return writeValueAsString(o, errorHandler);
     }
 }

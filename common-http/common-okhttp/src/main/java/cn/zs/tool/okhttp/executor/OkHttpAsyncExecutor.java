@@ -1,5 +1,6 @@
 package cn.zs.tool.okhttp.executor;
 
+import cn.zs.tool.core.fuction.throwing.ThrowingConsumer;
 import cn.zs.tool.core.text.StringUtil;
 import cn.zs.tool.http.core.HttpHeaders;
 import cn.zs.tool.http.core.converter.HttpMsgConverter;
@@ -9,7 +10,6 @@ import okhttp3.Call;
 import okhttp3.Response;
 
 import java.util.Objects;
-import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 /**
@@ -34,13 +34,13 @@ public class OkHttpAsyncExecutor<R> extends HttpAsyncExecuteProcessor<R> {
      * @param mustHandleResult 是否必须处理结果
      */
     public static <R> OkHttpAsyncExecutor<R> create(Call call, Response response, HttpMsgConverter<R> msgConverter,
-                                                    Consumer<Throwable> errHandler, Predicate<Integer> okPredicate,
+                                                    ThrowingConsumer<Throwable, Throwable> errHandler, Predicate<Integer> okPredicate,
                                                     Boolean mustHandleResult) {
         return new OkHttpAsyncExecutor<>(call, response, msgConverter, errHandler, okPredicate, Boolean.TRUE.equals(mustHandleResult));
     }
 
     public OkHttpAsyncExecutor(Call call, Response response, HttpMsgConverter<R> msgConverter,
-                               Consumer<Throwable> errHandler, Predicate<Integer> okPredicate, boolean mustHandleResult) {
+                               ThrowingConsumer<Throwable, Throwable> errHandler, Predicate<Integer> okPredicate, boolean mustHandleResult) {
         super(msgConverter, okPredicate, errHandler, mustHandleResult);
         Objects.requireNonNull(call, "call must not be null");
         Objects.requireNonNull(response, "response must not be null");
@@ -55,7 +55,7 @@ public class OkHttpAsyncExecutor<R> extends HttpAsyncExecuteProcessor<R> {
             }
         } catch (Throwable e) {
             statusMsg = e.getMessage();
-            errHandler.accept(e);
+            errorHandler(e);
         }
     }
 
