@@ -73,13 +73,6 @@ public interface OkHttpExecuteDecorator {
 
     /**
      * 同步执行处理 json 结果
-     */
-    default <R> OkHttpExecutor<R> executeForJson(Class<R> resultType) {
-        return executeForJson(JsonHttpMsgConverter.create(resultType));
-    }
-
-    /**
-     * 同步执行处理 json 结果
      *
      * @param msgConverter {@link JsonHttpMsgConverter}
      */
@@ -89,15 +82,8 @@ public interface OkHttpExecuteDecorator {
 
     /**
      * 同步执行处理 xml 结果
-     */
-    default <R> OkHttpExecutor<R> executeForXml(Class<R> resultType) {
-        return executeForXml(XmlHttpMsgConverter.create(resultType));
-    }
-
-    /**
-     * 同步执行处理 xml 结果
      *
-     * @param msgConverter {@link JsonHttpMsgConverter}
+     * @param msgConverter {@link XmlHttpMsgConverter}
      */
     default <R> OkHttpExecutor<R> executeForXml(XmlHttpMsgConverter<R> msgConverter) {
         return execute(msgConverter);
@@ -156,13 +142,6 @@ public interface OkHttpExecuteDecorator {
     /**
      * 异步执行获取 json 反序列化类型结果包装器
      */
-    default <R> CompletableFuture<OkHttpAsyncExecutor<R>> executeAsyncForJson(Class<R> type) {
-        return executeAsyncForJson(JsonHttpMsgConverter.create(type));
-    }
-
-    /**
-     * 异步执行获取 json 反序列化类型结果包装器
-     */
     default <R> CompletableFuture<OkHttpAsyncExecutor<R>> executeAsyncForJson(JsonHttpMsgConverter<R> msgConverter) {
         return executeAsyncForJson(msgConverter, null, null, false);
     }
@@ -174,13 +153,6 @@ public interface OkHttpExecuteDecorator {
                                                                               ThrowingConsumer<Throwable, Throwable> errHandler,
                                                                               Predicate<Integer> okPredicate, Boolean mustHandleResult) {
         return executeAsync(msgConverter, errHandler, okPredicate, mustHandleResult);
-    }
-
-    /**
-     * 异步执行获取 xml 反序列化类型结果包装器
-     */
-    default <R> CompletableFuture<OkHttpAsyncExecutor<R>> executeAsyncForXml(Class<R> type) {
-        return executeAsyncForXml(XmlHttpMsgConverter.create(type));
     }
 
     /**

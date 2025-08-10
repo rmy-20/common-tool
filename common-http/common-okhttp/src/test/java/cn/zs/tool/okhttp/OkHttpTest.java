@@ -64,7 +64,7 @@ class OkHttpTest {
         OkHttpExecutor<Map<String, Object>> exchange = OkHttpTool.post(uri).pathsEncoded("/test/post")
                 .setContentType(MediaTypeEnum.APPLICATION_JSON_UTF8.getMediaType())
                 .body(JsonTool.JSON_TOOL.toJson(map))
-                .execute(JsonHttpMsgConverter.create(new TypeReference<Map<String, Object>>() {
+                .execute(JsonHttpMsgConverter.create(JsonTool.JSON_TOOL, new TypeReference<Map<String, Object>>() {
                 }));
         Assert.isTrue(exchange.isOk(), "okhttp post请求失败");
         System.out.println("okhttp post结果：" + exchange.mustHandleResult(true).get());
@@ -85,7 +85,7 @@ class OkHttpTest {
         CompletableFuture<OkHttpAsyncExecutor<Map<String, Object>>> future = OkHttpTool.post(uri).pathsEncoded("/test/post")
                 .setContentType(MediaTypeEnum.APPLICATION_JSON_UTF8.getMediaType())
                 .body(JsonTool.JSON_TOOL.toJson(map))
-                .executeAsyncForJson(JsonHttpMsgConverter.create(new TypeReference<Map<String, Object>>() {
+                .executeAsyncForJson(JsonHttpMsgConverter.create(JsonTool.JSON_TOOL, new TypeReference<Map<String, Object>>() {
                 }), null, null, true);
         for (int i = 0; i < 50; i++) {
             log.info("{}", i);

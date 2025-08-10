@@ -1,5 +1,6 @@
 package cn.zs.tool.core.io;
 
+import cn.zs.tool.core.fuction.throwing.ThrowingConsumer;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.ByteArrayOutputStream;
@@ -8,7 +9,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.util.Objects;
-import java.util.function.Consumer;
 
 /**
  * IO 工具类
@@ -101,13 +101,14 @@ public class IOUtil {
      * @param closeable  待关闭流
      * @param errHandler 异常处理器
      */
-    public static void closeQuietly(Closeable closeable, Consumer<Throwable> errHandler) {
+    @SuppressWarnings("unchecked")
+    public static void closeQuietly(Closeable closeable, ThrowingConsumer<Throwable, ?> errHandler) {
         if (Objects.nonNull(closeable)) {
             try {
                 closeable.close();
             } catch (Exception e) {
                 if (Objects.nonNull(errHandler)) {
-                    errHandler.accept(e);
+                    ((ThrowingConsumer<Throwable, RuntimeException>) errHandler).accept(e);
                 }
             }
         }
