@@ -5,8 +5,11 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.io.ByteArrayOutputStream;
 import java.io.Closeable;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.util.Objects;
 
@@ -67,6 +70,116 @@ public class IOUtil {
     }
 
     /**
+     * 获取一个默认的 byte[]
+     */
+    static byte[] byteArray() {
+        return new byte[4096];
+    }
+
+    /**
+     * 拷贝流，并返回拷贝的字节数，当有异常时将抛出异常
+     *
+     * @param inputStream  输入流
+     * @param outputStream 输出流
+     * @return 拷贝的字节数
+     */
+    public static long copy(InputStream inputStream, OutputStream outputStream) {
+        return copy(inputStream, outputStream, ex -> {
+            throw ex;
+        });
+    }
+
+    /**
+     * 拷贝流
+     *
+     * @param inputStream  输入流
+     * @param outputStream 输出流
+     * @param errHandler   异常处理器
+     * @return 拷贝的字节数, -1 表示异常
+     */
+    public static long copy(InputStream inputStream, OutputStream outputStream, ThrowingConsumer<Throwable, ? extends Throwable> errHandler) {
+        return copy(inputStream, outputStream, byteArray(), errHandler);
+    }
+
+    /**
+     * 拷贝流，并返回拷贝的字节数
+     *
+     * @param inputStream  输入流
+     * @param outputStream 输出流
+     * @param buffer       缓冲区
+     * @param errHandler   异常处理器
+     * @return 拷贝的字节数, -1 表示异常
+     */
+    @SuppressWarnings("unchecked")
+    public static long copy(InputStream inputStream, OutputStream outputStream, byte[] buffer,
+                            ThrowingConsumer<Throwable, ? extends Throwable> errHandler) {
+        try {
+            long totalCount = 0L;
+            int readLen;
+            while ((readLen = inputStream.read(buffer)) != -1) {
+                outputStream.write(buffer, 0, readLen);
+                totalCount += readLen;
+            }
+            outputStream.flush();
+            return totalCount;
+        } catch (Throwable ex) {
+            ((ThrowingConsumer<Throwable, RuntimeException>) errHandler).accept(ex);
+        }
+        return -1;
+    }
+
+    /**
+     * 拷贝流，并返回拷贝的字节数；如果目标文件所在文件夹不存在，则创建；有异常则抛出异常
+     *
+     * @param inputStream 输入流
+     * @param targetFile  目标文件
+     * @return 拷贝的字节数, -1 表示异常
+     */
+    public static long copy(InputStream inputStream, File targetFile) {
+        return copy(inputStream, targetFile, ex -> {
+            throw ex;
+        });
+    }
+
+    /**
+     * 拷贝流，并返回拷贝的字节数；如果目标文件所在文件夹不存在，则创建
+     *
+     * @param inputStream 输入流
+     * @param targetFile  目标文件
+     * @param errHandler  异常处理器
+     * @return 拷贝的字节数, -1 表示异常
+     */
+    public static long copy(InputStream inputStream, File targetFile, ThrowingConsumer<Throwable, ? extends Throwable> errHandler) {
+        return copy(inputStream, targetFile, byteArray(), errHandler);
+    }
+
+    /**
+     * 拷贝流，并返回拷贝的字节数；如果目标文件所在文件夹不存在，则创建
+     *
+     * @param inputStream 输入流
+     * @param targetFile  目标文件
+     * @param buffer      缓冲区
+     * @param errHandler  异常处理器
+     * @return 拷贝的字节数, -1 表示异常
+     */
+    @SuppressWarnings("unchecked")
+    public static long copy(InputStream inputStream, File targetFile, byte[] buffer, ThrowingConsumer<Throwable, ? extends Throwable> errHandler) {
+        try {
+            File parentFolder = targetFile.getParentFile();
+            if (!parentFolder.exists() && !parentFolder.mkdirs()) {
+                throw new IllegalArgumentException("Can't create directory : " + parentFolder);
+            }
+
+            try (FileOutputStream outputStream = new FileOutputStream(targetFile);) {
+                return copy(inputStream, outputStream, buffer, errHandler);
+            }
+        } catch (Throwable ex) {
+            ((ThrowingConsumer<Throwable, RuntimeException>) errHandler).accept(ex);
+        }
+        return -1;
+    }
+
+    /**
      * 关闭流
      */
     public static void close(Closeable closeable) throws IOException {
@@ -102,7 +215,7 @@ public class IOUtil {
      * @param errHandler 异常处理器
      */
     @SuppressWarnings("unchecked")
-    public static void closeQuietly(Closeable closeable, ThrowingConsumer<Throwable, ?> errHandler) {
+    public static void closeQuietly(Closeable closeable, ThrowingConsumer<Throwable, ? extends Throwable> errHandler) {
         if (Objects.nonNull(closeable)) {
             try {
                 closeable.close();

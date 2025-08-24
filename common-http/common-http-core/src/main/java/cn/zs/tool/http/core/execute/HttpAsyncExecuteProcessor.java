@@ -34,7 +34,7 @@ public abstract class HttpAsyncExecuteProcessor<R> {
     /**
      * 错误处理器
      */
-    protected final ThrowingConsumer<Throwable, ?> errHandler;
+    protected final ThrowingConsumer<Throwable, ? extends Throwable> errHandler;
 
     /**
      * true 为必须处理结果

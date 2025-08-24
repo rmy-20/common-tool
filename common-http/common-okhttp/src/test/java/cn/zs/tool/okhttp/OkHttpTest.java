@@ -14,7 +14,7 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.FileOutputStream;
+import java.io.File;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.Base64;
@@ -103,21 +103,7 @@ class OkHttpTest {
         }
         OkHttpExecutor<Boolean> exchange = OkHttpTool.get(uri).paths("download")
                 .setContentType(MediaTypeEnum.APPLICATION_OCTET_STREAM.getMediaType())
-                .execute(ins -> {
-                    boolean success = false;
-                    try (FileOutputStream outputStream = new FileOutputStream("/opt/" + "SM2公私钥对.txt")) {
-                        byte[] buffer = new byte[1024];
-                        int len;
-                        while ((len = ins.read(buffer)) != -1) {
-                            outputStream.write(buffer, 0, len);
-                        }
-                        outputStream.flush();
-                        success = true;
-                    } catch (Throwable throwable) {
-                        log.error("下载文件异常", throwable);
-                    }
-                    return success;
-                });
+                .download(new File("/opt/" + "SM2公私钥对.txt"));
         Assert.isTrue(exchange.isOk() && exchange.get(), "okhttp 下载文件失败");
         exchange.getHeaders().forEach((key, value) -> log.info("header --> {}：{}", key, value));
     }

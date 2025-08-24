@@ -19,7 +19,7 @@ public abstract class HttpExecuteProcessor<R, T extends HttpExecuteProcessor<R, 
     /**
      * 默认异常处理器
      */
-    protected static final ThrowingConsumer<Throwable, ?> HTTP_ERR_HANDLE = e -> log.error("http请求异常", e);
+    protected static final ThrowingConsumer<Throwable, ? extends Throwable> HTTP_ERR_HANDLE = e -> log.error("http请求异常", e);
 
     /**
      * 响应结果处理器
@@ -34,7 +34,7 @@ public abstract class HttpExecuteProcessor<R, T extends HttpExecuteProcessor<R, 
     /**
      * 错误处理器
      */
-    protected ThrowingConsumer<Throwable, ?> errHandler;
+    protected ThrowingConsumer<Throwable, ? extends Throwable> errHandler;
 
     /**
      * 响应状态信息

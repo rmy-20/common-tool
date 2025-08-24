@@ -62,6 +62,16 @@ public interface StringPool {
     String SLASH_SIGN = "/";
 
     /**
+     * / 字符串编码
+     */
+    String SLASH_SIGN_ENCODE = "%2F";
+
+    /**
+     * //
+     */
+    String DOUBLE_SLASH_SIGN = "//";
+
+    /**
      * 正则：/+$，匹配结尾为 / 的字符串
      */
     String REGEX_END_SLASH = "/+$";
@@ -77,6 +87,16 @@ public interface StringPool {
     String START_CURLY_BRACKET = "{";
 
     /**
+     * [
+     */
+    String START_SQUARE_BRACKET = "[";
+
+    /**
+     * @
+     */
+    String AT_SIGN = "@";
+
+    /**
      * \n
      */
     String LINE_FEE = "\n";
@@ -85,6 +105,11 @@ public interface StringPool {
      * "0"
      */
     String ZERO = "0";
+
+    /**
+     * -1
+     */
+    String MINUS_ONE = "-1";
 
     /**
      * Y

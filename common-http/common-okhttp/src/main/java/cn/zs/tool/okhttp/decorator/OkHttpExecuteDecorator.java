@@ -4,8 +4,10 @@ import cn.zs.tool.core.fuction.throwing.ThrowingConsumer;
 import cn.zs.tool.http.core.HttpHeaders;
 import cn.zs.tool.http.core.constant.HttpMethodEnum;
 import cn.zs.tool.http.core.converter.ByteArrayHttpMsgConverter;
+import cn.zs.tool.http.core.converter.FileHttpMsgConverter;
 import cn.zs.tool.http.core.converter.HttpMsgConverter;
 import cn.zs.tool.http.core.converter.JsonHttpMsgConverter;
+import cn.zs.tool.http.core.converter.OutputStreamHttpMsgConverter;
 import cn.zs.tool.http.core.converter.StringHttpMsgConverter;
 import cn.zs.tool.http.core.converter.XmlHttpMsgConverter;
 import cn.zs.tool.okhttp.executor.OkHttpAsyncExecutor;
@@ -17,6 +19,8 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 
+import java.io.File;
+import java.io.OutputStream;
 import java.nio.charset.Charset;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
@@ -94,6 +98,46 @@ public interface OkHttpExecuteDecorator {
      */
     default OkHttpExecutor<byte[]> executeForBytes() {
         return execute(ByteArrayHttpMsgConverter.INSTANCE);
+    }
+
+    /**
+     * 同步执行下载文件
+     *
+     * @param targetFile 目标文件
+     * @return true 为成功
+     */
+    default OkHttpExecutor<Boolean> download(File targetFile) {
+        return execute(FileHttpMsgConverter.create(targetFile));
+    }
+
+    /**
+     * 同步执行下载文件
+     *
+     * @param msgConverter 结果处理器
+     * @return true 为成功
+     */
+    default OkHttpExecutor<Boolean> download(FileHttpMsgConverter msgConverter) {
+        return execute(msgConverter);
+    }
+
+    /**
+     * 同步执行下载文件
+     *
+     * @param outputStream 输出流
+     * @return true 为成功
+     */
+    default OkHttpExecutor<Boolean> download(OutputStream outputStream) {
+        return execute(OutputStreamHttpMsgConverter.create(outputStream));
+    }
+
+    /**
+     * 同步执行下载文件
+     *
+     * @param msgConverter 结果处理器
+     * @return true 为成功
+     */
+    default OkHttpExecutor<Boolean> download(OutputStreamHttpMsgConverter msgConverter) {
+        return execute(msgConverter);
     }
 
     /**
@@ -191,6 +235,76 @@ public interface OkHttpExecuteDecorator {
     default CompletableFuture<OkHttpAsyncExecutor<byte[]>> executeAsyncForBytes(HttpMsgConverter<byte[]> msgConverter,
                                                                                 ThrowingConsumer<Throwable, Throwable> errHandler,
                                                                                 Predicate<Integer> okPredicate, Boolean mustHandleResult) {
+        return executeAsync(msgConverter, errHandler, okPredicate, mustHandleResult);
+    }
+
+    /**
+     * 异步下载
+     *
+     * @param outputStream 输出流
+     * @return true 为成功
+     */
+    default CompletableFuture<OkHttpAsyncExecutor<Boolean>> asyncDownload(OutputStream outputStream) {
+        return asyncDownload(OutputStreamHttpMsgConverter.create(outputStream));
+    }
+
+    /**
+     * 异步下载
+     *
+     * @param msgConverter 输出流处理器
+     * @return true 为成功
+     */
+    default CompletableFuture<OkHttpAsyncExecutor<Boolean>> asyncDownload(OutputStreamHttpMsgConverter msgConverter) {
+        return asyncDownload(msgConverter, null, null, false);
+    }
+
+    /**
+     * 异步下载
+     *
+     * @param msgConverter     输出流处理器
+     * @param okPredicate      ok状态码断言，为空默认使用 status -> status >= 200 && status < 300
+     * @param errHandler       异常处理器
+     * @param mustHandleResult 是否必须处理结果，默认为false
+     * @return true 为成功
+     */
+    default CompletableFuture<OkHttpAsyncExecutor<Boolean>> asyncDownload(OutputStreamHttpMsgConverter msgConverter,
+                                                                          ThrowingConsumer<Throwable, Throwable> errHandler,
+                                                                          Predicate<Integer> okPredicate, Boolean mustHandleResult) {
+        return executeAsync(msgConverter, errHandler, okPredicate, mustHandleResult);
+    }
+
+    /**
+     * 异步下载
+     *
+     * @param targetFile 目标文件
+     * @return true 为成功
+     */
+    default CompletableFuture<OkHttpAsyncExecutor<Boolean>> asyncDownload(File targetFile) {
+        return asyncDownload(FileHttpMsgConverter.create(targetFile));
+    }
+
+    /**
+     * 异步下载
+     *
+     * @param msgConverter 文件下载处理器
+     * @return true 为成功
+     */
+    default CompletableFuture<OkHttpAsyncExecutor<Boolean>> asyncDownload(FileHttpMsgConverter msgConverter) {
+        return asyncDownload(msgConverter, null, null, false);
+    }
+
+    /**
+     * 异步下载
+     *
+     * @param msgConverter     文件下载处理器
+     * @param okPredicate      ok状态码断言，为空默认使用 status -> status >= 200 && status < 300
+     * @param errHandler       异常处理器
+     * @param mustHandleResult 是否必须处理结果，默认为false
+     * @return true 为成功
+     */
+    default CompletableFuture<OkHttpAsyncExecutor<Boolean>> asyncDownload(FileHttpMsgConverter msgConverter,
+                                                                          ThrowingConsumer<Throwable, Throwable> errHandler,
+                                                                          Predicate<Integer> okPredicate, Boolean mustHandleResult) {
         return executeAsync(msgConverter, errHandler, okPredicate, mustHandleResult);
     }
 
