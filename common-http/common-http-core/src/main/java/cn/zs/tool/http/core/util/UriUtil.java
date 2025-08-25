@@ -1,4 +1,4 @@
-package cn.zs.tool.http.core.uri;
+package cn.zs.tool.http.core.util;
 
 import cn.zs.tool.core.text.CharacterUtil;
 import cn.zs.tool.core.text.StringPool;
@@ -54,7 +54,7 @@ public class UriUtil {
     }
 
     /**
-     * 截取 path
+     * 根据 / 截取路径段
      */
     public static List<String> splitPathSegments(String path) {
         if (StringUtil.isBlank(path)) {
@@ -62,25 +62,17 @@ public class UriUtil {
         }
         List<String> pathSegments = new ArrayList<>();
         StringBuilder pathSegmentBuilder = new StringBuilder();
-        int length = path.length(), lastIndex = length - 1;
-        for (int i = 0; i < length; i++) {
+        int length = path.length();
+        for (int i = length > 0 && path.charAt(0) != '/' ? 0 : 1; i < length; i++) {
             char c = path.charAt(i);
             if (c == '/') {
-                if (i == 0) {
-                    continue;
-                }
                 pathSegments.add(pathSegmentBuilder.toString());
                 pathSegmentBuilder.setLength(0);
-                if (i == lastIndex) {
-                    pathSegments.add(StringPool.EMPTY);
-                }
             } else {
                 pathSegmentBuilder.append(c);
             }
         }
-        if (pathSegmentBuilder.length() > 0) {
-            pathSegments.add(pathSegmentBuilder.toString());
-        }
+        pathSegments.add(pathSegmentBuilder.toString());
         return pathSegments;
     }
 

@@ -1,6 +1,5 @@
 package cn.zs.tool.okhttp.request;
 
-import cn.zs.tool.core.text.StringUtil;
 import cn.zs.tool.http.core.constant.HttpMethodEnum;
 import okhttp3.MediaType;
 import okhttp3.RequestBody;
@@ -87,14 +86,6 @@ public class OkHttpRequest extends OkHttpBaseRequest<OkHttpRequest> {
     public OkHttpRequest body(RequestBody requestBody) {
         this.requestBody = requestBody;
         return this;
-    }
-
-    /**
-     * 获取请求体类型
-     */
-    private MediaType getMediaType() {
-        String contentType = getHeaders().getContentType();
-        return StringUtil.isNotBlank(contentType) ? MediaType.parse(contentType) : null;
     }
 
     // endregion

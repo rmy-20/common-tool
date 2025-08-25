@@ -41,7 +41,7 @@ public class OkHttpFormRequest extends OkHttpBaseRequest<OkHttpFormRequest> {
      * @param name  key
      * @param value value
      */
-    public OkHttpFormRequest add(String name, Object value) {
+    public OkHttpFormRequest addText(String name, Object value) {
         formBuilder.add(name, Objects.toString(value, StringPool.EMPTY));
         return this;
     }
@@ -52,7 +52,7 @@ public class OkHttpFormRequest extends OkHttpBaseRequest<OkHttpFormRequest> {
      * @param name  key
      * @param value value
      */
-    public OkHttpFormRequest addEncoded(String name, Object value) {
+    public OkHttpFormRequest addTextEncoded(String name, Object value) {
         formBuilder.addEncoded(name, Objects.toString(value, StringPool.EMPTY));
         return this;
     }

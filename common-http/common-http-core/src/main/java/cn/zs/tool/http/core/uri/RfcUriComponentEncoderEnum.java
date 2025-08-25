@@ -3,6 +3,7 @@ package cn.zs.tool.http.core.uri;
 import cn.zs.tool.core.lang.Assert;
 import cn.zs.tool.core.text.CharacterUtil;
 import cn.zs.tool.core.text.StringUtil;
+import cn.zs.tool.http.core.util.UriUtil;
 
 import java.io.ByteArrayOutputStream;
 import java.nio.charset.Charset;

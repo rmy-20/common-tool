@@ -7,6 +7,7 @@ import cn.zs.tool.core.text.StringPool;
 import cn.zs.tool.core.text.StringUtil;
 import cn.zs.tool.http.core.exception.UriException;
 import cn.zs.tool.http.core.exception.UriParseException;
+import cn.zs.tool.http.core.util.UriUtil;
 import lombok.Getter;
 
 import java.net.URI;
@@ -418,9 +419,7 @@ public class RfcUri {
             if (CollectionUtil.isEmpty(queryParameters)) {
                 return this;
             }
-            if (queryParameters.size() % 2 != 0) {
-                throw new UriException("queryParameters size must be even");
-            }
+            Assert.isTrue(queryParameters.size() % 2 == 0, () -> new UriException("queryParameters size must be even"));
             ensureQueryParametersExist();
             for (String queryParameter : queryParameters) {
                 this.queryParameters.add(RfcUriComponentEncoderEnum.QUERY_PARAM.encode(queryParameter, charset));
@@ -516,7 +515,7 @@ public class RfcUri {
             try {
                 return Integer.parseInt(port);
             } catch (NumberFormatException e) {
-                throw new UriException("he port must be an integer: " + port);
+                throw new UriException("The port must be an integer: " + port);
             }
         }
 
@@ -537,7 +536,7 @@ public class RfcUri {
                 if (hasUserInfo || hasHost) {
                     builder.append(StringPool.DOUBLE_SLASH_SIGN);
                     if (hasUserInfo) {
-                        builder.append(userinfo).append(StringPool.AT_SIGN);
+                        builder.append(userinfo).append('@');
                     }
                     if (hasHost) {
                         builder.append(host);
@@ -665,7 +664,7 @@ public class RfcUri {
          * @param encodeCharset 解析结果为分层uri时编码的字符集
          */
         public Builder parse(boolean encode, Charset encodeCharset) {
-            Assert.isTrue(this.component == ComponentEnum.START && this.index == 0, "Internal Error");
+            Assert.isTrue(this.component == ComponentEnum.START && this.index == 0, () -> new UriParseException("Internal uri parse Error"));
             while (hasNext()) {
                 this.component.handleNext(this);
                 this.index++;
@@ -753,7 +752,7 @@ public class RfcUri {
                 return true;
             }
             remainingPercentEncodedChars--;
-            Assert.isTrue(CharacterUtil.isHexDigit(currentChar()), "Bad path");
+            Assert.isTrue(CharacterUtil.isHexDigit(currentChar()), () -> new UriParseException("Bad path"));
             // 为下一次的 %uXXXX 中的 u 赋值
             inUtf16Sequence &= remainingPercentEncodedChars > 0;
             return true;
@@ -767,7 +766,7 @@ public class RfcUri {
                 return false;
             }
             remainingPercentEncodedChars--;
-            Assert.isTrue(CharacterUtil.isHexDigit(currentChar()), "Bad authority");
+            Assert.isTrue(CharacterUtil.isHexDigit(currentChar()), () -> new UriParseException("Bad authority"));
             return true;
         }
 

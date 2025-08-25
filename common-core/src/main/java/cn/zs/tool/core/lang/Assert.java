@@ -1,8 +1,8 @@
 package cn.zs.tool.core.lang;
 
+import cn.zs.tool.core.fuction.throwing.ThrowingRunnable;
+import cn.zs.tool.core.fuction.throwing.ThrowingSupplier;
 import cn.zs.tool.core.text.StringUtil;
-
-import java.util.function.Supplier;
 
 /**
  * 断言类
@@ -45,11 +45,24 @@ public final class Assert {
      *
      * @param condition     条件
      * @param throwSupplier 异常生产者
-     * @param <EX>          异常类型
      */
-    public static <EX extends RuntimeException> void isTrue(boolean condition, final Supplier<? extends EX> throwSupplier) {
-        if (!condition) {
+    public static void isTrue(boolean condition, final ThrowingSupplier<Throwable, ? extends Throwable> throwSupplier) {
+        isTrue(() -> condition, () -> {
             throw throwSupplier.get();
+        });
+    }
+
+    /**
+     * 断言
+     *
+     * @param condition 条件
+     * @param errRun    不符合条件时执行的方法
+     */
+    @SuppressWarnings("unchecked")
+    public static void isTrue(ThrowingSupplier<Boolean, ? extends Throwable> condition,
+                              ThrowingRunnable<? extends Throwable> errRun) {
+        if (!((ThrowingSupplier<Boolean, RuntimeException>) condition).get()) {
+            ((ThrowingRunnable<RuntimeException>) errRun).run();
         }
     }
 }

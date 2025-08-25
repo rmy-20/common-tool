@@ -45,7 +45,7 @@ public class OkHttpMultipartRequest extends OkHttpBaseRequest<OkHttpMultipartReq
      * @param name  key
      * @param value value
      */
-    public OkHttpMultipartRequest add(String name, String value) {
+    public OkHttpMultipartRequest addText(String name, String value) {
         formBuilder.addFormDataPart(name, Objects.toString(value, StringPool.EMPTY));
         return this;
     }
@@ -56,9 +56,9 @@ public class OkHttpMultipartRequest extends OkHttpBaseRequest<OkHttpMultipartReq
      * @param name key
      * @param file 文件
      */
-    public OkHttpMultipartRequest add(String name, File file) {
+    public OkHttpMultipartRequest addBinary(String name, File file) {
         String fileName = file.getName();
-        return add(name, fileName, file);
+        return addBinary(name, fileName, file);
     }
 
     /**
@@ -68,9 +68,9 @@ public class OkHttpMultipartRequest extends OkHttpBaseRequest<OkHttpMultipartReq
      * @param filename 文件名
      * @param file     文件
      */
-    public OkHttpMultipartRequest add(String name, String filename, File file) {
+    public OkHttpMultipartRequest addBinary(String name, String filename, File file) {
         RequestBody fileBody = RequestBody.create(file, null);
-        return add(name, filename, fileBody);
+        return addPart(name, filename, fileBody);
     }
 
     /**
@@ -80,9 +80,9 @@ public class OkHttpMultipartRequest extends OkHttpBaseRequest<OkHttpMultipartReq
      * @param filename 文件名
      * @param bytes    文件
      */
-    public OkHttpMultipartRequest add(String name, String filename, byte[] bytes) {
+    public OkHttpMultipartRequest addBinary(String name, String filename, byte[] bytes) {
         RequestBody fileBody = RequestBody.create(bytes, null);
-        return add(name, filename, fileBody);
+        return addPart(name, filename, fileBody);
     }
 
     /**
@@ -92,10 +92,10 @@ public class OkHttpMultipartRequest extends OkHttpBaseRequest<OkHttpMultipartReq
      * @param filename 文件名
      * @param stream   文件流
      */
-    public OkHttpMultipartRequest add(String name, String filename, InputStream stream) {
+    public OkHttpMultipartRequest addBinary(String name, String filename, InputStream stream) {
         try (Buffer buffer = new Buffer();) {
             buffer.readFrom(stream);
-            return add(name, filename, buffer.readByteArray());
+            return addBinary(name, filename, buffer.readByteArray());
         } catch (Exception e) {
             throw new HttpException("okhttp multipart添加文件流异常", e);
         }
@@ -108,7 +108,7 @@ public class OkHttpMultipartRequest extends OkHttpBaseRequest<OkHttpMultipartReq
      * @param filename 文件名
      * @param fileBody 文件
      */
-    public OkHttpMultipartRequest add(String name, String filename, RequestBody fileBody) {
+    public OkHttpMultipartRequest addPart(String name, String filename, RequestBody fileBody) {
         this.formBuilder.addFormDataPart(name, filename, fileBody);
         return this;
     }
