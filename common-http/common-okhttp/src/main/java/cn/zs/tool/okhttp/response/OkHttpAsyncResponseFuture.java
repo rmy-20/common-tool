@@ -12,7 +12,6 @@ import java.io.IOException;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Predicate;
-import java.util.function.Supplier;
 
 /**
  * okhttp回调
@@ -44,32 +43,32 @@ public class OkHttpAsyncResponseFuture<R> extends CompletableFuture<OkHttpAsyncE
     /**
      * 创建{@link OkHttpAsyncResponseFuture}
      *
-     * @param callSupplier {@link Call}生产者
+     * @param call         {@link Call}
      * @param msgConverter 结果处理器
      * @param errHandler   错误处理器
      * @param okPredicate  成功判断
      */
-    public static <R> OkHttpAsyncResponseFuture<R> create(Supplier<Call> callSupplier, HttpMsgConverter<R> msgConverter,
+    public static <R> OkHttpAsyncResponseFuture<R> create(Call call, HttpMsgConverter<R> msgConverter,
                                                           ThrowingConsumer<Throwable, Throwable> errHandler,
                                                           Predicate<Integer> okPredicate, Boolean mustHandleResult) {
-        return new OkHttpAsyncResponseFuture<>(callSupplier, msgConverter, errHandler, okPredicate, mustHandleResult);
+        return new OkHttpAsyncResponseFuture<>(call, msgConverter, errHandler, okPredicate, mustHandleResult);
     }
 
-    public OkHttpAsyncResponseFuture(Supplier<Call> callSupplier, HttpMsgConverter<R> msgConverter, ThrowingConsumer<Throwable, Throwable> errHandler,
+    public OkHttpAsyncResponseFuture(Call call, HttpMsgConverter<R> msgConverter, ThrowingConsumer<Throwable, Throwable> errHandler,
                                      Predicate<Integer> okPredicate, Boolean mustHandleResult) {
         this.msgConverter = Objects.requireNonNull(msgConverter, "msgConverter must not be null");
-        this.errHandler = errHandler;
-        this.okPredicate = okPredicate;
+        this.errHandler = Objects.requireNonNull(errHandler, "errHandler must not be null");
+        this.okPredicate = Objects.requireNonNull(okPredicate, "okPredicate must not be null");
         this.mustHandleResult = mustHandleResult;
-        enqueue(callSupplier);
+        enqueue(call);
     }
 
     /**
      * 异步请求
      */
-    private void enqueue(Supplier<Call> callSupplier) {
+    private void enqueue(Call call) {
         try {
-            callSupplier.get().enqueue(this);
+            Objects.requireNonNull(call, "call must not be null").enqueue(this);
         } catch (Throwable e) {
             log.error("执行okhttp异步请求异常", e);
             completeExceptionally(e);

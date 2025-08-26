@@ -41,7 +41,7 @@ class HttpClient5Test {
                 .queryEncoded("age", 18)
                 .queryEncoded("sex", "男")
                 .queryEncoded("address", "中国")
-                .executeForString();
+                .stringExecutor().execute();
         Assert.isTrue(exchange.isOk(), "okhttp get请求失败");
         System.out.println("okhttp get结果：" + exchange.get());
     }
@@ -61,10 +61,10 @@ class HttpClient5Test {
         HttpClient5Executor<Map<String, Object>> exchange = HttpClient5Tool.post(uri).pathsEncoded("/test/post")
                 .setContentType(MediaTypeEnum.APPLICATION_JSON_UTF8.getMediaType())
                 .body(JsonTool.JSON_TOOL.toJson(map))
-                .execute(JsonHttpMsgConverter.create(JsonTool.JSON_TOOL, new TypeReference<Map<String, Object>>() {
-                }));
+                .executor(JsonHttpMsgConverter.create(JsonTool.JSON_TOOL, new TypeReference<Map<String, Object>>() {
+                })).mustHandleResult(true).execute();
         Assert.isTrue(exchange.isOk(), "okhttp post请求失败");
-        System.out.println("okhttp post结果：" + exchange.mustHandleResult(true).get());
+        System.out.println("okhttp post结果：" + exchange.get());
     }
 
     @Test
@@ -74,7 +74,7 @@ class HttpClient5Test {
         }
         HttpClient5Executor<Boolean> exchange = HttpClient5Tool.get(uri).paths("download")
                 .setContentType(MediaTypeEnum.APPLICATION_OCTET_STREAM.getMediaType())
-                .download(new File("/opt/httpclient/" + "SM2公私钥对.txt"));
+                .downloadExecutor(new File("/opt/httpclient/" + "SM2公私钥对.txt")).execute();
         Assert.isTrue(exchange.isOk() && exchange.get(), "okhttp 下载文件失败");
         exchange.getHeaders().forEach((key, value) -> log.info("header --> {}：{}", key, value));
     }
@@ -92,7 +92,7 @@ class HttpClient5Test {
                 .addTextEncoded("timestamp", Instant.now().toEpochMilli())
                 .addTextEncoded("version", "版本号")
                 .addTextEncoded("sign", "MEUCIQC5er362TvTWrTpoZzvYeHldXTJtEIZpZJOea6nDseHngIgV61eTm/R7XLOd4/9lWV9lbRQJFEhTxASWfWkqE65F5c=")
-                .executeForString();
+                .stringExecutor().execute();
         Assert.isTrue(exchange.isOk(), "okhttp form 请求失败");
         System.out.println("okhttp form结果：" + exchange.get());
     }
@@ -121,7 +121,7 @@ class HttpClient5Test {
                 .addText("md5", RandomUtil.generateUuidSimple())
                 .addText("format", "哈哈faga---===");
         base64FileMap.forEach((k, v) -> multipartRequest.addBinary("file", k, Base64.getDecoder().decode(v.getBytes(StandardCharsets.UTF_8))));
-        HttpClient5Executor<String> exchange = multipartRequest.executeForString();
+        HttpClient5Executor<String> exchange = multipartRequest.stringExecutor().execute();
         Assert.isTrue(exchange.isOk(), "okhttp上传失败");
         System.out.println("okhttp上传结果：" + exchange.get());
     }

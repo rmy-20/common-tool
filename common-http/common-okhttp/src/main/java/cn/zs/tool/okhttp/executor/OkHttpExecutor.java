@@ -1,5 +1,6 @@
 package cn.zs.tool.okhttp.executor;
 
+import cn.zs.tool.core.fuction.throwing.ThrowingConsumer;
 import cn.zs.tool.core.text.StringUtil;
 import cn.zs.tool.http.core.HttpHeaders;
 import cn.zs.tool.http.core.converter.HttpMsgConverter;
@@ -9,6 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 import okhttp3.Call;
 
 import java.util.Objects;
+import java.util.function.Predicate;
 
 /**
  * okhttp http请求处理
@@ -16,7 +18,7 @@ import java.util.Objects;
  * @author sheng
  */
 @Slf4j
-public class OkHttpExecutor<R> extends HttpExecuteProcessor<R, OkHttpExecutor<R>> {
+public class OkHttpExecutor<R> extends HttpExecuteProcessor<R> {
     /**
      * okhttp调用
      */
@@ -30,29 +32,29 @@ public class OkHttpExecutor<R> extends HttpExecuteProcessor<R, OkHttpExecutor<R>
     /**
      * 创建okhttp交换机
      *
-     * @param call         okhttp调用
-     * @param msgConverter 结果处理器
+     * @param call             okhttp调用
+     * @param msgConverter     结果处理器
+     * @param errHandler       异常处理器
+     * @param okPredicate      ok响应码判断
+     * @param mustHandleResult 是否强制处理结果
      */
-    public static <R> OkHttpExecutor<R> create(Call call, HttpMsgConverter<R> msgConverter) {
-        return new OkHttpExecutor<>(call, msgConverter);
+    public static <R> OkHttpExecutor<R> create(Call call, HttpMsgConverter<R> msgConverter, ThrowingConsumer<Throwable, Throwable> errHandler,
+                                               Predicate<Integer> okPredicate, boolean mustHandleResult) {
+        return new OkHttpExecutor<>(call, msgConverter, errHandler, okPredicate, mustHandleResult);
     }
 
-    public OkHttpExecutor(Call call, HttpMsgConverter<R> msgConverter) {
-        super(msgConverter);
+    public OkHttpExecutor(Call call, HttpMsgConverter<R> msgConverter, ThrowingConsumer<Throwable, Throwable> errHandler,
+                          Predicate<Integer> okPredicate, boolean mustHandleResult) {
+        super(msgConverter, okPredicate, errHandler, mustHandleResult);
         this.call = Objects.requireNonNull(call, "okhttp call must not be null");
+        execute();
     }
 
-    @Override
-    protected OkHttpExecutor<R> self() {
-        return this;
-    }
-
-    @Override
     protected void execute() {
         if (Objects.isNull(okHttpResponse) && !call.isExecuted()) {
             try (OkHttpResponse clientResponse = OkHttpResponse.create(call.execute())) {
                 this.okHttpResponse = clientResponse;
-                if (isOk() || mustHandleResult) {
+                if (isOk() || (mustHandleResult && Objects.nonNull(clientResponse.getBody()))) {
                     result = msgConverter.apply(clientResponse.getBody());
                 }
             } catch (Throwable e) {
@@ -64,7 +66,6 @@ public class OkHttpExecutor<R> extends HttpExecuteProcessor<R, OkHttpExecutor<R>
 
     @Override
     public int getStatus() {
-        execute();
         return Objects.nonNull(okHttpResponse) ? okHttpResponse.getStatus() : -1;
     }
 
@@ -73,7 +74,6 @@ public class OkHttpExecutor<R> extends HttpExecuteProcessor<R, OkHttpExecutor<R>
      */
     @Override
     public String getMessage() {
-        execute();
         return StringUtil.isNotBlank(statusMsg) ? statusMsg : okHttpResponse.getMessage();
     }
 
@@ -82,7 +82,6 @@ public class OkHttpExecutor<R> extends HttpExecuteProcessor<R, OkHttpExecutor<R>
      */
     @Override
     public HttpHeaders getHeaders() {
-        execute();
         return Objects.nonNull(okHttpResponse) ? okHttpResponse.getHeaders() : HttpHeaders.EMPTY_HEADERS;
     }
 }

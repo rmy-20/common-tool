@@ -2,7 +2,6 @@ package cn.zs.tool.http.core.execute;
 
 import cn.zs.tool.core.fuction.throwing.ThrowingConsumer;
 import cn.zs.tool.http.core.HttpHeaders;
-import cn.zs.tool.http.core.constant.HttpConstant;
 import cn.zs.tool.http.core.converter.HttpMsgConverter;
 import lombok.extern.slf4j.Slf4j;
 
@@ -10,31 +9,31 @@ import java.util.Objects;
 import java.util.function.Predicate;
 
 /**
- * http 同步执行
+ * http 执行
  *
  * @author sheng
  */
 @Slf4j
-public abstract class HttpExecuteProcessor<R, T extends HttpExecuteProcessor<R, T>> {
+public abstract class HttpExecuteProcessor<R> {
     /**
-     * 默认异常处理器
-     */
-    protected static final ThrowingConsumer<Throwable, ? extends Throwable> HTTP_ERR_HANDLE = e -> log.error("http请求异常", e);
-
-    /**
-     * 响应结果处理器
+     * 响应处理器
      */
     protected final HttpMsgConverter<R> msgConverter;
 
     /**
      * 成功判断
      */
-    protected Predicate<Integer> okPredicate;
+    protected final Predicate<Integer> okPredicate;
 
     /**
      * 错误处理器
      */
-    protected ThrowingConsumer<Throwable, ? extends Throwable> errHandler;
+    protected final ThrowingConsumer<Throwable, ? extends Throwable> errHandler;
+
+    /**
+     * true 为必须处理结果
+     */
+    protected final boolean mustHandleResult;
 
     /**
      * 响应状态信息
@@ -42,35 +41,32 @@ public abstract class HttpExecuteProcessor<R, T extends HttpExecuteProcessor<R, 
     protected String statusMsg;
 
     /**
-     * true 为必须处理结果
-     */
-    protected boolean mustHandleResult;
-
-    /**
      * 结果
      */
     protected R result;
 
-    protected HttpExecuteProcessor(HttpMsgConverter<R> msgConverter) {
+    protected HttpExecuteProcessor(HttpMsgConverter<R> msgConverter, Predicate<Integer> okPredicate,
+                                   ThrowingConsumer<Throwable, Throwable> errHandler, boolean mustHandleResult) {
         this.msgConverter = Objects.requireNonNull(msgConverter, "msgConverter must not be null");
+        this.okPredicate = Objects.requireNonNull(okPredicate, "okPredicate must not be null");
+        this.errHandler = Objects.requireNonNull(errHandler, "errHandler must not be null");
+        this.mustHandleResult = mustHandleResult;
     }
 
     /**
-     * 返回当前实例
+     * 异常处理
+     *
+     * @param ex 异常
      */
-    protected abstract T self();
-
-    /**
-     * 获取结果前执行
-     */
-    protected void execute() {
+    @SuppressWarnings("unchecked")
+    protected void errorHandler(Throwable ex) {
+        ((ThrowingConsumer<Throwable, RuntimeException>) errHandler).accept(ex);
     }
 
     /**
      * 获取结果
      */
     public R get() {
-        execute();
         return result;
     }
 
@@ -83,7 +79,7 @@ public abstract class HttpExecuteProcessor<R, T extends HttpExecuteProcessor<R, 
      * 判断是否成功响应
      */
     public boolean isOk() {
-        return getOkPredicate().test(getStatus());
+        return okPredicate.test(getStatus());
     }
 
     /**
@@ -95,49 +91,4 @@ public abstract class HttpExecuteProcessor<R, T extends HttpExecuteProcessor<R, 
      * 获取请求头
      */
     public abstract HttpHeaders getHeaders();
-
-    /**
-     * 获取成功判断器
-     */
-    public Predicate<Integer> getOkPredicate() {
-        return Objects.nonNull(okPredicate) ? okPredicate : HttpConstant.HTTP_OK_PREDICATE;
-    }
-
-    /**
-     * 异常处理
-     *
-     * @param ex 异常
-     */
-    @SuppressWarnings("unchecked")
-    protected void errorHandler(Throwable ex) {
-        if (Objects.nonNull(errHandler)) {
-            ((ThrowingConsumer<Throwable, RuntimeException>) errHandler).accept(ex);
-        } else {
-            ((ThrowingConsumer<Throwable, RuntimeException>) HTTP_ERR_HANDLE).accept(ex);
-        }
-    }
-
-    /**
-     * 错误处理器
-     */
-    public T errHandler(ThrowingConsumer<Throwable, Throwable> errHandler) {
-        this.errHandler = errHandler;
-        return self();
-    }
-
-    /**
-     * 成功判断器
-     */
-    public T okPredicate(Predicate<Integer> okPredicate) {
-        this.okPredicate = okPredicate;
-        return self();
-    }
-
-    /**
-     * 是否必须处理结果
-     */
-    public T mustHandleResult(boolean mustHandleResult) {
-        this.mustHandleResult = mustHandleResult;
-        return self();
-    }
 }

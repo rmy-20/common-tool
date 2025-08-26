@@ -1,5 +1,6 @@
 package cn.zs.tool.httpclient5.request;
 
+import cn.zs.tool.core.fuction.throwing.ThrowingSupplier;
 import cn.zs.tool.http.core.HttpHeaders;
 import cn.zs.tool.http.core.converter.ByteArrayHttpMsgConverter;
 import cn.zs.tool.http.core.converter.FileHttpMsgConverter;
@@ -14,7 +15,8 @@ import cn.zs.tool.http.core.exception.HttpException;
 import cn.zs.tool.http.core.uri.RfcUri;
 import cn.zs.tool.httpclient5.constant.HttpClient5Constant;
 import cn.zs.tool.httpclient5.constant.HttpRequestMethodEnum;
-import cn.zs.tool.httpclient5.executor.HttpClient5Executor;
+import cn.zs.tool.httpclient5.executor.HttpClient5ExecutorBuilder;
+import cn.zs.tool.httpclient5.response.HttpClient5Response;
 import org.apache.hc.client5.http.async.HttpAsyncClient;
 import org.apache.hc.client5.http.classic.HttpClient;
 import org.apache.hc.client5.http.classic.methods.HttpUriRequestBase;
@@ -193,99 +195,106 @@ public abstract class HttpClient5BaseRequest<T extends HttpClient5BaseRequest<T>
         return this.httpEntity;
     }
 
-    // region 同步请求
+    // region 请求
 
     /**
-     * 同步执行处理 UTF_8 {@link String}结果
+     * 获取处理 UTF_8 {@link String}结果的请求执行器
      */
-    public HttpClient5Executor<String> executeForString() {
-        return execute(StringHttpMsgConverter.UTF_8_INSTANCE);
+    public HttpClient5ExecutorBuilder<String> stringExecutor() {
+        return executor(StringHttpMsgConverter.UTF_8_INSTANCE);
     }
 
     /**
-     * 同步执行处理{@link String}结果
+     * 获取处理{@link String}结果的请求执行器
      *
      * @param charset 结果编码
      */
-    public HttpClient5Executor<String> executeForString(Charset charset) {
-        return execute(StringHttpMsgConverter.create(charset));
+    public HttpClient5ExecutorBuilder<String> stringExecutor(Charset charset) {
+        return executor(StringHttpMsgConverter.create(charset));
     }
 
     /**
-     * 同步执行处理 json 结果
+     * 获取处理 json 结果的请求执行器
      *
      * @param msgConverter {@link JsonHttpMsgConverter}
      */
-    public <R> HttpClient5Executor<R> executeForJson(JsonHttpMsgConverter<R> msgConverter) {
-        return execute(msgConverter);
+    public <R> HttpClient5ExecutorBuilder<R> jsonExecutor(JsonHttpMsgConverter<R> msgConverter) {
+        return executor(msgConverter);
     }
 
     /**
-     * 同步执行处理 xml 结果
+     * 获取处理 xml 结果的请求执行器
      *
      * @param msgConverter {@link XmlHttpMsgConverter}
      */
-    public <R> HttpClient5Executor<R> executeForXml(XmlHttpMsgConverter<R> msgConverter) {
-        return execute(msgConverter);
+    public <R> HttpClient5ExecutorBuilder<R> xmlExecutor(XmlHttpMsgConverter<R> msgConverter) {
+        return executor(msgConverter);
     }
 
     /**
-     * 同步执行获取 byte[] 结果执行器
+     * 获取处理 byte[] 结果的请求执行器
      */
-    public HttpClient5Executor<byte[]> executeForBytes() {
-        return execute(ByteArrayHttpMsgConverter.INSTANCE);
+    public HttpClient5ExecutorBuilder<byte[]> bytesExecutor() {
+        return executor(ByteArrayHttpMsgConverter.INSTANCE);
     }
 
     /**
-     * 同步执行下载文件
+     * 获取下载文件的请求执行器
      *
      * @param targetFile 目标文件
      * @return true 为成功
      */
-    public HttpClient5Executor<Boolean> download(File targetFile) {
-        return execute(FileHttpMsgConverter.create(targetFile));
+    public HttpClient5ExecutorBuilder<Boolean> downloadExecutor(File targetFile) {
+        return executor(FileHttpMsgConverter.create(targetFile));
     }
 
     /**
-     * 同步执行下载文件
+     * 获取下载文件的请求执行器
      *
      * @param msgConverter 结果处理器
      * @return true 为成功
      */
-    public HttpClient5Executor<Boolean> download(FileHttpMsgConverter msgConverter) {
-        return execute(msgConverter);
+    public HttpClient5ExecutorBuilder<Boolean> downloadExecutor(FileHttpMsgConverter msgConverter) {
+        return executor(msgConverter);
     }
 
     /**
-     * 同步执行下载文件
+     * 获取下载文件的请求执行器
      *
      * @param outputStream 输出流
      * @return true 为成功
      */
-    public HttpClient5Executor<Boolean> download(OutputStream outputStream) {
-        return execute(OutputStreamHttpMsgConverter.create(outputStream));
+    public HttpClient5ExecutorBuilder<Boolean> downloadExecutor(OutputStream outputStream) {
+        return executor(OutputStreamHttpMsgConverter.create(outputStream));
     }
 
     /**
-     * 同步执行下载文件
+     * 获取下载文件的请求执行器
      *
      * @param msgConverter 结果处理器
      * @return true 为成功
      */
-    public HttpClient5Executor<Boolean> download(OutputStreamHttpMsgConverter msgConverter) {
-        return execute(msgConverter);
+    public HttpClient5ExecutorBuilder<Boolean> downloadExecutor(OutputStreamHttpMsgConverter msgConverter) {
+        return executor(msgConverter);
     }
 
     /**
-     * 同步执行
+     * 获取请求执行器
      *
      * @param msgConverter 结果处理器
      */
-    public <R> HttpClient5Executor<R> execute(HttpMsgConverter<R> msgConverter) {
-        return HttpClient5Executor.create(getHttpClient(), createRequest(), httpContext, msgConverter);
+    public <R> HttpClient5ExecutorBuilder<R> executor(HttpMsgConverter<R> msgConverter) {
+        return HttpClient5ExecutorBuilder.create(createResponseSupplier(), msgConverter);
     }
 
     // endregion
+
+    /**
+     * 创建响应提供者
+     */
+    protected ThrowingSupplier<HttpClient5Response, Throwable> createResponseSupplier() {
+        return () -> HttpClient5Response.create(getHttpClient().executeOpen(null, createRequest(), httpContext));
+    }
 
     /**
      * 请求前执行
