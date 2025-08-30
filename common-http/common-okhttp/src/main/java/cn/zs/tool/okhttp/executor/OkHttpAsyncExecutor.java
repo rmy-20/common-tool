@@ -50,7 +50,7 @@ public class OkHttpAsyncExecutor<R> extends HttpExecuteProcessor<R> {
     private void handleResult(Response response) {
         try (OkHttpResponse httpResponse = OkHttpResponse.create(response)) {
             this.okHttpResponse = httpResponse;
-            if (httpResponse.isOk() || mustHandleResult) {
+            if (httpResponse.isOk() || (mustHandleResult && Objects.nonNull(httpResponse.getBody()))) {
                 this.result = msgConverter.apply(httpResponse.getBody());
             }
         } catch (Throwable e) {

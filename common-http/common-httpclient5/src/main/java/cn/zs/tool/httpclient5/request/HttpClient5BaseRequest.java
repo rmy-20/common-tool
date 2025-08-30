@@ -1,6 +1,5 @@
 package cn.zs.tool.httpclient5.request;
 
-import cn.zs.tool.core.fuction.throwing.ThrowingSupplier;
 import cn.zs.tool.http.core.HttpHeaders;
 import cn.zs.tool.http.core.converter.ByteArrayHttpMsgConverter;
 import cn.zs.tool.http.core.converter.FileHttpMsgConverter;
@@ -13,19 +12,14 @@ import cn.zs.tool.http.core.decorator.HttpHeaderDecorator;
 import cn.zs.tool.http.core.decorator.RfcUriBuilderDecorator;
 import cn.zs.tool.http.core.exception.HttpException;
 import cn.zs.tool.http.core.uri.RfcUri;
-import cn.zs.tool.httpclient5.constant.HttpClient5Constant;
 import cn.zs.tool.httpclient5.constant.HttpRequestMethodEnum;
 import cn.zs.tool.httpclient5.executor.HttpClient5ExecutorBuilder;
-import cn.zs.tool.httpclient5.response.HttpClient5Response;
-import org.apache.hc.client5.http.async.HttpAsyncClient;
-import org.apache.hc.client5.http.classic.HttpClient;
 import org.apache.hc.client5.http.classic.methods.HttpUriRequestBase;
 import org.apache.hc.client5.http.config.RequestConfig;
 import org.apache.hc.core5.concurrent.Cancellable;
 import org.apache.hc.core5.http.HttpEntity;
 import org.apache.hc.core5.http.ProtocolVersion;
 import org.apache.hc.core5.http.io.entity.NullEntity;
-import org.apache.hc.core5.http.protocol.HttpContext;
 
 import java.io.File;
 import java.io.OutputStream;
@@ -40,16 +34,6 @@ import java.util.Objects;
  */
 public abstract class HttpClient5BaseRequest<T extends HttpClient5BaseRequest<T>>
         implements RfcUriBuilderDecorator<T>, HttpHeaderDecorator<T> {
-    /**
-     * 同步请求 #{@link HttpClient}
-     */
-    protected HttpClient httpClient;
-
-    /**
-     * 异步请求 #{@link HttpAsyncClient}
-     */
-    protected HttpAsyncClient httpAsyncClient;
-
     /**
      * uri
      */
@@ -86,11 +70,6 @@ public abstract class HttpClient5BaseRequest<T extends HttpClient5BaseRequest<T>
     private ProtocolVersion protocolVersion;
 
     /**
-     * 请求上下文
-     */
-    private HttpContext httpContext;
-
-    /**
      * 默认编码字符集，默认 UTF-8
      */
     protected Charset defaultCharset = StandardCharsets.UTF_8;
@@ -103,22 +82,6 @@ public abstract class HttpClient5BaseRequest<T extends HttpClient5BaseRequest<T>
         }
         this.uriBuilder = rfcUri.newBuilder();
         this.headers = HttpHeaders.create();
-    }
-
-    /**
-     * 设置 HttpClient
-     */
-    public T httpClient(HttpClient httpClient) {
-        this.httpClient = httpClient;
-        return self();
-    }
-
-    /**
-     * 设置 HttpAsyncClient
-     */
-    public T httpAsyncClient(HttpAsyncClient httpAsyncClient) {
-        this.httpAsyncClient = httpAsyncClient;
-        return self();
     }
 
     /**
@@ -146,14 +109,6 @@ public abstract class HttpClient5BaseRequest<T extends HttpClient5BaseRequest<T>
     }
 
     /**
-     * 请求上下文
-     */
-    public T httpContext(HttpContext httpContext) {
-        this.httpContext = httpContext;
-        return self();
-    }
-
-    /**
      * 设置默认编码字符集
      */
     public HttpClient5BaseRequest<T> defaultCharset(Charset defaultCharset) {
@@ -170,13 +125,6 @@ public abstract class HttpClient5BaseRequest<T extends HttpClient5BaseRequest<T>
 
     @Override
     public abstract T self();
-
-    /**
-     * 获取当前实例所用 #{@link HttpClient}
-     */
-    public HttpClient getHttpClient() {
-        return Objects.nonNull(httpClient) ? httpClient : HttpClient5Constant.HTTP_CLIENT;
-    }
 
     @Override
     public RfcUri.Builder getUriBuilder() {
@@ -284,17 +232,10 @@ public abstract class HttpClient5BaseRequest<T extends HttpClient5BaseRequest<T>
      * @param msgConverter 结果处理器
      */
     public <R> HttpClient5ExecutorBuilder<R> executor(HttpMsgConverter<R> msgConverter) {
-        return HttpClient5ExecutorBuilder.create(createResponseSupplier(), msgConverter);
+        return HttpClient5ExecutorBuilder.create(createRequest(), msgConverter);
     }
 
     // endregion
-
-    /**
-     * 创建响应提供者
-     */
-    protected ThrowingSupplier<HttpClient5Response, Throwable> createResponseSupplier() {
-        return () -> HttpClient5Response.create(getHttpClient().executeOpen(null, createRequest(), httpContext));
-    }
 
     /**
      * 请求前执行
