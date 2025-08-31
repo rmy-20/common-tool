@@ -1,13 +1,12 @@
 package cn.zs.tool.httpclient5.response;
 
-import cn.zs.tool.core.constant.CommonConstant;
 import cn.zs.tool.core.fuction.throwing.ThrowingConsumer;
 import cn.zs.tool.core.fuction.throwing.ThrowingFunc;
 import cn.zs.tool.core.fuction.throwing.ThrowingSupplier;
-import cn.zs.tool.core.io.IOUtil;
 import cn.zs.tool.http.core.converter.HttpMsgConverter;
 import cn.zs.tool.httpclient5.executor.HttpClient5AsyncExecutor;
 import cn.zs.tool.httpclient5.support.classic.FunctionalClassicEntityConsumer;
+import cn.zs.tool.httpclient5.support.classic.HttpEntityClassicEntityProducer;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.hc.client5.http.async.HttpAsyncClient;
 import org.apache.hc.client5.http.classic.HttpClient;
@@ -19,19 +18,16 @@ import org.apache.hc.core5.http.HttpException;
 import org.apache.hc.core5.http.HttpResponse;
 import org.apache.hc.core5.http.io.entity.InputStreamEntity;
 import org.apache.hc.core5.http.message.BasicClassicHttpResponse;
-import org.apache.hc.core5.http.nio.AsyncEntityProducer;
 import org.apache.hc.core5.http.nio.AsyncPushConsumer;
 import org.apache.hc.core5.http.nio.AsyncRequestProducer;
 import org.apache.hc.core5.http.nio.AsyncResponseConsumer;
 import org.apache.hc.core5.http.nio.HandlerFactory;
 import org.apache.hc.core5.http.nio.support.AbstractAsyncResponseConsumer;
 import org.apache.hc.core5.http.nio.support.BasicRequestProducer;
-import org.apache.hc.core5.http.nio.support.classic.AbstractClassicEntityProducer;
 import org.apache.hc.core5.http.protocol.HttpContext;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Predicate;
@@ -152,17 +148,8 @@ public class HttpClient5AsyncResponseFuture<R> extends CompletableFuture<HttpCli
         if (Objects.nonNull(asyncRequestProducerFunc)) {
             return asyncRequestProducerFunc.apply(request);
         }
-        AsyncEntityProducer entityProducer = null;
         HttpEntity entity = request.getEntity();
-        if (Objects.nonNull(entity)) {
-            entityProducer = new AbstractClassicEntityProducer(4096, ContentType.parse(entity.getContentType()), CommonConstant.EXECUTOR_SERVICE) {
-                @Override
-                protected void produceData(ContentType contentType, OutputStream outputStream) throws IOException {
-                    IOUtil.copy(entity.getContent(), outputStream);
-                }
-            };
-        }
-        return new BasicRequestProducer(request, entityProducer);
+        return new BasicRequestProducer(request, Objects.nonNull(entity) ? HttpEntityClassicEntityProducer.create(entity) : null);
     }
 
     public AsyncResponseConsumer<BasicClassicHttpResponse> getAsyncResponseConsumer() throws Throwable {

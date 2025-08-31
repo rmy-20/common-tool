@@ -6,30 +6,27 @@ import org.apache.hc.client5.http.SchemePortResolver;
 import org.apache.hc.client5.http.config.ConnectionConfig;
 import org.apache.hc.client5.http.config.RequestConfig;
 import org.apache.hc.client5.http.config.TlsConfig;
-import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
-import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
-import org.apache.hc.client5.http.impl.classic.HttpClients;
-import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManager;
-import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManagerBuilder;
-import org.apache.hc.client5.http.io.ManagedHttpClientConnection;
-import org.apache.hc.client5.http.ssl.DefaultClientTlsStrategy;
-import org.apache.hc.client5.http.ssl.TlsSocketStrategy;
+import org.apache.hc.client5.http.impl.async.CloseableHttpAsyncClient;
+import org.apache.hc.client5.http.impl.async.HttpAsyncClientBuilder;
+import org.apache.hc.client5.http.impl.async.HttpAsyncClients;
+import org.apache.hc.client5.http.impl.nio.PoolingAsyncClientConnectionManager;
+import org.apache.hc.client5.http.impl.nio.PoolingAsyncClientConnectionManagerBuilder;
 import org.apache.hc.core5.function.Resolver;
 import org.apache.hc.core5.http.HttpHost;
-import org.apache.hc.core5.http.io.HttpConnectionFactory;
-import org.apache.hc.core5.http.io.SocketConfig;
 import org.apache.hc.core5.pool.PoolConcurrencyPolicy;
 import org.apache.hc.core5.pool.PoolReusePolicy;
+import org.apache.hc.core5.reactor.IOReactorConfig;
 import org.apache.hc.core5.util.Timeout;
 
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 /**
- * httpclient 构建者
+ * httpAsyncClient 构建者
  *
  * @author sheng
  */
-public class HttpClient5Builder {
+public class HttpAsyncClient5Builder {
     /**
      * 连接池允许创建的最大连接数量
      */
@@ -39,11 +36,6 @@ public class HttpClient5Builder {
      * 每个路由（域名）连接数
      */
     private int maxPerRoute = 50;
-
-    /**
-     * 默认的TLS策略
-     */
-    private TlsSocketStrategy tlsSocketStrategy = DefaultClientTlsStrategy.createDefault();
 
     /**
      * 协议端口解析器
@@ -66,11 +58,6 @@ public class HttpClient5Builder {
     private PoolReusePolicy poolReusePolicy = PoolReusePolicy.LIFO;
 
     /**
-     * 套接字配置解析器
-     */
-    private Resolver<HttpRoute, SocketConfig> socketConfigResolver;
-
-    /**
      * 连接配置解析器
      */
     private Resolver<HttpRoute, ConnectionConfig> connectionConfigResolver;
@@ -79,11 +66,6 @@ public class HttpClient5Builder {
      * TLS配置解析器
      */
     private Resolver<HttpHost, TlsConfig> tlsConfigResolver;
-
-    /**
-     * 连接池的连接工厂
-     */
-    private HttpConnectionFactory<ManagedHttpClientConnection> connFactory;
 
     /**
      * socket超时时间
@@ -151,16 +133,26 @@ public class HttpClient5Builder {
     private TimeUnit evictIdleConnectionsUnit = TimeUnit.SECONDS;
 
     /**
+     * I/O reactor 配置
+     */
+    private IOReactorConfig ioReactorConfig;
+
+    /**
+     * 是否启动
+     */
+    private boolean start = true;
+
+    /**
      * 创建工程
      */
-    public static HttpClient5Builder create() {
-        return new HttpClient5Builder();
+    public static HttpAsyncClient5Builder create() {
+        return new HttpAsyncClient5Builder();
     }
 
     /**
      * 构建httpclient
      */
-    public CloseableHttpClient build() {
+    public CloseableHttpAsyncClient build() {
         ConnectionConfig connectionConfig = ConnectionConfig.custom()
                 // 客户端和服务器建立连接的超时时间
                 .setConnectTimeout(Timeout.ofSeconds(connectTimeoutUnit.toSeconds(connectTimeout)))
@@ -172,17 +164,14 @@ public class HttpClient5Builder {
                 .setValidateAfterInactivity(Timeout.ofSeconds(validateAfterInactivityUnit.toSeconds(validateAfterInactivity)))
                 .build();
 
-        PoolingHttpClientConnectionManager connectionManager = PoolingHttpClientConnectionManagerBuilder.create()
+        PoolingAsyncClientConnectionManager connectionManager = PoolingAsyncClientConnectionManagerBuilder.create()
                 .setMaxConnTotal(maxTotal)
                 .setMaxConnPerRoute(maxPerRoute)
-                .setConnectionFactory(connFactory)
                 .setDefaultConnectionConfig(connectionConfig)
                 .setPoolConcurrencyPolicy(poolConcurrencyPolicy)
-                .setTlsSocketStrategy(tlsSocketStrategy)
                 .setConnPoolPolicy(poolReusePolicy)
                 .setSchemePortResolver(schemePortResolver)
                 .setDnsResolver(dnsResolver)
-                .setSocketConfigResolver(socketConfigResolver)
                 .setConnectionConfigResolver(connectionConfigResolver)
                 .setTlsConfigResolver(tlsConfigResolver)
                 .build();
@@ -193,21 +182,29 @@ public class HttpClient5Builder {
                 .setConnectionRequestTimeout(Timeout.ofSeconds(connectionRequestTimeoutUnit.toSeconds(connectionRequestTimeout)))
                 .build();
 
-        HttpClientBuilder httpClientBuilder = HttpClients.custom()
+        HttpAsyncClientBuilder httpClientBuilder = HttpAsyncClients.custom()
                 .setDefaultRequestConfig(requestConfig).setConnectionManager(connectionManager);
+
+        if (Objects.nonNull(ioReactorConfig)) {
+            httpClientBuilder.setIOReactorConfig(ioReactorConfig);
+        }
         // 开启守护线程定时清理空闲连接
         if (evictExpiredConnections) {
             // 定时清理空闲连接的时间
             httpClientBuilder.evictExpiredConnections()
                     .evictIdleConnections(Timeout.ofSeconds(evictIdleConnectionsUnit.toSeconds(evictIdleConnections)));
         }
-        return httpClientBuilder.build();
+        CloseableHttpAsyncClient asyncClient = httpClientBuilder.build();
+        if (start) {
+            asyncClient.start();
+        }
+        return asyncClient;
     }
 
     /**
      * 设置最大连接数
      */
-    public HttpClient5Builder maxTotal(int maxTotal) {
+    public HttpAsyncClient5Builder maxTotal(int maxTotal) {
         this.maxTotal = maxTotal;
         return this;
     }
@@ -215,23 +212,15 @@ public class HttpClient5Builder {
     /**
      * 设置每个路由最大连接数
      */
-    public HttpClient5Builder maxPerRoute(int maxPerRoute) {
+    public HttpAsyncClient5Builder maxPerRoute(int maxPerRoute) {
         this.maxPerRoute = maxPerRoute;
-        return this;
-    }
-
-    /**
-     * 设置TLS套接字策略
-     */
-    public HttpClient5Builder tlsSocketStrategy(TlsSocketStrategy tlsSocketStrategy) {
-        this.tlsSocketStrategy = tlsSocketStrategy;
         return this;
     }
 
     /**
      * 协议端口解析器
      */
-    public HttpClient5Builder schemePortResolver(SchemePortResolver schemePortResolver) {
+    public HttpAsyncClient5Builder schemePortResolver(SchemePortResolver schemePortResolver) {
         this.schemePortResolver = schemePortResolver;
         return this;
     }
@@ -239,7 +228,7 @@ public class HttpClient5Builder {
     /**
      * 设置DNS解析器
      */
-    public HttpClient5Builder dnsResolver(DnsResolver dnsResolver) {
+    public HttpAsyncClient5Builder dnsResolver(DnsResolver dnsResolver) {
         this.dnsResolver = dnsResolver;
         return this;
     }
@@ -247,7 +236,7 @@ public class HttpClient5Builder {
     /**
      * 设置连接池并发策略
      */
-    public HttpClient5Builder poolConcurrencyPolicy(PoolConcurrencyPolicy poolConcurrencyPolicy) {
+    public HttpAsyncClient5Builder poolConcurrencyPolicy(PoolConcurrencyPolicy poolConcurrencyPolicy) {
         this.poolConcurrencyPolicy = poolConcurrencyPolicy;
         return this;
     }
@@ -255,23 +244,15 @@ public class HttpClient5Builder {
     /**
      * 设置连接池的复用策略
      */
-    public HttpClient5Builder poolReusePolicy(PoolReusePolicy poolReusePolicy) {
+    public HttpAsyncClient5Builder poolReusePolicy(PoolReusePolicy poolReusePolicy) {
         this.poolReusePolicy = poolReusePolicy;
-        return this;
-    }
-
-    /**
-     * 设置连接池的socket配置解析器
-     */
-    public HttpClient5Builder socketConfigResolver(Resolver<HttpRoute, SocketConfig> socketConfigResolver) {
-        this.socketConfigResolver = socketConfigResolver;
         return this;
     }
 
     /**
      * 获取连接池的连接配置解析器
      */
-    public HttpClient5Builder connectionConfigResolver(Resolver<HttpRoute, ConnectionConfig> connectionConfigResolver) {
+    public HttpAsyncClient5Builder connectionConfigResolver(Resolver<HttpRoute, ConnectionConfig> connectionConfigResolver) {
         this.connectionConfigResolver = connectionConfigResolver;
         return this;
     }
@@ -279,23 +260,15 @@ public class HttpClient5Builder {
     /**
      * 获取连接池的TLS配置解析器
      */
-    public HttpClient5Builder tlsConfigResolver(Resolver<HttpHost, TlsConfig> tlsConfigResolver) {
+    public HttpAsyncClient5Builder tlsConfigResolver(Resolver<HttpHost, TlsConfig> tlsConfigResolver) {
         this.tlsConfigResolver = tlsConfigResolver;
-        return this;
-    }
-
-    /**
-     * 设置连接池的连接工厂
-     */
-    public HttpClient5Builder connFactory(HttpConnectionFactory<ManagedHttpClientConnection> connFactory) {
-        this.connFactory = connFactory;
         return this;
     }
 
     /**
      * 设置socket超时时间
      */
-    public HttpClient5Builder socketTimeout(int socketTimeout) {
+    public HttpAsyncClient5Builder socketTimeout(int socketTimeout) {
         this.socketTimeout = socketTimeout;
         return this;
     }
@@ -303,7 +276,7 @@ public class HttpClient5Builder {
     /**
      * 设置socket超时时间单位
      */
-    public HttpClient5Builder socketTimeoutUnit(TimeUnit socketTimeoutUnit) {
+    public HttpAsyncClient5Builder socketTimeoutUnit(TimeUnit socketTimeoutUnit) {
         this.socketTimeoutUnit = socketTimeoutUnit;
         return this;
     }
@@ -311,7 +284,7 @@ public class HttpClient5Builder {
     /**
      * 设置连接超时时间
      */
-    public HttpClient5Builder connectTimeout(int connectTimeout) {
+    public HttpAsyncClient5Builder connectTimeout(int connectTimeout) {
         this.connectTimeout = connectTimeout;
         return this;
     }
@@ -319,7 +292,7 @@ public class HttpClient5Builder {
     /**
      * 设置连接超时时间单位
      */
-    public HttpClient5Builder connectTimeoutUnit(TimeUnit connectTimeoutUnit) {
+    public HttpAsyncClient5Builder connectTimeoutUnit(TimeUnit connectTimeoutUnit) {
         this.connectTimeoutUnit = connectTimeoutUnit;
         return this;
     }
@@ -327,7 +300,7 @@ public class HttpClient5Builder {
     /**
      * 设置验证连接是否活跃
      */
-    public HttpClient5Builder validateAfterInactivity(int validateAfterInactivity) {
+    public HttpAsyncClient5Builder validateAfterInactivity(int validateAfterInactivity) {
         this.validateAfterInactivity = validateAfterInactivity;
         return this;
     }
@@ -335,7 +308,7 @@ public class HttpClient5Builder {
     /**
      * 设置验证连接是否活跃单位
      */
-    public HttpClient5Builder validateAfterInactivityUnit(TimeUnit validateAfterInactivityUnit) {
+    public HttpAsyncClient5Builder validateAfterInactivityUnit(TimeUnit validateAfterInactivityUnit) {
         this.validateAfterInactivityUnit = validateAfterInactivityUnit;
         return this;
     }
@@ -343,7 +316,7 @@ public class HttpClient5Builder {
     /**
      * 设置连接存活时间
      */
-    public HttpClient5Builder timeToLive(int timeToLive) {
+    public HttpAsyncClient5Builder timeToLive(int timeToLive) {
         this.timeToLive = timeToLive;
         return this;
     }
@@ -351,7 +324,7 @@ public class HttpClient5Builder {
     /**
      * 设置连接存活时间单位
      */
-    public HttpClient5Builder timeToLiveUnit(TimeUnit timeToLiveUnit) {
+    public HttpAsyncClient5Builder timeToLiveUnit(TimeUnit timeToLiveUnit) {
         this.timeToLiveUnit = timeToLiveUnit;
         return this;
     }
@@ -359,7 +332,7 @@ public class HttpClient5Builder {
     /**
      * 设置从连接池获取连接的超时时间
      */
-    public HttpClient5Builder connectionRequestTimeout(int connectionRequestTimeout) {
+    public HttpAsyncClient5Builder connectionRequestTimeout(int connectionRequestTimeout) {
         this.connectionRequestTimeout = connectionRequestTimeout;
         return this;
     }
@@ -367,7 +340,7 @@ public class HttpClient5Builder {
     /**
      * 设置从连接池获取连接的超时时间单位
      */
-    public HttpClient5Builder connectionRequestTimeoutUnit(TimeUnit connectionRequestTimeoutUnit) {
+    public HttpAsyncClient5Builder connectionRequestTimeoutUnit(TimeUnit connectionRequestTimeoutUnit) {
         this.connectionRequestTimeoutUnit = connectionRequestTimeoutUnit;
         return this;
     }
@@ -375,7 +348,7 @@ public class HttpClient5Builder {
     /**
      * 设置是否开启守护线程定时清理空闲连接
      */
-    public HttpClient5Builder evictExpiredConnections(boolean evictExpiredConnections) {
+    public HttpAsyncClient5Builder evictExpiredConnections(boolean evictExpiredConnections) {
         this.evictExpiredConnections = evictExpiredConnections;
         return this;
     }
@@ -383,7 +356,7 @@ public class HttpClient5Builder {
     /**
      * 设置守护线程定时清理空闲连接的时间间隔
      */
-    public HttpClient5Builder evictIdleConnections(int evictIdleConnections) {
+    public HttpAsyncClient5Builder evictIdleConnections(int evictIdleConnections) {
         this.evictIdleConnections = evictIdleConnections;
         return this;
     }
@@ -391,8 +364,24 @@ public class HttpClient5Builder {
     /**
      * 设置守护线程定时清理空闲连接的时间间隔单位
      */
-    public HttpClient5Builder evictIdleConnectionsUnit(TimeUnit evictIdleConnectionsUnit) {
+    public HttpAsyncClient5Builder evictIdleConnectionsUnit(TimeUnit evictIdleConnectionsUnit) {
         this.evictIdleConnectionsUnit = evictIdleConnectionsUnit;
+        return this;
+    }
+
+    /**
+     * 设置 I/O reactor 配置
+     */
+    public HttpAsyncClient5Builder ioReactorConfig(IOReactorConfig ioReactorConfig) {
+        this.ioReactorConfig = ioReactorConfig;
+        return this;
+    }
+
+    /**
+     * 设置是否启动
+     */
+    public HttpAsyncClient5Builder start(boolean start) {
+        this.start = start;
         return this;
     }
 }

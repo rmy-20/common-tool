@@ -47,21 +47,20 @@ public class IOUtil {
      * @param inputStream 待读取的流
      */
     public static byte[] readAllBytes(InputStream inputStream) throws IOException {
-        return readAllBytes(inputStream, 1024);
+        return readAllBytes(inputStream, byteArray());
     }
 
     /**
      * 读取流，转化为 byte[]
      *
      * @param inputStream 待读取的流
-     * @param bufferSize  每次读取输入流缓冲区大小
+     * @param buffer      缓冲区
      */
-    public static byte[] readAllBytes(InputStream inputStream, int bufferSize) throws IOException {
-        if (Objects.isNull(inputStream) || bufferSize <= 0) {
+    public static byte[] readAllBytes(InputStream inputStream, byte[] buffer) throws IOException {
+        if (Objects.isNull(inputStream) || buffer == null || buffer.length == 0) {
             return new byte[0];
         }
         ByteArrayOutputStream bot = new ByteArrayOutputStream();
-        byte[] buffer = new byte[bufferSize];
         int read;
         while ((read = inputStream.read(buffer)) != -1) {
             bot.write(buffer, 0, read);
@@ -73,7 +72,7 @@ public class IOUtil {
      * 获取一个默认的 byte[]
      */
     static byte[] byteArray() {
-        return new byte[4096];
+        return new byte[8192];
     }
 
     /**
