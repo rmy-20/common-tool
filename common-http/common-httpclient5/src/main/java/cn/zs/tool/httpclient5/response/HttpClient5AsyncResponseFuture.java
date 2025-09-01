@@ -171,7 +171,7 @@ public class HttpClient5AsyncResponseFuture<R> extends CompletableFuture<HttpCli
                 Header[] headerArr = response.getHeaders();
                 if (Objects.nonNull(headerArr)) {
                     for (Header header : headerArr) {
-                        classicHttpResponse.setHeader(header);
+                        classicHttpResponse.addHeader(header);
                     }
                 }
                 classicHttpResponse.setVersion(response.getVersion());
