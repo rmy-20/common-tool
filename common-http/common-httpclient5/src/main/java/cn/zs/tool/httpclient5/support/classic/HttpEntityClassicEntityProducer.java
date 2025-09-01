@@ -1,7 +1,6 @@
 package cn.zs.tool.httpclient5.support.classic;
 
 import cn.zs.tool.core.constant.CommonConstant;
-import cn.zs.tool.core.io.IOUtil;
 import org.apache.hc.core5.http.ContentType;
 import org.apache.hc.core5.http.HttpEntity;
 import org.apache.hc.core5.http.nio.support.classic.AbstractClassicEntityProducer;
@@ -67,7 +66,7 @@ public class HttpEntityClassicEntityProducer extends AbstractClassicEntityProduc
 
     @Override
     protected void produceData(ContentType contentType, OutputStream outputStream) throws IOException {
-        IOUtil.copy(entity.getContent(), outputStream);
+        entity.writeTo(outputStream);
     }
 
     @Override

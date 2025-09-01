@@ -45,8 +45,8 @@ class HttpClient5Test {
                 .queryEncoded("sex", "男")
                 .queryEncoded("address", "中国")
                 .stringExecutor().execute();
-        Assert.isTrue(exchange.isOk(), "okhttp get请求失败");
-        System.out.println("okhttp get结果：" + exchange.get());
+        Assert.isTrue(exchange.isOk(), "http client get请求失败");
+        System.out.println("http client get结果：" + exchange.get());
     }
 
     @Test
@@ -68,8 +68,8 @@ class HttpClient5Test {
         }
 
         HttpClient5AsyncExecutor<String> exchange = future.join();
-        Assert.isTrue(exchange.isOk(), "okhttp get请求失败");
-        System.out.println("okhttp get结果：" + exchange.get());
+        Assert.isTrue(exchange.isOk(), "http client get 异步请求失败");
+        System.out.println("http client get 异步结果：" + exchange.get());
     }
 
     @Test
@@ -89,8 +89,8 @@ class HttpClient5Test {
                 .body(JsonTool.JSON_TOOL.toJson(map))
                 .executor(JsonHttpMsgConverter.create(JsonTool.JSON_TOOL, new TypeReference<Map<String, Object>>() {
                 })).mustHandleResult(true).execute();
-        Assert.isTrue(exchange.isOk(), "okhttp post请求失败");
-        System.out.println("okhttp post结果：" + exchange.get());
+        Assert.isTrue(exchange.isOk(), "http client post请求失败");
+        System.out.println("http client post结果：" + exchange.get());
     }
 
     @Test
@@ -115,8 +115,8 @@ class HttpClient5Test {
             TimeUnit.MILLISECONDS.sleep(200L);
         }
         HttpClient5AsyncExecutor<Map<String, Object>> exchange = future.join();
-        Assert.isTrue(exchange.isOk(), "okhttp post请求失败");
-        System.out.println("okhttp post结果：" + exchange.get());
+        Assert.isTrue(exchange.isOk(), "http client post 异步请求失败");
+        System.out.println("http client post 异步结果：" + exchange.get());
     }
 
     @Test
@@ -127,7 +127,7 @@ class HttpClient5Test {
         HttpClient5Executor<Boolean> exchange = HttpClient5Tool.get(uri).paths("download")
                 .setContentType(MediaTypeEnum.APPLICATION_OCTET_STREAM.getMediaType())
                 .downloadExecutor(new File("/opt/httpclient/" + "SM2公私钥对.txt")).execute();
-        Assert.isTrue(exchange.isOk() && exchange.get(), "okhttp 下载文件失败");
+        Assert.isTrue(exchange.isOk() && exchange.get(), "http client 下载文件失败");
         exchange.getHeaders().forEach((key, value) -> log.info("header --> {}：{}", key, value));
     }
 
@@ -144,7 +144,7 @@ class HttpClient5Test {
             TimeUnit.MILLISECONDS.sleep(200L);
         }
         HttpClient5AsyncExecutor<Boolean> exchange = future.join();
-        Assert.isTrue(exchange.isOk() && exchange.get(), "okhttp 下载文件失败");
+        Assert.isTrue(exchange.isOk() && exchange.get(), "http client 异步下载文件失败");
         exchange.getHeaders().forEach((key, value) -> log.info("header --> {}：{}", key, value));
     }
 
@@ -162,8 +162,8 @@ class HttpClient5Test {
                 .addTextEncoded("version", "版本号")
                 .addTextEncoded("sign", "MEUCIQC5er362TvTWrTpoZzvYeHldXTJtEIZpZJOea6nDseHngIgV61eTm/R7XLOd4/9lWV9lbRQJFEhTxASWfWkqE65F5c=")
                 .stringExecutor().execute();
-        Assert.isTrue(exchange.isOk(), "okhttp form 请求失败");
-        System.out.println("okhttp form结果：" + exchange.get());
+        Assert.isTrue(exchange.isOk(), "http client form 请求失败");
+        System.out.println("http client form结果：" + exchange.get());
     }
 
     @Test
@@ -185,8 +185,8 @@ class HttpClient5Test {
             TimeUnit.MILLISECONDS.sleep(200L);
         }
         HttpClient5AsyncExecutor<String> exchange = future.join();
-        Assert.isTrue(exchange.isOk(), "okhttp form 请求失败");
-        System.out.println("okhttp form结果：" + exchange.get());
+        Assert.isTrue(exchange.isOk(), "http client form 异步请求失败");
+        System.out.println("http client form 异步结果：" + exchange.get());
     }
 
     @Test
@@ -214,8 +214,8 @@ class HttpClient5Test {
                 .addText("format", "哈哈faga---===");
         base64FileMap.forEach((k, v) -> multipartRequest.addBinary("file", k, Base64.getDecoder().decode(v.getBytes(StandardCharsets.UTF_8))));
         HttpClient5Executor<String> exchange = multipartRequest.stringExecutor().execute();
-        Assert.isTrue(exchange.isOk(), "okhttp上传失败");
-        System.out.println("okhttp上传结果：" + exchange.get());
+        Assert.isTrue(exchange.isOk(), "http client上传失败");
+        System.out.println("http client上传结果：" + exchange.get());
     }
 
     @Test
@@ -248,7 +248,7 @@ class HttpClient5Test {
             TimeUnit.MILLISECONDS.sleep(200L);
         }
         HttpClient5AsyncExecutor<String> exchange = future.join();
-        Assert.isTrue(exchange.isOk(), "okhttp上传失败");
-        System.out.println("okhttp上传结果：" + exchange.get());
+        Assert.isTrue(exchange.isOk(), "http client 异步上传失败");
+        System.out.println("http client 异步上传结果：" + exchange.get());
     }
 }
