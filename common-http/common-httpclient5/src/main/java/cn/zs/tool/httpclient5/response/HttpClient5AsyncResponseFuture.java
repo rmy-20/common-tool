@@ -13,6 +13,7 @@ import org.apache.hc.client5.http.classic.HttpClient;
 import org.apache.hc.client5.http.classic.methods.HttpUriRequestBase;
 import org.apache.hc.core5.concurrent.FutureCallback;
 import org.apache.hc.core5.http.ContentType;
+import org.apache.hc.core5.http.Header;
 import org.apache.hc.core5.http.HttpEntity;
 import org.apache.hc.core5.http.HttpException;
 import org.apache.hc.core5.http.HttpResponse;
@@ -28,6 +29,7 @@ import org.apache.hc.core5.http.protocol.HttpContext;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Locale;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Predicate;
@@ -164,9 +166,19 @@ public class HttpClient5AsyncResponseFuture<R> extends CompletableFuture<HttpCli
 
             @Override
             protected BasicClassicHttpResponse buildResult(HttpResponse response, InputStream entity, ContentType contentType) {
-                BasicClassicHttpResponse classicHttpResponse = new BasicClassicHttpResponse(response.getCode(),
-                        response.getReasonPhrase());
+                BasicClassicHttpResponse classicHttpResponse = new BasicClassicHttpResponse(response.getCode(), response.getReasonPhrase());
                 classicHttpResponse.setEntity(new InputStreamEntity(entity, contentType));
+                Header[] headerArr = response.getHeaders();
+                if (Objects.nonNull(headerArr)) {
+                    for (Header header : headerArr) {
+                        classicHttpResponse.setHeader(header);
+                    }
+                }
+                classicHttpResponse.setVersion(response.getVersion());
+                Locale locale = response.getLocale();
+                if (Objects.nonNull(locale)) {
+                    classicHttpResponse.setLocale(locale);
+                }
                 return classicHttpResponse;
             }
         };
