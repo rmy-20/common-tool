@@ -1,5 +1,6 @@
 package cn.zs.tool.httpclient5.request;
 
+import cn.zs.tool.http.core.request.BaseHttpRequest;
 import cn.zs.tool.httpclient5.constant.HttpRequestMethodEnum;
 import org.apache.hc.core5.http.ContentType;
 import org.apache.hc.core5.http.HttpEntity;
@@ -16,7 +17,7 @@ import java.util.Objects;
  *
  * @author sheng
  */
-public class HttpClient5Request extends HttpClient5BaseRequest<HttpClient5Request> {
+public class HttpClient5Request extends HttpClient5BaseRequest<HttpClient5Request> implements BaseHttpRequest<HttpClient5Request> {
     public HttpClient5Request(String url, HttpRequestMethodEnum method) {
         super(url, method);
     }
@@ -36,13 +37,7 @@ public class HttpClient5Request extends HttpClient5BaseRequest<HttpClient5Reques
     /**
      * 设置请求体
      */
-    public HttpClient5Request body(String body) {
-        return body(body, getDefaultCharset());
-    }
-
-    /**
-     * 设置请求体
-     */
+    @Override
     public HttpClient5Request body(String body, Charset charset) {
         return body(new StringEntity(body, charset));
     }

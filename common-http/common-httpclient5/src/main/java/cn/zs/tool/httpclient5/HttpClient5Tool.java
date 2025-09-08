@@ -87,6 +87,26 @@ public class HttpClient5Tool {
     }
 
     /**
+     * 请求
+     *
+     * @param url    请求地址
+     * @param method 请求方法
+     */
+    public static HttpClient5Request request(String url, HttpRequestMethodEnum method) {
+        return HttpClient5Request.create(url, method);
+    }
+
+    /**
+     * 请求
+     *
+     * @param url    请求地址
+     * @param method 请求方法
+     */
+    public static HttpClient5Request request(URI url, HttpRequestMethodEnum method) {
+        return request(url.toString(), method);
+    }
+
+    /**
      * 表单post请求
      *
      * @param url 请求地址
@@ -103,7 +123,6 @@ public class HttpClient5Tool {
     public static HttpClient5FormRequest form(String url, HttpRequestMethodEnum method) {
         return HttpClient5FormRequest.create(url, method);
     }
-
 
     /**
      * 文件上传post请求

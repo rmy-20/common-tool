@@ -4,7 +4,7 @@ import cn.zs.tool.core.fuction.throwing.ThrowingConsumer;
 import cn.zs.tool.core.text.StringUtil;
 import cn.zs.tool.http.core.HttpHeaders;
 import cn.zs.tool.http.core.converter.HttpMsgConverter;
-import cn.zs.tool.http.core.execute.HttpExecuteProcessor;
+import cn.zs.tool.http.core.execute.BaseExecutor;
 import cn.zs.tool.okhttp.response.OkHttpResponse;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.Call;
@@ -18,7 +18,7 @@ import java.util.function.Predicate;
  * @author sheng
  */
 @Slf4j
-public class OkHttpExecutor<R> extends HttpExecuteProcessor<R> {
+public class OkHttpExecutor<R> extends BaseExecutor<R> {
     /**
      * okhttp调用
      */

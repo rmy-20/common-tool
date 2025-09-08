@@ -4,7 +4,7 @@ import cn.zs.tool.core.fuction.throwing.ThrowingConsumer;
 import cn.zs.tool.core.text.StringUtil;
 import cn.zs.tool.http.core.HttpHeaders;
 import cn.zs.tool.http.core.converter.HttpMsgConverter;
-import cn.zs.tool.http.core.execute.HttpExecuteProcessor;
+import cn.zs.tool.http.core.execute.BaseExecutor;
 import cn.zs.tool.httpclient5.response.HttpClient5Response;
 import org.apache.hc.core5.http.message.BasicClassicHttpResponse;
 
@@ -16,7 +16,7 @@ import java.util.function.Predicate;
  *
  * @author sheng
  */
-public class HttpClient5AsyncExecutor<R> extends HttpExecuteProcessor<R> {
+public class HttpClient5AsyncExecutor<R> extends BaseExecutor<R> {
     /**
      * 响应
      */

@@ -1,7 +1,7 @@
 package cn.zs.tool.okhttp.executor;
 
 import cn.zs.tool.http.core.converter.HttpMsgConverter;
-import cn.zs.tool.http.core.execute.ExecutorBaseBuilder;
+import cn.zs.tool.http.core.execute.BaseExecutorBuilder;
 import cn.zs.tool.okhttp.response.OkHttpAsyncResponseFuture;
 import okhttp3.Call;
 
@@ -13,7 +13,7 @@ import java.util.concurrent.CompletableFuture;
  *
  * @author sheng
  */
-public class OkHttpExecutorBuilder<R> extends ExecutorBaseBuilder<R, OkHttpExecutor<R>, OkHttpAsyncExecutor<R>, OkHttpExecutorBuilder<R>> {
+public class OkHttpExecutorBuilder<R> extends BaseExecutorBuilder<R, OkHttpExecutor<R>, OkHttpAsyncExecutor<R>, OkHttpExecutorBuilder<R>> {
     /**
      * 请求对象
      */

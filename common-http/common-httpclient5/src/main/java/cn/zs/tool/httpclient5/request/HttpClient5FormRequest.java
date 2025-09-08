@@ -3,6 +3,7 @@ package cn.zs.tool.httpclient5.request;
 import cn.zs.tool.core.text.StringPool;
 import cn.zs.tool.core.text.StringUtil;
 import cn.zs.tool.http.core.constant.MediaTypeEnum;
+import cn.zs.tool.http.core.request.BaseFormRequest;
 import cn.zs.tool.httpclient5.constant.HttpRequestMethodEnum;
 import org.apache.hc.client5.http.entity.UrlEncodedFormEntity;
 import org.apache.hc.core5.http.NameValuePair;
@@ -17,7 +18,8 @@ import java.util.Objects;
  *
  * @author sheng
  */
-public class HttpClient5FormRequest extends HttpClient5BaseRequest<HttpClient5FormRequest> {
+public class HttpClient5FormRequest extends HttpClient5BaseRequest<HttpClient5FormRequest>
+        implements BaseFormRequest<HttpClient5FormRequest> {
     /**
      * 表单参数
      */
@@ -43,6 +45,7 @@ public class HttpClient5FormRequest extends HttpClient5BaseRequest<HttpClient5Fo
      * @param name  key
      * @param value value
      */
+    @Override
     public HttpClient5FormRequest addTextEncoded(String name, Object value) {
         formParams.add(new BasicNameValuePair(name, Objects.toString(value, StringPool.EMPTY)));
         return this;

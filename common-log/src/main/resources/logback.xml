@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    scan: 当配置文件被修改后, 将会被重新载入。
+    scanPeriod:配置监测配置文件是否有修改的时间间隔，如果没有给出时间单位，默认单位是毫秒。当scan为true时，此属性生效。默认的时间间隔为1分钟。
+    debug: 当此属性设置为true时，将打印出logback内部日志信息，实时查看logback运行状态。默认值为false。
+-->
+<configuration scan="true" scanPeriod="60 seconds">
+    <!-- 名字随便起，这是开发环境的所以起名为develop -->
+    <contextName>develop</contextName>
+
+    <!-- 定义日志输出格式 -->
+    <property name="LOG_PATTERN" value="%d{yyyy-MM-dd HH:mm:ss.SSS} %5p --- [%t] %-40.40logger{39} : %m%n"/>
+
+    <!--1. 输出到控制台-->
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <Pattern>${LOG_PATTERN}</Pattern>
+            <charset>utf-8</charset>
+        </encoder>
+
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>debug</level>
+        </filter>
+    </appender>
+
+    <!-- 根日志，用来指定最基础的日志输出级别，只有一个level属性。-->
+    <root level="info">
+        <appender-ref ref="STDOUT"/>
+    </root>
+
+    <!-- 自定义包的日志级别 -->
+    <logger name="cn.zs" level="info"/>
+</configuration>

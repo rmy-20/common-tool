@@ -12,6 +12,7 @@ import lombok.Getter;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -141,6 +142,17 @@ public class RfcUri {
      */
     public String getUriString() {
         return uri.toString();
+    }
+
+    /**
+     * 获取#{@link URL}
+     */
+    public URL getUrl() {
+        try {
+            return uri.toURL();
+        } catch (Exception e) {
+            throw new UriException("RFC uri转换URL异常", e);
+        }
     }
 
     /**

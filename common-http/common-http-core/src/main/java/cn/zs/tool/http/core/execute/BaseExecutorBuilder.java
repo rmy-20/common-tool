@@ -16,8 +16,8 @@ import java.util.function.Predicate;
  * @author sheng
  */
 @Slf4j
-public abstract class ExecutorBaseBuilder<R, SyncExecutor extends HttpExecuteProcessor<R>,
-        AsyncExecutor extends HttpExecuteProcessor<R>, T extends ExecutorBaseBuilder<R, SyncExecutor, AsyncExecutor, T>> {
+public abstract class BaseExecutorBuilder<R, SyncExecutor extends BaseExecutor<R>,
+        AsyncExecutor extends BaseExecutor<R>, T extends BaseExecutorBuilder<R, SyncExecutor, AsyncExecutor, T>> {
     /**
      * 错误处理器
      */
@@ -45,7 +45,7 @@ public abstract class ExecutorBaseBuilder<R, SyncExecutor extends HttpExecutePro
     @Getter
     protected boolean mustHandleResult = false;
 
-    public ExecutorBaseBuilder(HttpMsgConverter<R> msgConverter) {
+    public BaseExecutorBuilder(HttpMsgConverter<R> msgConverter) {
         this.msgConverter = Objects.requireNonNull(msgConverter, "msgConverter must not be null");
     }
 

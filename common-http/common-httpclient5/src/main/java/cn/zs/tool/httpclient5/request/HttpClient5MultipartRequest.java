@@ -1,5 +1,6 @@
 package cn.zs.tool.httpclient5.request;
 
+import cn.zs.tool.http.core.request.BaseMultipartRequest;
 import cn.zs.tool.httpclient5.constant.HttpRequestMethodEnum;
 import org.apache.hc.client5.http.entity.mime.ByteArrayBody;
 import org.apache.hc.client5.http.entity.mime.ContentBody;
@@ -19,7 +20,8 @@ import java.util.Objects;
  *
  * @author sheng
  */
-public class HttpClient5MultipartRequest extends HttpClient5BaseRequest<HttpClient5MultipartRequest> {
+public class HttpClient5MultipartRequest extends HttpClient5BaseRequest<HttpClient5MultipartRequest>
+        implements BaseMultipartRequest<HttpClient5MultipartRequest> {
     /**
      * multipart form 参数构建
      */
@@ -59,6 +61,7 @@ public class HttpClient5MultipartRequest extends HttpClient5BaseRequest<HttpClie
      * @param name  key
      * @param value value
      */
+    @Override
     public HttpClient5MultipartRequest addText(String name, String value) {
         formBuilder.addTextBody(name, value);
         return this;
@@ -80,9 +83,15 @@ public class HttpClient5MultipartRequest extends HttpClient5BaseRequest<HttpClie
      * @param name key
      * @param file 文件
      */
+    @Override
     public HttpClient5MultipartRequest addBinary(String name, File file) {
         formBuilder.addBinaryBody(name, file);
         return this;
+    }
+
+    @Override
+    public HttpClient5MultipartRequest addBinary(String name, String filename, File file) {
+        return addBinary(name, filename, file, ContentType.DEFAULT_BINARY);
     }
 
     /**
@@ -115,6 +124,7 @@ public class HttpClient5MultipartRequest extends HttpClient5BaseRequest<HttpClie
      * @param filename 文件名
      * @param bytes    文件
      */
+    @Override
     public HttpClient5MultipartRequest addBinary(String name, String filename, byte[] bytes) {
         return addPart(name, new ByteArrayBody(bytes, filename));
     }
@@ -137,6 +147,7 @@ public class HttpClient5MultipartRequest extends HttpClient5BaseRequest<HttpClie
      * @param filename 文件名
      * @param stream   文件流
      */
+    @Override
     public HttpClient5MultipartRequest addBinary(String name, String filename, InputStream stream) {
         return addPart(name, new InputStreamBody(stream, filename));
     }

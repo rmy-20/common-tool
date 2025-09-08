@@ -1,19 +1,19 @@
 package cn.zs.tool.okhttp.request;
 
 import cn.zs.tool.http.core.constant.HttpMethodEnum;
+import cn.zs.tool.http.core.request.BaseHttpRequest;
 import okhttp3.MediaType;
 import okhttp3.RequestBody;
 
 import java.io.File;
 import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
 
 /**
  * okhttp请求
  *
  * @author sheng
  */
-public class OkHttpRequest extends OkHttpBaseRequest<OkHttpRequest> {
+public class OkHttpRequest extends OkHttpBaseRequest<OkHttpRequest> implements BaseHttpRequest<OkHttpRequest> {
     /**
      * 请求体
      */
@@ -38,13 +38,7 @@ public class OkHttpRequest extends OkHttpBaseRequest<OkHttpRequest> {
     /**
      * 设置请求体
      */
-    public OkHttpRequest body(String body) {
-        return body(body, StandardCharsets.UTF_8);
-    }
-
-    /**
-     * 设置请求体
-     */
+    @Override
     public OkHttpRequest body(String body, Charset charset) {
         return body(body, charset, null);
     }

@@ -4,7 +4,7 @@ import cn.zs.tool.core.fuction.throwing.ThrowingConsumer;
 import cn.zs.tool.core.text.StringUtil;
 import cn.zs.tool.http.core.HttpHeaders;
 import cn.zs.tool.http.core.converter.HttpMsgConverter;
-import cn.zs.tool.http.core.execute.HttpExecuteProcessor;
+import cn.zs.tool.http.core.execute.BaseExecutor;
 import cn.zs.tool.httpclient5.response.HttpClient5Response;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.hc.client5.http.classic.HttpClient;
@@ -20,7 +20,7 @@ import java.util.function.Predicate;
  * @author sheng
  */
 @Slf4j
-public class HttpClient5Executor<R> extends HttpExecuteProcessor<R> {
+public class HttpClient5Executor<R> extends BaseExecutor<R> {
     /**
      * 同步请求 #{@link HttpClient}
      */

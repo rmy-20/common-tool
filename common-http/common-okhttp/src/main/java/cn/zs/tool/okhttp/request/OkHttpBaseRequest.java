@@ -9,8 +9,8 @@ import cn.zs.tool.http.core.converter.JsonHttpMsgConverter;
 import cn.zs.tool.http.core.converter.OutputStreamHttpMsgConverter;
 import cn.zs.tool.http.core.converter.StringHttpMsgConverter;
 import cn.zs.tool.http.core.converter.XmlHttpMsgConverter;
-import cn.zs.tool.http.core.decorator.HttpHeaderDecorator;
 import cn.zs.tool.http.core.exception.HttpException;
+import cn.zs.tool.http.core.request.BaseRequest;
 import cn.zs.tool.okhttp.constant.OkHttpConstant;
 import cn.zs.tool.okhttp.decorator.OkHttpUriBuilderDecorator;
 import cn.zs.tool.okhttp.executor.OkHttpExecutorBuilder;
@@ -23,6 +23,7 @@ import okhttp3.RequestBody;
 import java.io.File;
 import java.io.OutputStream;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 
 /**
@@ -31,7 +32,7 @@ import java.util.Objects;
  * @author sheng
  */
 public abstract class OkHttpBaseRequest<T extends OkHttpBaseRequest<T>>
-        implements OkHttpUriBuilderDecorator<T>, HttpHeaderDecorator<T> {
+        implements OkHttpUriBuilderDecorator<T>, BaseRequest<T> {
 
     /**
      * OkHttpClient
@@ -53,6 +54,11 @@ public abstract class OkHttpBaseRequest<T extends OkHttpBaseRequest<T>>
      */
     private final HttpHeaders headers;
 
+    /**
+     * 默认编码字符集，默认 UTF-8
+     */
+    protected Charset defaultCharset = StandardCharsets.UTF_8;
+
     public OkHttpBaseRequest(String url, HttpMethodEnum method) {
         this.method = Objects.requireNonNull(method, "Http method must not be null");
         HttpUrl httpUrl = HttpUrl.parse(url);
@@ -69,6 +75,22 @@ public abstract class OkHttpBaseRequest<T extends OkHttpBaseRequest<T>>
     public T httpClient(OkHttpClient httpClient) {
         this.httpClient = httpClient;
         return self();
+    }
+
+    /**
+     * 设置默认编码字符集
+     */
+    public T defaultCharset(Charset defaultCharset) {
+        this.defaultCharset = defaultCharset;
+        return self();
+    }
+
+    /**
+     * 获取默认编码字符集
+     */
+    @Override
+    public Charset getDefaultCharset() {
+        return Objects.nonNull(defaultCharset) ? defaultCharset : BaseRequest.super.getDefaultCharset();
     }
 
     @Override
@@ -101,6 +123,7 @@ public abstract class OkHttpBaseRequest<T extends OkHttpBaseRequest<T>>
     /**
      * 获取处理 UTF_8 {@link String}结果的请求执行器
      */
+    @Override
     public OkHttpExecutorBuilder<String> stringExecutor() {
         return executor(StringHttpMsgConverter.UTF_8_INSTANCE);
     }
@@ -110,6 +133,7 @@ public abstract class OkHttpBaseRequest<T extends OkHttpBaseRequest<T>>
      *
      * @param charset 结果编码
      */
+    @Override
     public OkHttpExecutorBuilder<String> stringExecutor(Charset charset) {
         return executor(StringHttpMsgConverter.create(charset));
     }
@@ -119,6 +143,7 @@ public abstract class OkHttpBaseRequest<T extends OkHttpBaseRequest<T>>
      *
      * @param msgConverter {@link JsonHttpMsgConverter}
      */
+    @Override
     public <R> OkHttpExecutorBuilder<R> jsonExecutor(JsonHttpMsgConverter<R> msgConverter) {
         return executor(msgConverter);
     }
@@ -128,6 +153,7 @@ public abstract class OkHttpBaseRequest<T extends OkHttpBaseRequest<T>>
      *
      * @param msgConverter {@link XmlHttpMsgConverter}
      */
+    @Override
     public <R> OkHttpExecutorBuilder<R> xmlExecutor(XmlHttpMsgConverter<R> msgConverter) {
         return executor(msgConverter);
     }
@@ -135,6 +161,7 @@ public abstract class OkHttpBaseRequest<T extends OkHttpBaseRequest<T>>
     /**
      * 获取获取 byte[] 结果的请求执行器
      */
+    @Override
     public OkHttpExecutorBuilder<byte[]> bytesExecutor() {
         return executor(ByteArrayHttpMsgConverter.INSTANCE);
     }
@@ -145,6 +172,7 @@ public abstract class OkHttpBaseRequest<T extends OkHttpBaseRequest<T>>
      * @param targetFile 目标文件
      * @return true 为成功
      */
+    @Override
     public OkHttpExecutorBuilder<Boolean> downloadExecutor(File targetFile) {
         return executor(FileHttpMsgConverter.create(targetFile));
     }
@@ -155,6 +183,7 @@ public abstract class OkHttpBaseRequest<T extends OkHttpBaseRequest<T>>
      * @param msgConverter 结果处理器
      * @return true 为成功
      */
+    @Override
     public OkHttpExecutorBuilder<Boolean> downloadExecutor(FileHttpMsgConverter msgConverter) {
         return executor(msgConverter);
     }
@@ -165,6 +194,7 @@ public abstract class OkHttpBaseRequest<T extends OkHttpBaseRequest<T>>
      * @param outputStream 输出流
      * @return true 为成功
      */
+    @Override
     public OkHttpExecutorBuilder<Boolean> downloadExecutor(OutputStream outputStream) {
         return executor(OutputStreamHttpMsgConverter.create(outputStream));
     }
@@ -175,6 +205,7 @@ public abstract class OkHttpBaseRequest<T extends OkHttpBaseRequest<T>>
      * @param msgConverter 结果处理器
      * @return true 为成功
      */
+    @Override
     public OkHttpExecutorBuilder<Boolean> downloadExecutor(OutputStreamHttpMsgConverter msgConverter) {
         return executor(msgConverter);
     }
@@ -184,6 +215,7 @@ public abstract class OkHttpBaseRequest<T extends OkHttpBaseRequest<T>>
      *
      * @param msgConverter 结果处理器
      */
+    @Override
     public <R> OkHttpExecutorBuilder<R> executor(HttpMsgConverter<R> msgConverter) {
         return OkHttpExecutorBuilder.create(call(), msgConverter);
     }

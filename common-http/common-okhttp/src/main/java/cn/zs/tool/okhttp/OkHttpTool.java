@@ -87,6 +87,26 @@ public class OkHttpTool {
     }
 
     /**
+     * 请求
+     *
+     * @param url    请求地址
+     * @param method 请求方法
+     */
+    public static OkHttpRequest request(String url, HttpMethodEnum method) {
+        return OkHttpRequest.create(url, method);
+    }
+
+    /**
+     * 请求
+     *
+     * @param url    请求地址
+     * @param method 请求方法
+     */
+    public static OkHttpRequest request(URI url, HttpMethodEnum method) {
+        return OkHttpRequest.create(url.toString(), method);
+    }
+
+    /**
      * 表单post请求
      *
      * @param url 请求地址

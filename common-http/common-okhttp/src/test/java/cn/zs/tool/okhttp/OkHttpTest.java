@@ -87,7 +87,7 @@ class OkHttpTest {
                 .body(JsonTool.JSON_TOOL.toJson(map))
                 .jsonExecutor(JsonHttpMsgConverter.create(JsonTool.JSON_TOOL, new TypeReference<Map<String, Object>>() {
                 })).executeAsync();
-        for (int i = 0; i < 50; i++) {
+        for (int i = 0; i < 20; i++) {
             log.info("{}", i);
             TimeUnit.MILLISECONDS.sleep(200L);
         }

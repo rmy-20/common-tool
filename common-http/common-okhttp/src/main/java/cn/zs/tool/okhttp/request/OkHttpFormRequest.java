@@ -4,6 +4,7 @@ import cn.zs.tool.core.text.StringPool;
 import cn.zs.tool.core.text.StringUtil;
 import cn.zs.tool.http.core.constant.HttpMethodEnum;
 import cn.zs.tool.http.core.constant.MediaTypeEnum;
+import cn.zs.tool.http.core.request.BaseFormRequest;
 import okhttp3.FormBody;
 import okhttp3.RequestBody;
 
@@ -14,7 +15,7 @@ import java.util.Objects;
  *
  * @author sheng
  */
-public class OkHttpFormRequest extends OkHttpBaseRequest<OkHttpFormRequest> {
+public class OkHttpFormRequest extends OkHttpBaseRequest<OkHttpFormRequest> implements BaseFormRequest<OkHttpFormRequest> {
     /**
      * 表单
      */
@@ -52,6 +53,7 @@ public class OkHttpFormRequest extends OkHttpBaseRequest<OkHttpFormRequest> {
      * @param name  key
      * @param value value
      */
+    @Override
     public OkHttpFormRequest addTextEncoded(String name, Object value) {
         formBuilder.addEncoded(name, Objects.toString(value, StringPool.EMPTY));
         return this;

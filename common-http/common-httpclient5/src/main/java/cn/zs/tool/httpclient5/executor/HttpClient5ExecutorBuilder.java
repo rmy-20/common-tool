@@ -3,7 +3,7 @@ package cn.zs.tool.httpclient5.executor;
 import cn.zs.tool.core.fuction.throwing.ThrowingFunc;
 import cn.zs.tool.core.fuction.throwing.ThrowingSupplier;
 import cn.zs.tool.http.core.converter.HttpMsgConverter;
-import cn.zs.tool.http.core.execute.ExecutorBaseBuilder;
+import cn.zs.tool.http.core.execute.BaseExecutorBuilder;
 import cn.zs.tool.httpclient5.constant.HttpClient5Constant;
 import cn.zs.tool.httpclient5.response.HttpClient5AsyncResponseFuture;
 import org.apache.hc.client5.http.async.HttpAsyncClient;
@@ -25,7 +25,7 @@ import java.util.concurrent.CompletableFuture;
  *
  * @author sheng
  */
-public class HttpClient5ExecutorBuilder<R> extends ExecutorBaseBuilder<R,
+public class HttpClient5ExecutorBuilder<R> extends BaseExecutorBuilder<R,
         HttpClient5Executor<R>, HttpClient5AsyncExecutor<R>, HttpClient5ExecutorBuilder<R>> {
     /**
      * 请求信息
@@ -35,55 +35,67 @@ public class HttpClient5ExecutorBuilder<R> extends ExecutorBaseBuilder<R,
     /**
      * 同步请求 #{@link HttpClient}
      */
-    protected HttpClient httpClient;
+    private final HttpClient httpClient;
 
     /**
      * 异步请求 #{@link HttpAsyncClient}
      */
-    protected HttpAsyncClient httpAsyncClient;
+    private final HttpAsyncClient httpAsyncClient;
 
     /**
      * 请求上下文
      */
-    private HttpContext httpContext;
+    private final HttpContext httpContext;
 
     /**
      * #{@link AsyncRequestProducer} 提供者
      */
-    private ThrowingFunc<HttpUriRequestBase, AsyncRequestProducer, Throwable> asyncRequestProducerFunc;
+    private final ThrowingFunc<HttpUriRequestBase, AsyncRequestProducer, Throwable> asyncRequestProducerFunc;
 
     /**
      * #{@link AsyncResponseConsumer} 提供者
      */
-    private ThrowingSupplier<AsyncResponseConsumer<BasicClassicHttpResponse>, Throwable> asyncResponseConsumerSupplier;
+    private final ThrowingSupplier<AsyncResponseConsumer<BasicClassicHttpResponse>, Throwable> asyncResponseConsumerSupplier;
 
     /**
      * #{@link AsyncPushConsumer} 提供者
      */
-    private ThrowingSupplier<HandlerFactory<AsyncPushConsumer>, Throwable> pushHandlerFactorySupplier;
+    private final ThrowingSupplier<HandlerFactory<AsyncPushConsumer>, Throwable> pushHandlerFactorySupplier;
 
     /**
      * 创建执行器构建器
      *
-     * @param request      请求
-     * @param msgConverter 消息转换器
+     * @param request                       请求
+     * @param msgConverter                  消息转换器
+     * @param httpClient                    同步请求 #{@link HttpClient}
+     * @param httpAsyncClient               异步请求 #{@link HttpAsyncClient}
+     * @param httpContext                   请求上下文
+     * @param asyncRequestProducerFunc      #{@link AsyncRequestProducer} 提供者
+     * @param asyncResponseConsumerSupplier #{@link AsyncResponseConsumer} 提供者
+     * @param pushHandlerFactorySupplier    #{@link AsyncPushConsumer} 提供者
      */
-    public static <R> HttpClient5ExecutorBuilder<R> create(HttpUriRequestBase request,
-                                                           HttpMsgConverter<R> msgConverter) {
-        return new HttpClient5ExecutorBuilder<>(request, msgConverter);
+    public static <R> HttpClient5ExecutorBuilder<R> create(HttpUriRequestBase request, HttpMsgConverter<R> msgConverter,
+                                                           HttpClient httpClient, HttpAsyncClient httpAsyncClient, HttpContext httpContext,
+                                                           ThrowingFunc<HttpUriRequestBase, AsyncRequestProducer, Throwable> asyncRequestProducerFunc,
+                                                           ThrowingSupplier<AsyncResponseConsumer<BasicClassicHttpResponse>, Throwable> asyncResponseConsumerSupplier,
+                                                           ThrowingSupplier<HandlerFactory<AsyncPushConsumer>, Throwable> pushHandlerFactorySupplier) {
+        return new HttpClient5ExecutorBuilder<>(request, msgConverter, httpClient, httpAsyncClient, httpContext,
+                asyncRequestProducerFunc, asyncResponseConsumerSupplier, pushHandlerFactorySupplier);
     }
 
-    public HttpClient5ExecutorBuilder(HttpUriRequestBase request, HttpMsgConverter<R> msgConverter) {
+    public HttpClient5ExecutorBuilder(HttpUriRequestBase request, HttpMsgConverter<R> msgConverter,
+                                      HttpClient httpClient, HttpAsyncClient httpAsyncClient, HttpContext httpContext,
+                                      ThrowingFunc<HttpUriRequestBase, AsyncRequestProducer, Throwable> asyncRequestProducerFunc,
+                                      ThrowingSupplier<AsyncResponseConsumer<BasicClassicHttpResponse>, Throwable> asyncResponseConsumerSupplier,
+                                      ThrowingSupplier<HandlerFactory<AsyncPushConsumer>, Throwable> pushHandlerFactorySupplier) {
         super(msgConverter);
         this.request = Objects.requireNonNull(request, "request must not be null");
-    }
-
-    /**
-     * 设置 HttpClient
-     */
-    public HttpClient5ExecutorBuilder<R> httpClient(HttpClient httpClient) {
         this.httpClient = httpClient;
-        return self();
+        this.httpAsyncClient = httpAsyncClient;
+        this.httpContext = httpContext;
+        this.asyncRequestProducerFunc = asyncRequestProducerFunc;
+        this.asyncResponseConsumerSupplier = asyncResponseConsumerSupplier;
+        this.pushHandlerFactorySupplier = pushHandlerFactorySupplier;
     }
 
     /**
@@ -94,14 +106,6 @@ public class HttpClient5ExecutorBuilder<R> extends ExecutorBaseBuilder<R,
     }
 
     /**
-     * 设置 HttpAsyncClient
-     */
-    public HttpClient5ExecutorBuilder<R> httpAsyncClient(HttpAsyncClient httpAsyncClient) {
-        this.httpAsyncClient = httpAsyncClient;
-        return self();
-    }
-
-    /**
      * 获取当前实例所用 #{@link HttpAsyncClient}
      */
     public HttpAsyncClient getHttpAsyncClient() {
@@ -109,42 +113,10 @@ public class HttpClient5ExecutorBuilder<R> extends ExecutorBaseBuilder<R,
     }
 
     /**
-     * 请求上下文
-     */
-    public HttpClient5ExecutorBuilder<R> httpContext(HttpContext httpContext) {
-        this.httpContext = httpContext;
-        return self();
-    }
-
-    /**
      * 获取当前实例所用请求上下文
      */
     public HttpContext getHttpContext() {
         return Objects.nonNull(httpContext) ? httpContext : HttpClientContext.create();
-    }
-
-    /**
-     * 设置 #{@link AsyncRequestProducer} 提供者
-     */
-    public HttpClient5ExecutorBuilder<R> asyncRequestProducerFunc(ThrowingFunc<HttpUriRequestBase, AsyncRequestProducer, Throwable> asyncRequestProducerFunc) {
-        this.asyncRequestProducerFunc = asyncRequestProducerFunc;
-        return self();
-    }
-
-    /**
-     * 设置 #{@link AsyncResponseConsumer} 提供者
-     */
-    public HttpClient5ExecutorBuilder<R> asyncResponseConsumerSupplier(ThrowingSupplier<AsyncResponseConsumer<BasicClassicHttpResponse>, Throwable> asyncResponseConsumerSupplier) {
-        this.asyncResponseConsumerSupplier = asyncResponseConsumerSupplier;
-        return self();
-    }
-
-    /**
-     * 设置 #{@link AsyncPushConsumer} 提供者
-     */
-    public HttpClient5ExecutorBuilder<R> pushHandlerFactorySupplier(ThrowingSupplier<HandlerFactory<AsyncPushConsumer>, Throwable> pushHandlerFactorySupplier) {
-        this.pushHandlerFactorySupplier = pushHandlerFactorySupplier;
-        return self();
     }
 
     @Override

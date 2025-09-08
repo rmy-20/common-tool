@@ -1,6 +1,7 @@
 package cn.zs.tool.okhttp.decorator;
 
 import cn.zs.tool.core.text.StringPool;
+import cn.zs.tool.http.core.decorator.UriBuilderDecorator;
 import okhttp3.HttpUrl;
 
 import java.util.Objects;
@@ -10,12 +11,7 @@ import java.util.Objects;
  *
  * @author sheng
  */
-public interface OkHttpUriBuilderDecorator<T extends OkHttpUriBuilderDecorator<T>> {
-    /**
-     * 获取当前实例
-     */
-    T self();
-
+public interface OkHttpUriBuilderDecorator<T extends OkHttpUriBuilderDecorator<T>> extends UriBuilderDecorator<T> {
     /**
      * 获取当前实例的HttpUrl.Builder
      */
@@ -27,6 +23,7 @@ public interface OkHttpUriBuilderDecorator<T extends OkHttpUriBuilderDecorator<T
      * @param name  参数名
      * @param value 参数值
      */
+    @Override
     default T query(String name, Object value) {
         getUrlBuilder().addQueryParameter(name, Objects.toString(value, StringPool.EMPTY));
         return self();
@@ -38,6 +35,7 @@ public interface OkHttpUriBuilderDecorator<T extends OkHttpUriBuilderDecorator<T
      * @param name  参数名
      * @param value 参数值
      */
+    @Override
     default T queryEncoded(String name, Object value) {
         getUrlBuilder().addEncodedQueryParameter(name, Objects.toString(value, StringPool.EMPTY));
         return self();
@@ -48,6 +46,7 @@ public interface OkHttpUriBuilderDecorator<T extends OkHttpUriBuilderDecorator<T
      *
      * @param path 路径，如 a
      */
+    @Override
     default T path(String path) {
         getUrlBuilder().addPathSegment(path);
         return self();
@@ -58,6 +57,7 @@ public interface OkHttpUriBuilderDecorator<T extends OkHttpUriBuilderDecorator<T
      *
      * @param path 路径，如 /a/b/c
      */
+    @Override
     default T paths(String path) {
         getUrlBuilder().addPathSegments(path);
         return self();
@@ -68,6 +68,7 @@ public interface OkHttpUriBuilderDecorator<T extends OkHttpUriBuilderDecorator<T
      *
      * @param path 路径，如 a
      */
+    @Override
     default T pathEncoded(String path) {
         getUrlBuilder().addEncodedPathSegment(path);
         return self();
@@ -78,6 +79,7 @@ public interface OkHttpUriBuilderDecorator<T extends OkHttpUriBuilderDecorator<T
      *
      * @param path 路径，如 /a/b/c
      */
+    @Override
     default T pathsEncoded(String path) {
         getUrlBuilder().addEncodedPathSegments(path);
         return self();

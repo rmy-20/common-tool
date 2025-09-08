@@ -4,7 +4,7 @@ import cn.zs.tool.core.fuction.throwing.ThrowingConsumer;
 import cn.zs.tool.core.text.StringUtil;
 import cn.zs.tool.http.core.HttpHeaders;
 import cn.zs.tool.http.core.converter.HttpMsgConverter;
-import cn.zs.tool.http.core.execute.HttpExecuteProcessor;
+import cn.zs.tool.http.core.execute.BaseExecutor;
 import cn.zs.tool.okhttp.response.OkHttpResponse;
 import okhttp3.Call;
 import okhttp3.Response;
@@ -17,7 +17,7 @@ import java.util.function.Predicate;
  *
  * @author sheng
  */
-public class OkHttpAsyncExecutor<R> extends HttpExecuteProcessor<R> {
+public class OkHttpAsyncExecutor<R> extends BaseExecutor<R> {
     /**
      * okhttp响应对象
      */

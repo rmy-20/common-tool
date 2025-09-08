@@ -10,12 +10,7 @@ import java.util.Objects;
  *
  * @author sheng
  */
-public interface RfcUriBuilderDecorator<T extends RfcUriBuilderDecorator<T>> {
-    /**
-     * 获取当前实例
-     */
-    T self();
-
+public interface RfcUriBuilderDecorator<T extends RfcUriBuilderDecorator<T>> extends UriBuilderDecorator<T> {
     /**
      * 获取当前实例的URI构建器
      */
@@ -27,6 +22,7 @@ public interface RfcUriBuilderDecorator<T extends RfcUriBuilderDecorator<T>> {
      * @param name  参数名
      * @param value 参数值
      */
+    @Override
     default T query(String name, Object value) {
         getUriBuilder().query(name, Objects.toString(value, StringPool.EMPTY));
         return self();
@@ -38,6 +34,7 @@ public interface RfcUriBuilderDecorator<T extends RfcUriBuilderDecorator<T>> {
      * @param name  参数名
      * @param value 参数值
      */
+    @Override
     default T queryEncoded(String name, Object value) {
         getUriBuilder().queryEncoded(name, Objects.toString(value, StringPool.EMPTY));
         return self();
@@ -48,6 +45,7 @@ public interface RfcUriBuilderDecorator<T extends RfcUriBuilderDecorator<T>> {
      *
      * @param path 路径，如 a
      */
+    @Override
     default T path(String path) {
         getUriBuilder().pathSegment(path);
         return self();
@@ -58,6 +56,7 @@ public interface RfcUriBuilderDecorator<T extends RfcUriBuilderDecorator<T>> {
      *
      * @param path 路径，如 /a/b/c
      */
+    @Override
     default T paths(String path) {
         getUriBuilder().pathSegments(path);
         return self();
@@ -68,6 +67,7 @@ public interface RfcUriBuilderDecorator<T extends RfcUriBuilderDecorator<T>> {
      *
      * @param path 路径，如 a
      */
+    @Override
     default T pathEncoded(String path) {
         getUriBuilder().pathSegmentEncoded(path);
         return self();
@@ -78,6 +78,7 @@ public interface RfcUriBuilderDecorator<T extends RfcUriBuilderDecorator<T>> {
      *
      * @param path 路径，如 /a/b/c
      */
+    @Override
     default T pathsEncoded(String path) {
         getUriBuilder().pathSegmentsEncoded(path);
         return self();

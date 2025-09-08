@@ -1,5 +1,7 @@
 package cn.zs.tool.httpclient5.request;
 
+import cn.zs.tool.core.fuction.throwing.ThrowingFunc;
+import cn.zs.tool.core.fuction.throwing.ThrowingSupplier;
 import cn.zs.tool.http.core.HttpHeaders;
 import cn.zs.tool.http.core.converter.ByteArrayHttpMsgConverter;
 import cn.zs.tool.http.core.converter.FileHttpMsgConverter;
@@ -8,18 +10,26 @@ import cn.zs.tool.http.core.converter.JsonHttpMsgConverter;
 import cn.zs.tool.http.core.converter.OutputStreamHttpMsgConverter;
 import cn.zs.tool.http.core.converter.StringHttpMsgConverter;
 import cn.zs.tool.http.core.converter.XmlHttpMsgConverter;
-import cn.zs.tool.http.core.decorator.HttpHeaderDecorator;
 import cn.zs.tool.http.core.decorator.RfcUriBuilderDecorator;
 import cn.zs.tool.http.core.exception.HttpException;
+import cn.zs.tool.http.core.request.BaseRequest;
 import cn.zs.tool.http.core.uri.RfcUri;
 import cn.zs.tool.httpclient5.constant.HttpRequestMethodEnum;
 import cn.zs.tool.httpclient5.executor.HttpClient5ExecutorBuilder;
+import org.apache.hc.client5.http.async.HttpAsyncClient;
+import org.apache.hc.client5.http.classic.HttpClient;
 import org.apache.hc.client5.http.classic.methods.HttpUriRequestBase;
 import org.apache.hc.client5.http.config.RequestConfig;
 import org.apache.hc.core5.concurrent.Cancellable;
 import org.apache.hc.core5.http.HttpEntity;
 import org.apache.hc.core5.http.ProtocolVersion;
 import org.apache.hc.core5.http.io.entity.NullEntity;
+import org.apache.hc.core5.http.message.BasicClassicHttpResponse;
+import org.apache.hc.core5.http.nio.AsyncPushConsumer;
+import org.apache.hc.core5.http.nio.AsyncRequestProducer;
+import org.apache.hc.core5.http.nio.AsyncResponseConsumer;
+import org.apache.hc.core5.http.nio.HandlerFactory;
+import org.apache.hc.core5.http.protocol.HttpContext;
 
 import java.io.File;
 import java.io.OutputStream;
@@ -33,7 +43,7 @@ import java.util.Objects;
  * @author sheng
  */
 public abstract class HttpClient5BaseRequest<T extends HttpClient5BaseRequest<T>>
-        implements RfcUriBuilderDecorator<T>, HttpHeaderDecorator<T> {
+        implements RfcUriBuilderDecorator<T>, BaseRequest<T> {
     /**
      * uri
      */
@@ -74,6 +84,36 @@ public abstract class HttpClient5BaseRequest<T extends HttpClient5BaseRequest<T>
      */
     protected Charset defaultCharset = StandardCharsets.UTF_8;
 
+    /**
+     * 同步请求 #{@link HttpClient}
+     */
+    private HttpClient httpClient;
+
+    /**
+     * 异步请求 #{@link HttpAsyncClient}
+     */
+    private HttpAsyncClient httpAsyncClient;
+
+    /**
+     * 请求上下文
+     */
+    private HttpContext httpContext;
+
+    /**
+     * #{@link AsyncRequestProducer} 提供者
+     */
+    private ThrowingFunc<HttpUriRequestBase, AsyncRequestProducer, Throwable> asyncRequestProducerFunc;
+
+    /**
+     * #{@link AsyncResponseConsumer} 提供者
+     */
+    private ThrowingSupplier<AsyncResponseConsumer<BasicClassicHttpResponse>, Throwable> asyncResponseConsumerSupplier;
+
+    /**
+     * #{@link AsyncPushConsumer} 提供者
+     */
+    private ThrowingSupplier<HandlerFactory<AsyncPushConsumer>, Throwable> pushHandlerFactorySupplier;
+
     public HttpClient5BaseRequest(String url, HttpRequestMethodEnum method) {
         this.method = Objects.requireNonNull(method, "Http method must not be null");
         RfcUri rfcUri = RfcUri.parse(url);
@@ -111,7 +151,7 @@ public abstract class HttpClient5BaseRequest<T extends HttpClient5BaseRequest<T>
     /**
      * 设置默认编码字符集
      */
-    public HttpClient5BaseRequest<T> defaultCharset(Charset defaultCharset) {
+    public T defaultCharset(Charset defaultCharset) {
         this.defaultCharset = defaultCharset;
         return self();
     }
@@ -119,12 +159,58 @@ public abstract class HttpClient5BaseRequest<T extends HttpClient5BaseRequest<T>
     /**
      * 获取默认编码字符集
      */
+    @Override
     public Charset getDefaultCharset() {
-        return Objects.nonNull(defaultCharset) ? defaultCharset : StandardCharsets.UTF_8;
+        return Objects.nonNull(defaultCharset) ? defaultCharset : BaseRequest.super.getDefaultCharset();
     }
 
-    @Override
-    public abstract T self();
+    /**
+     * 设置 HttpClient
+     */
+    public T httpClient(HttpClient httpClient) {
+        this.httpClient = httpClient;
+        return self();
+    }
+
+    /**
+     * 设置 HttpAsyncClient
+     */
+    public T httpAsyncClient(HttpAsyncClient httpAsyncClient) {
+        this.httpAsyncClient = httpAsyncClient;
+        return self();
+    }
+
+    /**
+     * 请求上下文
+     */
+    public T httpContext(HttpContext httpContext) {
+        this.httpContext = httpContext;
+        return self();
+    }
+
+    /**
+     * 设置 #{@link AsyncRequestProducer} 提供者
+     */
+    public T asyncRequestProducerFunc(ThrowingFunc<HttpUriRequestBase, AsyncRequestProducer, Throwable> asyncRequestProducerFunc) {
+        this.asyncRequestProducerFunc = asyncRequestProducerFunc;
+        return self();
+    }
+
+    /**
+     * 设置 #{@link AsyncResponseConsumer} 提供者
+     */
+    public T asyncResponseConsumerSupplier(ThrowingSupplier<AsyncResponseConsumer<BasicClassicHttpResponse>, Throwable> asyncResponseConsumerSupplier) {
+        this.asyncResponseConsumerSupplier = asyncResponseConsumerSupplier;
+        return self();
+    }
+
+    /**
+     * 设置 #{@link AsyncPushConsumer} 提供者
+     */
+    public T pushHandlerFactorySupplier(ThrowingSupplier<HandlerFactory<AsyncPushConsumer>, Throwable> pushHandlerFactorySupplier) {
+        this.pushHandlerFactorySupplier = pushHandlerFactorySupplier;
+        return self();
+    }
 
     @Override
     public RfcUri.Builder getUriBuilder() {
@@ -148,6 +234,7 @@ public abstract class HttpClient5BaseRequest<T extends HttpClient5BaseRequest<T>
     /**
      * 获取处理 UTF_8 {@link String}结果的请求执行器
      */
+    @Override
     public HttpClient5ExecutorBuilder<String> stringExecutor() {
         return executor(StringHttpMsgConverter.UTF_8_INSTANCE);
     }
@@ -157,6 +244,7 @@ public abstract class HttpClient5BaseRequest<T extends HttpClient5BaseRequest<T>
      *
      * @param charset 结果编码
      */
+    @Override
     public HttpClient5ExecutorBuilder<String> stringExecutor(Charset charset) {
         return executor(StringHttpMsgConverter.create(charset));
     }
@@ -166,6 +254,7 @@ public abstract class HttpClient5BaseRequest<T extends HttpClient5BaseRequest<T>
      *
      * @param msgConverter {@link JsonHttpMsgConverter}
      */
+    @Override
     public <R> HttpClient5ExecutorBuilder<R> jsonExecutor(JsonHttpMsgConverter<R> msgConverter) {
         return executor(msgConverter);
     }
@@ -175,6 +264,7 @@ public abstract class HttpClient5BaseRequest<T extends HttpClient5BaseRequest<T>
      *
      * @param msgConverter {@link XmlHttpMsgConverter}
      */
+    @Override
     public <R> HttpClient5ExecutorBuilder<R> xmlExecutor(XmlHttpMsgConverter<R> msgConverter) {
         return executor(msgConverter);
     }
@@ -182,6 +272,7 @@ public abstract class HttpClient5BaseRequest<T extends HttpClient5BaseRequest<T>
     /**
      * 获取处理 byte[] 结果的请求执行器
      */
+    @Override
     public HttpClient5ExecutorBuilder<byte[]> bytesExecutor() {
         return executor(ByteArrayHttpMsgConverter.INSTANCE);
     }
@@ -192,6 +283,7 @@ public abstract class HttpClient5BaseRequest<T extends HttpClient5BaseRequest<T>
      * @param targetFile 目标文件
      * @return true 为成功
      */
+    @Override
     public HttpClient5ExecutorBuilder<Boolean> downloadExecutor(File targetFile) {
         return executor(FileHttpMsgConverter.create(targetFile));
     }
@@ -202,6 +294,7 @@ public abstract class HttpClient5BaseRequest<T extends HttpClient5BaseRequest<T>
      * @param msgConverter 结果处理器
      * @return true 为成功
      */
+    @Override
     public HttpClient5ExecutorBuilder<Boolean> downloadExecutor(FileHttpMsgConverter msgConverter) {
         return executor(msgConverter);
     }
@@ -212,6 +305,7 @@ public abstract class HttpClient5BaseRequest<T extends HttpClient5BaseRequest<T>
      * @param outputStream 输出流
      * @return true 为成功
      */
+    @Override
     public HttpClient5ExecutorBuilder<Boolean> downloadExecutor(OutputStream outputStream) {
         return executor(OutputStreamHttpMsgConverter.create(outputStream));
     }
@@ -222,6 +316,7 @@ public abstract class HttpClient5BaseRequest<T extends HttpClient5BaseRequest<T>
      * @param msgConverter 结果处理器
      * @return true 为成功
      */
+    @Override
     public HttpClient5ExecutorBuilder<Boolean> downloadExecutor(OutputStreamHttpMsgConverter msgConverter) {
         return executor(msgConverter);
     }
@@ -231,8 +326,10 @@ public abstract class HttpClient5BaseRequest<T extends HttpClient5BaseRequest<T>
      *
      * @param msgConverter 结果处理器
      */
+    @Override
     public <R> HttpClient5ExecutorBuilder<R> executor(HttpMsgConverter<R> msgConverter) {
-        return HttpClient5ExecutorBuilder.create(createRequest(), msgConverter);
+        return HttpClient5ExecutorBuilder.create(createRequest(), msgConverter, httpClient, httpAsyncClient,
+                httpContext, asyncRequestProducerFunc, asyncResponseConsumerSupplier, pushHandlerFactorySupplier);
     }
 
     // endregion

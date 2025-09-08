@@ -5,6 +5,7 @@ import cn.zs.tool.core.text.StringUtil;
 import cn.zs.tool.http.core.constant.HttpMethodEnum;
 import cn.zs.tool.http.core.constant.MediaTypeEnum;
 import cn.zs.tool.http.core.exception.HttpException;
+import cn.zs.tool.http.core.request.BaseMultipartRequest;
 import okhttp3.MultipartBody;
 import okhttp3.RequestBody;
 import okio.Buffer;
@@ -18,7 +19,7 @@ import java.util.Objects;
  *
  * @author sheng
  */
-public class OkHttpMultipartRequest extends OkHttpBaseRequest<OkHttpMultipartRequest> {
+public class OkHttpMultipartRequest extends OkHttpBaseRequest<OkHttpMultipartRequest> implements BaseMultipartRequest<OkHttpMultipartRequest> {
     /**
      * 表单
      */
@@ -45,6 +46,7 @@ public class OkHttpMultipartRequest extends OkHttpBaseRequest<OkHttpMultipartReq
      * @param name  key
      * @param value value
      */
+    @Override
     public OkHttpMultipartRequest addText(String name, String value) {
         formBuilder.addFormDataPart(name, Objects.toString(value, StringPool.EMPTY));
         return this;
@@ -56,6 +58,7 @@ public class OkHttpMultipartRequest extends OkHttpBaseRequest<OkHttpMultipartReq
      * @param name key
      * @param file 文件
      */
+    @Override
     public OkHttpMultipartRequest addBinary(String name, File file) {
         String fileName = file.getName();
         return addBinary(name, fileName, file);
@@ -68,6 +71,7 @@ public class OkHttpMultipartRequest extends OkHttpBaseRequest<OkHttpMultipartReq
      * @param filename 文件名
      * @param file     文件
      */
+    @Override
     public OkHttpMultipartRequest addBinary(String name, String filename, File file) {
         RequestBody fileBody = RequestBody.create(file, null);
         return addPart(name, filename, fileBody);
@@ -80,6 +84,7 @@ public class OkHttpMultipartRequest extends OkHttpBaseRequest<OkHttpMultipartReq
      * @param filename 文件名
      * @param bytes    文件
      */
+    @Override
     public OkHttpMultipartRequest addBinary(String name, String filename, byte[] bytes) {
         RequestBody fileBody = RequestBody.create(bytes, null);
         return addPart(name, filename, fileBody);
@@ -92,6 +97,7 @@ public class OkHttpMultipartRequest extends OkHttpBaseRequest<OkHttpMultipartReq
      * @param filename 文件名
      * @param stream   文件流
      */
+    @Override
     public OkHttpMultipartRequest addBinary(String name, String filename, InputStream stream) {
         try (Buffer buffer = new Buffer();) {
             buffer.readFrom(stream);
