@@ -7,6 +7,7 @@ import okhttp3.RequestBody;
 
 import java.io.File;
 import java.nio.charset.Charset;
+import java.util.Objects;
 
 /**
  * okhttp请求
@@ -55,7 +56,7 @@ public class OkHttpRequest extends OkHttpBaseRequest<OkHttpRequest> implements B
      * 设置请求体
      */
     public OkHttpRequest body(byte[] body) {
-        return body(body, null);
+        return body(body, (MediaType) null);
     }
 
     /**
@@ -66,12 +67,22 @@ public class OkHttpRequest extends OkHttpBaseRequest<OkHttpRequest> implements B
         return body(requestBody);
     }
 
+    @Override
+    public OkHttpRequest body(byte[] body, cn.zs.tool.http.core.MediaType mediaType, Charset charset) {
+        return body(body, Objects.nonNull(mediaType) ? MediaType.parse(mediaType.getMediaType()) : (MediaType) null);
+    }
+
     /**
      * 设置请求体
      */
     public OkHttpRequest body(File file, MediaType mediaType) {
         RequestBody requestBody = RequestBody.create(file, mediaType);
         return body(requestBody);
+    }
+
+    @Override
+    public OkHttpRequest body(File body, cn.zs.tool.http.core.MediaType mediaType, Charset charset) {
+        return body(body, Objects.nonNull(mediaType) ? MediaType.parse(mediaType.getMediaType()) : (MediaType) null);
     }
 
     /**

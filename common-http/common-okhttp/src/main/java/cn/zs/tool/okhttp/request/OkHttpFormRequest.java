@@ -42,6 +42,7 @@ public class OkHttpFormRequest extends OkHttpBaseRequest<OkHttpFormRequest> impl
      * @param name  key
      * @param value value
      */
+    @Override
     public OkHttpFormRequest addText(String name, Object value) {
         formBuilder.add(name, Objects.toString(value, StringPool.EMPTY));
         return this;

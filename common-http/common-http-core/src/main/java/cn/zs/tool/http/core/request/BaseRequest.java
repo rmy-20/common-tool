@@ -77,8 +77,7 @@ public interface BaseRequest<T extends BaseRequest<T>> extends UriBuilderDecorat
      * @param targetFile 目标文件
      * @return true 为成功
      */
-    default BaseExecutorBuilder<Boolean, ? extends BaseExecutor<Boolean>, ? extends BaseExecutor<Boolean>, ?>
-    downloadExecutor(File targetFile) {
+    default BaseExecutorBuilder<Boolean, ? extends BaseExecutor<Boolean>, ? extends BaseExecutor<Boolean>, ?> downloadExecutor(File targetFile) {
         return executor(FileHttpMsgConverter.create(targetFile));
     }
 

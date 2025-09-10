@@ -1,5 +1,6 @@
 package cn.zs.tool.httpclient5.request;
 
+import cn.zs.tool.http.core.MediaType;
 import cn.zs.tool.http.core.request.BaseHttpRequest;
 import cn.zs.tool.httpclient5.constant.HttpRequestMethodEnum;
 import org.apache.hc.core5.http.ContentType;
@@ -49,6 +50,11 @@ public class HttpClient5Request extends HttpClient5BaseRequest<HttpClient5Reques
         return body(body, contentType, getDefaultCharset());
     }
 
+    @Override
+    public HttpClient5Request body(byte[] body, MediaType mediaType, Charset charset) {
+        return body(body, ContentType.create(mediaType.getMediaType()), charset);
+    }
+
     /**
      * 设置请求体
      */
@@ -68,6 +74,11 @@ public class HttpClient5Request extends HttpClient5BaseRequest<HttpClient5Reques
      */
     public HttpClient5Request body(File file, ContentType contentType, Charset charset) {
         return body(new FileEntity(file, contentType, Objects.nonNull(charset) ? charset.name() : null));
+    }
+
+    @Override
+    public HttpClient5Request body(File body, MediaType mediaType, Charset charset) {
+        return body(body, Objects.nonNull(mediaType) ? ContentType.create(mediaType.getMediaType()) : null, charset);
     }
 
     /**

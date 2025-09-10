@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import java.io.ByteArrayOutputStream;
 import java.io.Closeable;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -62,7 +63,7 @@ public class IOUtil {
         }
         ByteArrayOutputStream bot = new ByteArrayOutputStream();
         int read;
-        while ((read = inputStream.read(buffer)) != -1) {
+        while ((read = inputStream.read(buffer)) > 0) {
             bot.write(buffer, 0, read);
         }
         return bot.toByteArray();
@@ -115,7 +116,7 @@ public class IOUtil {
         try {
             long totalCount = 0L;
             int readLen;
-            while ((readLen = inputStream.read(buffer)) != -1) {
+            while ((readLen = inputStream.read(buffer)) > 0) {
                 outputStream.write(buffer, 0, readLen);
                 totalCount += readLen;
             }
@@ -123,6 +124,52 @@ public class IOUtil {
             return totalCount;
         } catch (Throwable ex) {
             ((ThrowingConsumer<Throwable, RuntimeException>) errHandler).accept(ex);
+        }
+        return -1;
+    }
+
+    /**
+     * 拷贝文件到输出流，并返回拷贝的字节数
+     *
+     * @param sourceFile   文件
+     * @param outputStream 输出流
+     * @return 拷贝的字节数, -1 表示异常
+     */
+    public static long copy(File sourceFile, OutputStream outputStream) {
+        return copy(sourceFile, outputStream, ex -> {
+            throw ex;
+        });
+    }
+
+    /**
+     * 拷贝文件到输出流，并返回拷贝的字节数
+     *
+     * @param sourceFile   文件
+     * @param outputStream 输出流
+     * @param errHandler   异常处理器
+     * @return 拷贝的字节数, -1 表示异常
+     */
+    public static long copy(File sourceFile, OutputStream outputStream, ThrowingConsumer<Throwable, ? extends Throwable> errHandler) {
+        return copy(sourceFile, outputStream, byteArray(), errHandler);
+    }
+
+    /**
+     * 拷贝文件到输出流，并返回拷贝的字节数
+     *
+     * @param sourceFile   文件
+     * @param outputStream 输出流
+     * @param buffer       缓冲区
+     * @param errHandler   异常处理器
+     * @return 拷贝的字节数, -1 表示异常
+     */
+    @SuppressWarnings("unchecked")
+    public static long copy(File sourceFile, OutputStream outputStream, byte[] buffer, ThrowingConsumer<Throwable, ? extends Throwable> errHandler) {
+        if (sourceFile.exists()) {
+            try (FileInputStream inputStream = new FileInputStream(sourceFile);) {
+                return copy(inputStream, outputStream, buffer, errHandler);
+            } catch (Throwable ex) {
+                ((ThrowingConsumer<Throwable, RuntimeException>) errHandler).accept(ex);
+            }
         }
         return -1;
     }

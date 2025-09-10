@@ -342,7 +342,7 @@ public abstract class HttpClient5BaseRequest<T extends HttpClient5BaseRequest<T>
 
     protected HttpUriRequestBase createRequest() {
         executeBefore();
-        HttpUriRequestBase requestBase = method.create(uriBuilder.build().getUri());
+        HttpUriRequestBase requestBase = method.create(uriBuilder.build().uri());
         if (Objects.nonNull(requestConfig)) {
             requestBase.setConfig(requestConfig);
         }

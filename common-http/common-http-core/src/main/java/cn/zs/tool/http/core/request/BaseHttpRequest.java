@@ -1,5 +1,8 @@
 package cn.zs.tool.http.core.request;
 
+import cn.zs.tool.http.core.MediaType;
+
+import java.io.File;
 import java.nio.charset.Charset;
 
 /**
@@ -19,4 +22,42 @@ public interface BaseHttpRequest<T extends BaseHttpRequest<T>> extends BaseReque
      * 设置请求体
      */
     T body(String body, Charset charset);
+
+    /**
+     * 设置请求体
+     *
+     * @param body      请求体
+     * @param mediaType 请求体类型
+     */
+    default T body(byte[] body, MediaType mediaType) {
+        return body(body, mediaType, getDefaultCharset());
+    }
+
+    /**
+     * 设置请求体
+     *
+     * @param body      请求体
+     * @param mediaType 请求体类型
+     * @param charset   请求体编码
+     */
+    T body(byte[] body, MediaType mediaType, Charset charset);
+
+    /**
+     * 设置请求体
+     *
+     * @param body      请求体
+     * @param mediaType 请求体类型
+     */
+    default T body(File body, MediaType mediaType) {
+        return body(body, mediaType, getDefaultCharset());
+    }
+
+    /**
+     * 设置请求体
+     *
+     * @param body      请求体
+     * @param mediaType 请求体类型
+     * @param charset   请求体编码
+     */
+    T body(File body, MediaType mediaType, Charset charset);
 }

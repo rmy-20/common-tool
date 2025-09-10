@@ -12,5 +12,13 @@ public interface BaseFormRequest<T extends BaseFormRequest<T>> extends BaseReque
      * @param name  key
      * @param value value
      */
+    T addText(String name, Object value);
+
+    /**
+     * 添加表单
+     *
+     * @param name  key
+     * @param value value
+     */
     T addTextEncoded(String name, Object value);
 }

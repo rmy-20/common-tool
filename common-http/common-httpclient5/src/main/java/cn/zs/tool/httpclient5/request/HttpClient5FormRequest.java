@@ -39,6 +39,11 @@ public class HttpClient5FormRequest extends HttpClient5BaseRequest<HttpClient5Fo
         super(url, method);
     }
 
+    @Override
+    public HttpClient5FormRequest addText(String name, Object value) {
+        return addTextEncoded(name, value);
+    }
+
     /**
      * 添加表单参数
      *

@@ -84,7 +84,6 @@ public class RfcUri {
     /**
      * url
      */
-    @Getter
     private final URI uri;
 
     /**
@@ -138,16 +137,23 @@ public class RfcUri {
     }
 
     /**
+     * 获取 URI
+     */
+    public URI uri() {
+        return uri;
+    }
+
+    /**
      * 获取uri字符串
      */
-    public String getUriString() {
+    public String uriString() {
         return uri.toString();
     }
 
     /**
      * 获取#{@link URL}
      */
-    public URL getUrl() {
+    public URL url() {
         try {
             return uri.toURL();
         } catch (Exception e) {
@@ -499,22 +505,7 @@ public class RfcUri {
          * 获取完整查询参数
          */
         public String getQuery() {
-            if (CollectionUtil.isEmpty(queryParameters)) {
-                return StringPool.EMPTY;
-            }
-
-            StringBuilder builder = new StringBuilder();
-            for (int i = 0; i < queryParameters.size(); i += 2) {
-                if (i > 0) {
-                    builder.append('&');
-                }
-                builder.append(queryParameters.get(i));
-                String value = queryParameters.get(i + 1);
-                if (!StringPool.EMPTY.equals(value)) {
-                    builder.append('=').append(value);
-                }
-            }
-            return builder.toString();
+            return UriUtil.stitchQueryParameters(queryParameters);
         }
 
         /**

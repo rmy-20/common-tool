@@ -1,9 +1,15 @@
 package cn.zs.tool.http.core.util;
 
+import cn.zs.tool.core.collection.CollectionUtil;
+import cn.zs.tool.core.lang.Assert;
 import cn.zs.tool.core.text.CharacterUtil;
 import cn.zs.tool.core.text.StringPool;
 import cn.zs.tool.core.text.StringUtil;
+import cn.zs.tool.http.core.exception.UriException;
+import cn.zs.tool.http.core.uri.AllowedPredicate;
 
+import java.io.ByteArrayOutputStream;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -144,5 +150,72 @@ public class UriUtil {
             }
         }
         return queryParameters;
+    }
+
+    /**
+     * 拼接 query 参数
+     *
+     * @param queryParameters query 参数列表，索引 i 为 name，则索引 = i + 1 为 value
+     */
+    public static String stitchQueryParameters(List<String> queryParameters) {
+        if (CollectionUtil.isEmpty(queryParameters)) {
+            return StringPool.EMPTY;
+        }
+        Assert.isTrue(queryParameters.size() % 2 == 0, () -> new UriException("queryParameters size must be even"));
+        StringBuilder builder = new StringBuilder(queryParameters.get(0));
+        String firstValue = queryParameters.get(1);
+        if (StringUtil.isNotEmpty(firstValue)) {
+            builder.append('=').append(firstValue);
+        }
+        for (int i = 2; i < queryParameters.size(); i += 2) {
+            builder.append('&').append(queryParameters.get(i));
+            String value = queryParameters.get(i + 1);
+            if (StringUtil.isNotEmpty(value)) {
+                builder.append('=').append(value);
+            }
+        }
+        return builder.toString();
+    }
+
+    /**
+     * 对传入组件进行编码
+     *
+     * @param source      组件
+     * @param charset     默认字符集
+     * @param blankAsPlus 是否将空格编码为+
+     */
+    public static String encode(String source, Charset charset, AllowedPredicate allowed, boolean blankAsPlus) {
+        if (StringUtil.isEmpty(source)) {
+            return source;
+        }
+        Assert.nonNull(allowed, "AllowedPredicate must be not null");
+        Assert.nonNull(charset, "Charset must be not null");
+        byte[] sourceBytes = source.getBytes(charset);
+        // 检查给定字符串是否合法
+        boolean isAllowed = true;
+        for (byte sourceByte : sourceBytes) {
+            if (!allowed.isAllowed(sourceByte)) {
+                isAllowed = false;
+                break;
+            }
+        }
+        if (isAllowed) {
+            return source;
+        }
+
+        ByteArrayOutputStream stream = new ByteArrayOutputStream(sourceBytes.length);
+        for (byte sourceByte : sourceBytes) {
+            if (allowed.isAllowed(sourceByte)) {
+                stream.write(sourceByte);
+            } else if (blankAsPlus && sourceByte == 32) {
+                stream.write('+');
+            } else {
+                // 不合法字符进行编码
+                stream.write('%');
+                stream.write(Character.toUpperCase(Character.forDigit((sourceByte >> 4) & 0xF, 16)));
+                stream.write(Character.toUpperCase(Character.forDigit(sourceByte & 0xF, 16)));
+            }
+        }
+        return new String(stream.toByteArray(), charset);
     }
 }
