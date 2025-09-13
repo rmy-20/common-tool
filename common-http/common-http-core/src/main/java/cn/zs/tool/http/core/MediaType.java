@@ -93,4 +93,16 @@ public class MediaType {
         }
         return builder.toString();
     }
+
+    /**
+     * 添加参数
+     */
+    public MediaType withParameters(Map<String, String> parameters) {
+        return MediaType.create(type, subType, parameters, charset);
+    }
+
+    @Override
+    public String toString() {
+        return mediaType;
+    }
 }

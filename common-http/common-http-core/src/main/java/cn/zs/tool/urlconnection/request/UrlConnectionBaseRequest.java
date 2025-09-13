@@ -12,7 +12,6 @@ import cn.zs.tool.http.core.converter.StringHttpMsgConverter;
 import cn.zs.tool.http.core.converter.XmlHttpMsgConverter;
 import cn.zs.tool.http.core.decorator.RfcUriBuilderDecorator;
 import cn.zs.tool.http.core.exception.HttpException;
-import cn.zs.tool.http.core.exception.UriException;
 import cn.zs.tool.http.core.request.BaseRequest;
 import cn.zs.tool.http.core.uri.RfcUri;
 import cn.zs.tool.urlconnection.executor.UrlConnectionExecutorBuilder;
@@ -60,12 +59,12 @@ public abstract class UrlConnectionBaseRequest<T extends UrlConnectionBaseReques
     protected Proxy proxy;
 
     /**
-     * 连接超时时间
+     * 连接超时时间，单位秒
      */
     private int connectTimeout = -1;
 
     /**
-     * 读超时
+     * 读超时，单位秒
      */
     private int readTimeout = -1;
 
@@ -95,14 +94,6 @@ public abstract class UrlConnectionBaseRequest<T extends UrlConnectionBaseReques
     }
 
     /**
-     * 设置默认编码字符集
-     */
-    public T defaultCharset(Charset defaultCharset) {
-        this.defaultCharset = defaultCharset;
-        return self();
-    }
-
-    /**
      * 获取默认编码字符集
      */
     @Override
@@ -128,7 +119,15 @@ public abstract class UrlConnectionBaseRequest<T extends UrlConnectionBaseReques
     }
 
     /**
-     * 设置连接超时时间
+     * 设置代理
+     */
+    public T proxy(Proxy proxy) {
+        this.proxy = proxy;
+        return self();
+    }
+
+    /**
+     * 设置连接超时时间，单位秒
      */
     public T connectTimeout(int connectTimeout) {
         this.connectTimeout = connectTimeout;
@@ -136,7 +135,7 @@ public abstract class UrlConnectionBaseRequest<T extends UrlConnectionBaseReques
     }
 
     /**
-     * 设置读超时时间
+     * 设置读超时时间，单位秒
      */
     public T readTimeout(int readTimeout) {
         this.readTimeout = readTimeout;
@@ -156,6 +155,14 @@ public abstract class UrlConnectionBaseRequest<T extends UrlConnectionBaseReques
      */
     public T executorService(ExecutorService executorService) {
         this.executorService = executorService;
+        return self();
+    }
+
+    /**
+     * 设置默认编码字符集
+     */
+    public T defaultCharset(Charset defaultCharset) {
+        this.defaultCharset = defaultCharset;
         return self();
     }
 
@@ -269,15 +276,12 @@ public abstract class UrlConnectionBaseRequest<T extends UrlConnectionBaseReques
             executeBefore();
             URL url = uriBuilder.build().url();
             URLConnection urlConnection = Objects.nonNull(proxy) ? url.openConnection(proxy) : url.openConnection();
-            if (!(urlConnection instanceof HttpURLConnection)) {
-                throw new UriException("");
-            }
             HttpURLConnection connection = (HttpURLConnection) urlConnection;
             if (connectTimeout >= 0) {
-                connection.setConnectTimeout(connectTimeout);
+                connection.setConnectTimeout(connectTimeout * 1000);
             }
             if (readTimeout >= 0) {
-                connection.setReadTimeout(readTimeout);
+                connection.setReadTimeout(readTimeout * 1000);
             }
             connection.setDoInput(true);
             connection.setInstanceFollowRedirects(HttpMethodEnum.GET == method);
@@ -287,7 +291,7 @@ public abstract class UrlConnectionBaseRequest<T extends UrlConnectionBaseReques
             // 请求体
             if (method.isNeedBody()) {
                 connection.setDoOutput(true);
-                if (Objects.isNull(getRequestBody())) {
+                if (Objects.isNull(body)) {
                     body = Body.NULL_BODY;
                 }
                 long contentLength = body.contentLength();
@@ -299,7 +303,7 @@ public abstract class UrlConnectionBaseRequest<T extends UrlConnectionBaseReques
             }
             return connection;
         } catch (Exception e) {
-            throw new HttpException("Open URLConnection 异常", e);
+            throw new HttpException("Open URLConnection error", e);
         }
     }
 }

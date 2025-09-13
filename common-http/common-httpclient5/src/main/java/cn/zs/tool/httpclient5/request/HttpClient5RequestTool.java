@@ -3,7 +3,6 @@ package cn.zs.tool.httpclient5.request;
 import cn.zs.tool.core.fuction.throwing.ThrowingFunc;
 import cn.zs.tool.core.fuction.throwing.ThrowingSupplier;
 import cn.zs.tool.http.core.constant.HttpMethodEnum;
-import cn.zs.tool.http.core.request.BaseHttpRequest;
 import cn.zs.tool.http.core.request.BaseRequestTool;
 import cn.zs.tool.httpclient5.constant.HttpRequestMethodEnum;
 import org.apache.hc.client5.http.async.HttpAsyncClient;
@@ -131,7 +130,7 @@ public class HttpClient5RequestTool implements BaseRequestTool {
     }
 
     @Override
-    public BaseHttpRequest<?> request(URI url, HttpMethodEnum method) {
+    public HttpClient5Request request(URI url, HttpMethodEnum method) {
         return addConfig(HttpClient5Request.create(url.toString(), HttpRequestMethodEnum.getByMethod(method)));
     }
 

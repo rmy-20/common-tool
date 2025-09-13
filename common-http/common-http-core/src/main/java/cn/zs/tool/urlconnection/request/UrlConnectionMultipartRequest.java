@@ -1,13 +1,18 @@
 package cn.zs.tool.urlconnection.request;
 
-import cn.zs.tool.core.text.StringUtil;
 import cn.zs.tool.http.core.body.MultipartFormBody;
+import cn.zs.tool.http.core.body.multipart.BaseMultipart;
+import cn.zs.tool.http.core.constant.HttpConstant;
 import cn.zs.tool.http.core.constant.HttpMethodEnum;
 import cn.zs.tool.http.core.constant.MediaTypeEnum;
 import cn.zs.tool.http.core.request.BaseMultipartRequest;
 
 import java.io.File;
 import java.io.InputStream;
+import java.nio.charset.Charset;
+import java.util.Collections;
+import java.util.Map;
+import java.util.Objects;
 
 /**
  * url connection multipart request
@@ -28,35 +33,71 @@ public class UrlConnectionMultipartRequest extends UrlConnectionBaseRequest<UrlC
         return new UrlConnectionMultipartRequest(url, method);
     }
 
+    /**
+     * 创建#{@link UrlConnectionMultipartRequest}
+     */
+    public static UrlConnectionMultipartRequest create(String url, HttpMethodEnum method, MultipartFormBody formBody) {
+        return new UrlConnectionMultipartRequest(url, method, formBody);
+    }
+
     public UrlConnectionMultipartRequest(String url, HttpMethodEnum method) {
+        this(url, method, MultipartFormBody.create());
+    }
+
+    public UrlConnectionMultipartRequest(String url, HttpMethodEnum method, MultipartFormBody formBody) {
         super(url, method);
-        this.formBody = MultipartFormBody.create();
+        this.formBody = Objects.requireNonNull(formBody, "formBody must not be null");
         super.body = this.formBody;
     }
 
     @Override
     public UrlConnectionMultipartRequest addText(String name, String value) {
-        return null;
+        formBody.addText(name, value);
+        return this;
+    }
+
+    /**
+     * 添加文本
+     *
+     * @param name    key
+     * @param value   value
+     * @param charset 文本编码
+     */
+    public UrlConnectionMultipartRequest addText(String name, String value, Charset charset) {
+        formBody.addText(name, value, charset);
+        return this;
     }
 
     @Override
     public UrlConnectionMultipartRequest addBinary(String name, File file) {
-        return null;
+        formBody.addBinary(name, file);
+        return this;
     }
 
     @Override
     public UrlConnectionMultipartRequest addBinary(String name, String filename, File file) {
-        return null;
+        formBody.addBinary(name, filename, file);
+        return this;
     }
 
     @Override
     public UrlConnectionMultipartRequest addBinary(String name, String filename, byte[] bytes) {
-        return null;
+        formBody.addBinary(name, filename, bytes);
+        return this;
     }
 
     @Override
     public UrlConnectionMultipartRequest addBinary(String name, String filename, InputStream stream) {
-        return null;
+        formBody.addBinary(name, filename, stream);
+        return this;
+    }
+
+    /**
+     * 添加 multipart part
+     */
+    public UrlConnectionMultipartRequest addPart(BaseMultipart<?> part) {
+        formBody.addPart(part);
+        return this;
     }
 
     @Override
@@ -67,9 +108,7 @@ public class UrlConnectionMultipartRequest extends UrlConnectionBaseRequest<UrlC
     @Override
     protected void executeBefore() {
         super.executeBefore();
-        String contentType = getHeaders().getContentType();
-        if (StringUtil.isBlank(contentType)) {
-            getHeaders().setContentType(MediaTypeEnum.MULTIPART_FORM_DATA.getMediaType());
-        }
+        Map<String, String> parameters = Collections.singletonMap(HttpConstant.BOUNDARY, formBody.getBoundary());
+        getHeaders().setContentType(MediaTypeEnum.MULTIPART_FORM_DATA.getMediaType().withParameters(parameters));
     }
 }

@@ -10,7 +10,7 @@ import java.io.InputStream;
  */
 public interface BaseMultipartRequest<T extends BaseMultipartRequest<T>> extends BaseRequest<T> {
     /**
-     * 添加表单
+     * 添加字符串表单
      *
      * @param name  key
      * @param value value
@@ -35,7 +35,7 @@ public interface BaseMultipartRequest<T extends BaseMultipartRequest<T>> extends
     T addBinary(String name, String filename, File file);
 
     /**
-     * 添加文件
+     * 添加字节数组
      *
      * @param name     key
      * @param filename 文件名
@@ -44,7 +44,7 @@ public interface BaseMultipartRequest<T extends BaseMultipartRequest<T>> extends
     T addBinary(String name, String filename, byte[] bytes);
 
     /**
-     * 添加文件
+     * 添加文件流
      *
      * @param name     key
      * @param filename 文件名

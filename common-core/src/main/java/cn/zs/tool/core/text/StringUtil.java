@@ -2,6 +2,12 @@ package cn.zs.tool.core.text;
 
 import cn.zs.tool.core.array.ArrayUtil;
 
+import java.nio.ByteBuffer;
+import java.nio.CharBuffer;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.util.Objects;
+
 /**
  * 字符串工具类
  *
@@ -170,5 +176,60 @@ public class StringUtil {
      */
     public static String replaceAll(CharSequence text, String regex, String replacement) {
         return isNotBlank(text) ? text.toString().replaceAll(regex, replacement) : StringPool.EMPTY;
+    }
+
+    /**
+     * 编码，默认使用UTF-8编码
+     *
+     * @param text 文本
+     */
+    public static byte[] encoded(CharSequence text) {
+        return encoded(StandardCharsets.UTF_8, text);
+    }
+
+    /**
+     * 编码
+     *
+     * @param charset 编码字符集
+     * @param text    文本
+     */
+    public static byte[] encoded(Charset charset, CharSequence text) {
+        ByteBuffer buffer = charset.encode(CharBuffer.wrap(text));
+        int remaining = buffer.remaining();
+        byte[] array = new byte[remaining];
+        System.arraycopy(buffer.array(), 0, array, 0, remaining);
+        return array;
+    }
+
+    /**
+     * 去除字符串中的换行符
+     */
+    public static CharSequence stripLineBreaks(final CharSequence text) {
+        if (Objects.isNull(text)) {
+            return null;
+        }
+        boolean requiresRewrite = false;
+        int n = 0;
+        for (; n < text.length(); n++) {
+            final char ch = text.charAt(n);
+            if (CharacterUtil.isLineBreak(ch)) {
+                requiresRewrite = true;
+                break;
+            }
+        }
+        if (!requiresRewrite) {
+            return text;
+        }
+        final StringBuilder builder = new StringBuilder();
+        builder.append(text, 0, n);
+        for (; n < text.length(); n++) {
+            final char ch = text.charAt(n);
+            if (CharacterUtil.isLineBreak(ch)) {
+                builder.append(' ');
+            } else {
+                builder.append(ch);
+            }
+        }
+        return builder.toString();
     }
 }
