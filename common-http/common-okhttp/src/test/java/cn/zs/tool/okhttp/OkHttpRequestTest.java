@@ -3,7 +3,7 @@ package cn.zs.tool.okhttp;
 import cn.zs.tool.core.date.DateTool;
 import cn.zs.tool.core.lang.Assert;
 import cn.zs.tool.core.util.RandomUtil;
-import cn.zs.tool.http.core.constant.MediaTypeEnum;
+import cn.zs.tool.http.core.MediaType;
 import cn.zs.tool.http.core.converter.JsonHttpMsgConverter;
 import cn.zs.tool.http.core.execute.BaseExecutor;
 import cn.zs.tool.http.core.request.BaseMultipartRequest;
@@ -43,7 +43,7 @@ class OkHttpRequestTest {
             return;
         }
         BaseExecutor<String> executor = tool.get(uri).paths("/test/get")
-                .setContentType(MediaTypeEnum.APPLICATION_JSON.getMediaType())
+                .setContentType(MediaType.APPLICATION_JSON)
                 .queryEncoded("name", "小明")
                 .queryEncoded("age", 18)
                 .queryEncoded("sex", "男")
@@ -60,7 +60,7 @@ class OkHttpRequestTest {
             return;
         }
         CompletableFuture<? extends BaseExecutor<String>> future = tool.get(uri).paths("/test/get")
-                .setContentType(MediaTypeEnum.APPLICATION_JSON.getMediaType())
+                .setContentType(MediaType.APPLICATION_JSON)
                 .queryEncoded("name", "小明")
                 .queryEncoded("age", 18)
                 .queryEncoded("sex", "男")
@@ -91,7 +91,7 @@ class OkHttpRequestTest {
         map.put("sessionId", "");
         map.put("version", "1.0");
         BaseExecutor<Map<String, Object>> executor = tool.post(uri).pathsEncoded("/test/post")
-                .setContentType(MediaTypeEnum.APPLICATION_JSON_UTF8.getMediaType())
+                .setContentType(MediaType.APPLICATION_JSON_UTF8)
                 .body(JsonTool.JSON_TOOL.toJson(map))
                 .executor(JsonHttpMsgConverter.create(JsonTool.JSON_TOOL, new TypeReference<Map<String, Object>>() {
                 })).mustHandleResult(true).execute();
@@ -113,7 +113,7 @@ class OkHttpRequestTest {
         map.put("sessionId", "");
         map.put("version", "1.0");
         CompletableFuture<? extends BaseExecutor<Map<String, Object>>> future = tool.post(uri).pathsEncoded("/test/post")
-                .setContentType(MediaTypeEnum.APPLICATION_JSON_UTF8.getMediaType())
+                .setContentType(MediaType.APPLICATION_JSON_UTF8)
                 .body(JsonTool.JSON_TOOL.toJson(map))
                 .jsonExecutor(JsonHttpMsgConverter.create(JsonTool.JSON_TOOL, new TypeReference<Map<String, Object>>() {
                 })).executeAsync();
@@ -133,7 +133,7 @@ class OkHttpRequestTest {
             return;
         }
         BaseExecutor<Boolean> executor = tool.get(uri).paths("download")
-                .setContentType(MediaTypeEnum.APPLICATION_OCTET_STREAM.getMediaType())
+                .setContentType(MediaType.APPLICATION_OCTET_STREAM)
                 .downloadExecutor(new File("/opt/okhttp/" + "SM2公私钥对.txt")).execute();
         Assert.isTrue(executor.isOk() && executor.get(), "okhttp 下载文件失败");
         executor.getHeaders().forEach((key, value) -> log.info("header --> {}：{}", key, value));
@@ -145,7 +145,7 @@ class OkHttpRequestTest {
             return;
         }
         CompletableFuture<? extends BaseExecutor<Boolean>> future = tool.get(uri).paths("download")
-                .setContentType(MediaTypeEnum.APPLICATION_OCTET_STREAM.getMediaType())
+                .setContentType(MediaType.APPLICATION_OCTET_STREAM)
                 .downloadExecutor(new File("/opt/okhttp/async/" + "SM2公私钥对.txt")).executeAsync();
         for (int i = 0; i < 20; i++) {
             log.info("{}", i);

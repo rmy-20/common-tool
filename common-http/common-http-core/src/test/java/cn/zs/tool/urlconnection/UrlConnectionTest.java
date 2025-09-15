@@ -3,7 +3,7 @@ package cn.zs.tool.urlconnection;
 import cn.zs.tool.core.date.DateTool;
 import cn.zs.tool.core.lang.Assert;
 import cn.zs.tool.core.util.RandomUtil;
-import cn.zs.tool.http.core.constant.MediaTypeEnum;
+import cn.zs.tool.http.core.MediaType;
 import cn.zs.tool.http.core.converter.JsonHttpMsgConverter;
 import cn.zs.tool.http.core.execute.BaseExecutor;
 import cn.zs.tool.jackson.JsonTool;
@@ -36,7 +36,7 @@ public class UrlConnectionTest {
             return;
         }
         UrlConnectionExecutor<String> executor = UrlConnectionTool.get(uri).paths("/test/get")
-                .setContentType(MediaTypeEnum.APPLICATION_JSON.getMediaType())
+                .setContentType(MediaType.APPLICATION_JSON)
                 .queryEncoded("name", "小明")
                 .queryEncoded("age", 18)
                 .queryEncoded("sex", "男")
@@ -53,7 +53,7 @@ public class UrlConnectionTest {
             return;
         }
         CompletableFuture<UrlConnectionExecutor<String>> future = UrlConnectionTool.get(uri).paths("/test/get")
-                .setContentType(MediaTypeEnum.APPLICATION_JSON.getMediaType())
+                .setContentType(MediaType.APPLICATION_JSON)
                 .queryEncoded("name", "小明")
                 .queryEncoded("age", 18)
                 .queryEncoded("sex", "男")
@@ -84,7 +84,7 @@ public class UrlConnectionTest {
         map.put("sessionId", "中 文 哈哈~！@#￥%……&*（）——+{}《》？~!@#$%^&*()_+");
         map.put("version", "1.0");
         UrlConnectionExecutor<Map<String, Object>> executor = UrlConnectionTool.post(uri).pathsEncoded("/test/post")
-                .setContentType(MediaTypeEnum.APPLICATION_JSON_UTF8.getMediaType())
+                .setContentType(MediaType.APPLICATION_JSON_UTF8)
                 .body(JsonTool.JSON_TOOL.toJson(map))
                 .executor(JsonHttpMsgConverter.create(JsonTool.JSON_TOOL, new TypeReference<Map<String, Object>>() {
                 })).mustHandleResult(true).execute();
@@ -106,7 +106,7 @@ public class UrlConnectionTest {
         map.put("sessionId", "");
         map.put("version", "1.0");
         CompletableFuture<UrlConnectionExecutor<Map<String, Object>>> future = UrlConnectionTool.post(uri).pathsEncoded("/test/post")
-                .setContentType(MediaTypeEnum.APPLICATION_JSON_UTF8.getMediaType())
+                .setContentType(MediaType.APPLICATION_JSON_UTF8)
                 .body(JsonTool.JSON_TOOL.toJson(map))
                 .jsonExecutor(JsonHttpMsgConverter.create(JsonTool.JSON_TOOL, new TypeReference<Map<String, Object>>() {
                 })).executeAsync();
@@ -126,7 +126,7 @@ public class UrlConnectionTest {
             return;
         }
         UrlConnectionExecutor<Boolean> executor = UrlConnectionTool.get(uri).paths("download")
-                .setContentType(MediaTypeEnum.APPLICATION_OCTET_STREAM.getMediaType())
+                .setContentType(MediaType.APPLICATION_OCTET_STREAM)
                 .downloadExecutor(new File("/opt/urlconnection/" + "SM2公私钥对.txt")).execute();
         Assert.isTrue(executor.isOk() && executor.get(), "UrlConnection 下载文件失败");
         executor.getHeaders().forEach((name, value) -> System.out.println("header --> " + name + "：" + value));
@@ -138,7 +138,7 @@ public class UrlConnectionTest {
             return;
         }
         CompletableFuture<UrlConnectionExecutor<Boolean>> future = UrlConnectionTool.get(uri).paths("download")
-                .setContentType(MediaTypeEnum.APPLICATION_OCTET_STREAM.getMediaType())
+                .setContentType(MediaType.APPLICATION_OCTET_STREAM)
                 .downloadExecutor(new File("/opt/urlconnection/async/" + "SM2公私钥对.txt")).executeAsync();
         for (int i = 0; i < 20; i++) {
             System.out.println(i);

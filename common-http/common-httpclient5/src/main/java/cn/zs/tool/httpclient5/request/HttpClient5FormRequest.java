@@ -2,7 +2,7 @@ package cn.zs.tool.httpclient5.request;
 
 import cn.zs.tool.core.text.StringPool;
 import cn.zs.tool.core.text.StringUtil;
-import cn.zs.tool.http.core.constant.MediaTypeEnum;
+import cn.zs.tool.http.core.MediaType;
 import cn.zs.tool.http.core.request.BaseFormRequest;
 import cn.zs.tool.httpclient5.constant.HttpRequestMethodEnum;
 import org.apache.hc.client5.http.entity.UrlEncodedFormEntity;
@@ -72,9 +72,8 @@ public class HttpClient5FormRequest extends HttpClient5BaseRequest<HttpClient5Fo
     protected void executeBefore() {
         super.executeBefore();
         this.httpEntity = new UrlEncodedFormEntity(formParams, getDefaultCharset());
-        String contentType = getHeaders().getContentType();
-        if (StringUtil.isBlank(contentType)) {
-            getHeaders().setContentType(MediaTypeEnum.APPLICATION_FORM_URLENCODED.getMediaType());
+        if (StringUtil.isAllBlank(getHeaders().getContentType(), httpEntity.getContentType())) {
+            getHeaders().setContentType(MediaType.APPLICATION_FORM_URLENCODED);
         }
     }
 

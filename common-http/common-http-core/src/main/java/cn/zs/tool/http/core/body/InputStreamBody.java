@@ -1,6 +1,7 @@
 package cn.zs.tool.http.core.body;
 
 import cn.zs.tool.core.io.IOUtil;
+import cn.zs.tool.http.core.MediaType;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -12,13 +13,32 @@ import java.util.Objects;
  *
  * @author sheng
  */
-public class InputStreamBody implements Body {
+public class InputStreamBody extends Body {
     /**
      * 输入流
      */
     private final InputStream inputStream;
 
+    /**
+     * 创建#{@link InputStreamBody}
+     */
+    public static InputStreamBody create(InputStream inputStream) {
+        return new InputStreamBody(inputStream);
+    }
+
+    /**
+     * 创建#{@link InputStreamBody}
+     */
+    public static InputStreamBody create(InputStream inputStream, MediaType contentType) {
+        return new InputStreamBody(inputStream, contentType);
+    }
+
     public InputStreamBody(InputStream inputStream) {
+        this(inputStream, MediaType.APPLICATION_OCTET_STREAM);
+    }
+
+    public InputStreamBody(InputStream inputStream, MediaType contentType) {
+        super(contentType);
         this.inputStream = Objects.requireNonNull(inputStream, "inputStream must not be null");
     }
 

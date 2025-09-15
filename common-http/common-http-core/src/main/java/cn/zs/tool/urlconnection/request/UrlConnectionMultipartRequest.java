@@ -2,16 +2,12 @@ package cn.zs.tool.urlconnection.request;
 
 import cn.zs.tool.http.core.body.MultipartFormBody;
 import cn.zs.tool.http.core.body.multipart.BaseMultipart;
-import cn.zs.tool.http.core.constant.HttpConstant;
 import cn.zs.tool.http.core.constant.HttpMethodEnum;
-import cn.zs.tool.http.core.constant.MediaTypeEnum;
 import cn.zs.tool.http.core.request.BaseMultipartRequest;
 
 import java.io.File;
 import java.io.InputStream;
 import java.nio.charset.Charset;
-import java.util.Collections;
-import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -103,12 +99,5 @@ public class UrlConnectionMultipartRequest extends UrlConnectionBaseRequest<UrlC
     @Override
     public UrlConnectionMultipartRequest self() {
         return this;
-    }
-
-    @Override
-    protected void executeBefore() {
-        super.executeBefore();
-        Map<String, String> parameters = Collections.singletonMap(HttpConstant.BOUNDARY, formBody.getBoundary());
-        getHeaders().setContentType(MediaTypeEnum.MULTIPART_FORM_DATA.getMediaType().withParameters(parameters));
     }
 }

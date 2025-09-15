@@ -1,6 +1,7 @@
 package cn.zs.tool.http.core.body;
 
 import cn.zs.tool.core.text.StringPool;
+import cn.zs.tool.http.core.MediaType;
 import cn.zs.tool.http.core.util.UriUtil;
 
 import java.io.IOException;
@@ -16,7 +17,7 @@ import java.util.Objects;
  *
  * @author sheng
  */
-public class UrlEncodedFormBody implements Body {
+public class UrlEncodedFormBody extends Body {
     /**
      * queryParameters
      */
@@ -48,11 +49,29 @@ public class UrlEncodedFormBody implements Body {
         return new UrlEncodedFormBody(charset);
     }
 
+    /**
+     * 创建#{@link UrlEncodedFormBody}
+     *
+     * @param charset 编码
+     */
+    public static UrlEncodedFormBody create(Charset charset, MediaType contentType) {
+        return new UrlEncodedFormBody(charset, contentType);
+    }
+
     public UrlEncodedFormBody() {
-        this(StandardCharsets.UTF_8);
+        this(MediaType.APPLICATION_FORM_URLENCODED);
     }
 
     public UrlEncodedFormBody(Charset charset) {
+        this(charset, MediaType.APPLICATION_FORM_URLENCODED);
+    }
+
+    public UrlEncodedFormBody(MediaType contentType) {
+        this(StandardCharsets.UTF_8, contentType);
+    }
+
+    public UrlEncodedFormBody(Charset charset, MediaType contentType) {
+        super(contentType);
         this.charset = Objects.requireNonNull(charset, "charset can not be null");
     }
 
@@ -100,15 +119,15 @@ public class UrlEncodedFormBody implements Body {
 
     @Override
     public void writeTo(OutputStream outputStream) throws IOException {
-        if (queryParameters.isEmpty()) {
-            return;
+        if (!queryParameters.isEmpty()) {
+            outputStream.write(getContent());
+            outputStream.flush();
         }
-        outputStream.write(getContent());
     }
 
     @Override
     public long contentLength() {
-        return getContent().length;
+        return queryParameters.isEmpty() ? 0 : getContent().length;
     }
 
     @Override

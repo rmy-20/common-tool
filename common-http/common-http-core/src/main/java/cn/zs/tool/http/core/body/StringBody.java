@@ -1,5 +1,7 @@
 package cn.zs.tool.http.core.body;
 
+import cn.zs.tool.http.core.MediaType;
+
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.charset.Charset;
@@ -11,7 +13,7 @@ import java.util.Objects;
  *
  * @author sheng
  */
-public class StringBody implements Body {
+public class StringBody extends Body {
     /**
      * 字符串内容
      */
@@ -36,11 +38,40 @@ public class StringBody implements Body {
         return new StringBody(content, charset);
     }
 
+    /**
+     * 创建#{@link StringBody}
+     *
+     * @param content     字符串
+     * @param contentType 内容类型
+     */
+    public static StringBody create(String content, MediaType contentType) {
+        return new StringBody(content, contentType);
+    }
+
+    /**
+     * 创建#{@link StringBody}
+     *
+     * @param content     字符串
+     * @param contentType 内容类型
+     */
+    public static StringBody create(String content, Charset charset, MediaType contentType) {
+        return new StringBody(content, charset, contentType);
+    }
+
     public StringBody(String content) {
-        this(content, StandardCharsets.UTF_8);
+        this(content, MediaType.TEXT_PLAIN);
     }
 
     public StringBody(String content, Charset charset) {
+        this(content, charset, MediaType.TEXT_PLAIN);
+    }
+
+    public StringBody(String content, MediaType contentType) {
+        this(content, StandardCharsets.UTF_8, contentType);
+    }
+
+    public StringBody(String content, Charset charset, MediaType contentType) {
+        super(contentType);
         if (Objects.isNull(charset)) {
             charset = StandardCharsets.UTF_8;
         }

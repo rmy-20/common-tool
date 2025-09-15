@@ -1,7 +1,6 @@
 package cn.zs.tool.http.core.body.multipart;
 
 import cn.zs.tool.http.core.MediaType;
-import cn.zs.tool.http.core.constant.MediaTypeEnum;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -25,7 +24,7 @@ public class StringMultipart extends BaseMultipart<StringMultipart> {
     }
 
     public StringMultipart(String name, String text, Charset charset) {
-        this(name, text, charset, MediaTypeEnum.TEXT_PLAIN.getMediaType());
+        this(name, text, charset, MediaType.TEXT_PLAIN);
     }
 
     public StringMultipart(String name, String text, Charset charset, MediaType contentType) {

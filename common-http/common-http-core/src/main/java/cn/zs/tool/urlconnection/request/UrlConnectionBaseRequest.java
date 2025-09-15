@@ -1,5 +1,6 @@
 package cn.zs.tool.urlconnection.request;
 
+import cn.zs.tool.core.text.StringUtil;
 import cn.zs.tool.http.core.HttpHeaders;
 import cn.zs.tool.http.core.body.Body;
 import cn.zs.tool.http.core.constant.HttpMethodEnum;
@@ -269,6 +270,9 @@ public abstract class UrlConnectionBaseRequest<T extends UrlConnectionBaseReques
      * 请求前执行
      */
     protected void executeBefore() {
+        if (StringUtil.isBlank(headers.getContentType()) && Objects.nonNull(body)) {
+            headers.setContentType(body.getContentType());
+        }
     }
 
     protected HttpURLConnection openConnection() {

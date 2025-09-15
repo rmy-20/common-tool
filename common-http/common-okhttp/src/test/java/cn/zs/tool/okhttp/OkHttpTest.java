@@ -3,7 +3,7 @@ package cn.zs.tool.okhttp;
 import cn.zs.tool.core.date.DateTool;
 import cn.zs.tool.core.lang.Assert;
 import cn.zs.tool.core.util.RandomUtil;
-import cn.zs.tool.http.core.constant.MediaTypeEnum;
+import cn.zs.tool.http.core.MediaType;
 import cn.zs.tool.http.core.converter.JsonHttpMsgConverter;
 import cn.zs.tool.jackson.JsonTool;
 import cn.zs.tool.okhttp.executor.OkHttpAsyncExecutor;
@@ -39,7 +39,7 @@ class OkHttpTest {
             return;
         }
         OkHttpExecutor<String> exchange = OkHttpTool.get(uri).paths("/test/get")
-                .setContentType(MediaTypeEnum.APPLICATION_JSON.getMediaType())
+                .setContentType(MediaType.APPLICATION_JSON)
                 .queryEncoded("name", "小明")
                 .queryEncoded("age", 18)
                 .queryEncoded("sex", "男")
@@ -62,7 +62,7 @@ class OkHttpTest {
         map.put("sessionId", "");
         map.put("version", "1.0");
         OkHttpExecutor<Map<String, Object>> exchange = OkHttpTool.post(uri).pathsEncoded("/test/post")
-                .setContentType(MediaTypeEnum.APPLICATION_JSON_UTF8.getMediaType())
+                .setContentType(MediaType.APPLICATION_JSON_UTF8)
                 .body(JsonTool.JSON_TOOL.toJson(map))
                 .executor(JsonHttpMsgConverter.create(JsonTool.JSON_TOOL, new TypeReference<Map<String, Object>>() {
                 })).mustHandleResult(true).execute();
@@ -83,7 +83,7 @@ class OkHttpTest {
         map.put("sessionId", "");
         map.put("version", "1.0");
         CompletableFuture<OkHttpAsyncExecutor<Map<String, Object>>> future = OkHttpTool.post(uri).pathsEncoded("/test/post")
-                .setContentType(MediaTypeEnum.APPLICATION_JSON_UTF8.getMediaType())
+                .setContentType(MediaType.APPLICATION_JSON_UTF8)
                 .body(JsonTool.JSON_TOOL.toJson(map))
                 .jsonExecutor(JsonHttpMsgConverter.create(JsonTool.JSON_TOOL, new TypeReference<Map<String, Object>>() {
                 })).executeAsync();
@@ -102,7 +102,7 @@ class OkHttpTest {
             return;
         }
         OkHttpExecutor<Boolean> exchange = OkHttpTool.get(uri).paths("download")
-                .setContentType(MediaTypeEnum.APPLICATION_OCTET_STREAM.getMediaType())
+                .setContentType(MediaType.APPLICATION_OCTET_STREAM)
                 .downloadExecutor(new File("/opt/" + "SM2公私钥对.txt"))
                 .execute();
         Assert.isTrue(exchange.isOk() && exchange.get(), "okhttp 下载文件失败");

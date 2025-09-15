@@ -40,12 +40,12 @@ public class UrlConnectionRequest extends UrlConnectionBaseRequest<UrlConnection
 
     @Override
     public UrlConnectionRequest body(byte[] body, MediaType mediaType, Charset charset) {
-        return body(ByteArrayBody.create(body));
+        return body(ByteArrayBody.create(body, mediaType));
     }
 
     @Override
     public UrlConnectionRequest body(File body, MediaType mediaType, Charset charset) {
-        return body(FileBody.create(body));
+        return body(FileBody.create(body, mediaType));
     }
 
     /**

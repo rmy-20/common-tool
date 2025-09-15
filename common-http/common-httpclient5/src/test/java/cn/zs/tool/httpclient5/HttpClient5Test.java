@@ -3,7 +3,7 @@ package cn.zs.tool.httpclient5;
 import cn.zs.tool.core.date.DateTool;
 import cn.zs.tool.core.lang.Assert;
 import cn.zs.tool.core.util.RandomUtil;
-import cn.zs.tool.http.core.constant.MediaTypeEnum;
+import cn.zs.tool.http.core.MediaType;
 import cn.zs.tool.http.core.converter.JsonHttpMsgConverter;
 import cn.zs.tool.httpclient5.executor.HttpClient5AsyncExecutor;
 import cn.zs.tool.httpclient5.executor.HttpClient5Executor;
@@ -39,7 +39,7 @@ class HttpClient5Test {
             return;
         }
         HttpClient5Executor<String> exchange = HttpClient5Tool.get(uri).paths("/test/get")
-                .setContentType(MediaTypeEnum.APPLICATION_JSON.getMediaType())
+                .setContentType(MediaType.APPLICATION_JSON)
                 .queryEncoded("name", "小明")
                 .queryEncoded("age", 18)
                 .queryEncoded("sex", "男")
@@ -55,7 +55,7 @@ class HttpClient5Test {
             return;
         }
         CompletableFuture<HttpClient5AsyncExecutor<String>> future = HttpClient5Tool.get(uri).paths("/test/get")
-                .setContentType(MediaTypeEnum.APPLICATION_JSON.getMediaType())
+                .setContentType(MediaType.APPLICATION_JSON)
                 .queryEncoded("name", "小明")
                 .queryEncoded("age", 18)
                 .queryEncoded("sex", "男")
@@ -85,7 +85,7 @@ class HttpClient5Test {
         map.put("sessionId", "");
         map.put("version", "1.0");
         HttpClient5Executor<Map<String, Object>> exchange = HttpClient5Tool.post(uri).pathsEncoded("/test/post")
-                .setContentType(MediaTypeEnum.APPLICATION_JSON_UTF8.getMediaType())
+                .setContentType(MediaType.APPLICATION_JSON_UTF8)
                 .body(JsonTool.JSON_TOOL.toJson(map))
                 .executor(JsonHttpMsgConverter.create(JsonTool.JSON_TOOL, new TypeReference<Map<String, Object>>() {
                 })).mustHandleResult(true).execute();
@@ -106,7 +106,7 @@ class HttpClient5Test {
         map.put("sessionId", "");
         map.put("version", "1.0");
         CompletableFuture<HttpClient5AsyncExecutor<Map<String, Object>>> future = HttpClient5Tool.post(uri).pathsEncoded("/test/post")
-                .setContentType(MediaTypeEnum.APPLICATION_JSON_UTF8.getMediaType())
+                .setContentType(MediaType.APPLICATION_JSON_UTF8)
                 .body(JsonTool.JSON_TOOL.toJson(map))
                 .jsonExecutor(JsonHttpMsgConverter.create(JsonTool.JSON_TOOL, new TypeReference<Map<String, Object>>() {
                 })).executeAsync();
@@ -125,7 +125,7 @@ class HttpClient5Test {
             return;
         }
         HttpClient5Executor<Boolean> exchange = HttpClient5Tool.get(uri).paths("download")
-                .setContentType(MediaTypeEnum.APPLICATION_OCTET_STREAM.getMediaType())
+                .setContentType(MediaType.APPLICATION_OCTET_STREAM)
                 .downloadExecutor(new File("/opt/httpclient/" + "SM2公私钥对.txt")).execute();
         Assert.isTrue(exchange.isOk() && exchange.get(), "http client 下载文件失败");
         exchange.getHeaders().forEach((key, value) -> log.info("header --> {}：{}", key, value));
@@ -137,7 +137,7 @@ class HttpClient5Test {
             return;
         }
         CompletableFuture<HttpClient5AsyncExecutor<Boolean>> future = HttpClient5Tool.get(uri).paths("download")
-                .setContentType(MediaTypeEnum.APPLICATION_OCTET_STREAM.getMediaType())
+                .setContentType(MediaType.APPLICATION_OCTET_STREAM)
                 .downloadExecutor(new File("/opt/httpclient/async/" + "SM2公私钥对.txt")).executeAsync();
         for (int i = 0; i < 20; i++) {
             log.info("{}", i);

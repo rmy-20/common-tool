@@ -2,7 +2,6 @@ package cn.zs.tool.http.core.body.multipart;
 
 import cn.zs.tool.core.io.IOUtil;
 import cn.zs.tool.http.core.MediaType;
-import cn.zs.tool.http.core.constant.MediaTypeEnum;
 
 import java.io.File;
 import java.io.IOException;
@@ -28,7 +27,7 @@ public class FileMultipart extends BaseMultipart<FileMultipart> {
     }
 
     public FileMultipart(String name, String fileName, File file) {
-        this(name, fileName, file, MediaTypeEnum.APPLICATION_OCTET_STREAM.getMediaType());
+        this(name, fileName, file, MediaType.APPLICATION_OCTET_STREAM);
     }
 
     public FileMultipart(String name, String fileName, File file, MediaType contentType) {

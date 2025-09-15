@@ -1,9 +1,7 @@
 package cn.zs.tool.okhttp.request;
 
 import cn.zs.tool.core.text.StringPool;
-import cn.zs.tool.core.text.StringUtil;
 import cn.zs.tool.http.core.constant.HttpMethodEnum;
-import cn.zs.tool.http.core.constant.MediaTypeEnum;
 import cn.zs.tool.http.core.request.BaseFormRequest;
 import okhttp3.FormBody;
 import okhttp3.RequestBody;
@@ -58,15 +56,6 @@ public class OkHttpFormRequest extends OkHttpBaseRequest<OkHttpFormRequest> impl
     public OkHttpFormRequest addTextEncoded(String name, Object value) {
         formBuilder.addEncoded(name, Objects.toString(value, StringPool.EMPTY));
         return this;
-    }
-
-    @Override
-    public void executeBefore() {
-        super.executeBefore();
-        String contentType = getHeaders().getContentType();
-        if (StringUtil.isBlank(contentType)) {
-            getHeaders().setContentType(MediaTypeEnum.APPLICATION_FORM_URLENCODED.getMediaType());
-        }
     }
 
     @Override

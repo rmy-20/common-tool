@@ -1,6 +1,7 @@
 package cn.zs.tool.http.core.body;
 
 import cn.zs.tool.core.io.IOUtil;
+import cn.zs.tool.http.core.MediaType;
 
 import java.io.File;
 import java.io.IOException;
@@ -12,7 +13,7 @@ import java.util.Objects;
  *
  * @author sheng
  */
-public class FileBody implements Body {
+public class FileBody extends Body {
     /**
      * 文件
      */
@@ -25,7 +26,19 @@ public class FileBody implements Body {
         return new FileBody(file);
     }
 
+    /**
+     * 创建 #{@link FileBody}
+     */
+    public static FileBody create(File file, MediaType contentType) {
+        return new FileBody(file, contentType);
+    }
+
     public FileBody(File file) {
+        this(file, MediaType.APPLICATION_OCTET_STREAM);
+    }
+
+    public FileBody(File file, MediaType contentType) {
+        super(contentType);
         this.file = Objects.requireNonNull(file, "file must not be null");
     }
 

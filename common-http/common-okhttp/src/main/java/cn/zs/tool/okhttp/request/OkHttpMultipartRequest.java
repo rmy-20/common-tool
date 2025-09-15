@@ -1,9 +1,7 @@
 package cn.zs.tool.okhttp.request;
 
 import cn.zs.tool.core.text.StringPool;
-import cn.zs.tool.core.text.StringUtil;
 import cn.zs.tool.http.core.constant.HttpMethodEnum;
-import cn.zs.tool.http.core.constant.MediaTypeEnum;
 import cn.zs.tool.http.core.exception.HttpException;
 import cn.zs.tool.http.core.request.BaseMultipartRequest;
 import okhttp3.MultipartBody;
@@ -117,15 +115,6 @@ public class OkHttpMultipartRequest extends OkHttpBaseRequest<OkHttpMultipartReq
     public OkHttpMultipartRequest addPart(String name, String filename, RequestBody fileBody) {
         this.formBuilder.addFormDataPart(name, filename, fileBody);
         return this;
-    }
-
-    @Override
-    public void executeBefore() {
-        super.executeBefore();
-        String contentType = getHeaders().getContentType();
-        if (StringUtil.isBlank(contentType)) {
-            getHeaders().setContentType(MediaTypeEnum.MULTIPART_FORM_DATA.getMediaType());
-        }
     }
 
     @Override

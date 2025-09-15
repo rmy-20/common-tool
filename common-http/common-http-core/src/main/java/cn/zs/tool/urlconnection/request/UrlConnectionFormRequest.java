@@ -1,10 +1,10 @@
 package cn.zs.tool.urlconnection.request;
 
-import cn.zs.tool.core.text.StringUtil;
 import cn.zs.tool.http.core.body.UrlEncodedFormBody;
 import cn.zs.tool.http.core.constant.HttpMethodEnum;
-import cn.zs.tool.http.core.constant.MediaTypeEnum;
 import cn.zs.tool.http.core.request.BaseFormRequest;
+
+import java.util.Objects;
 
 /**
  * form请求
@@ -28,9 +28,23 @@ public class UrlConnectionFormRequest extends UrlConnectionBaseRequest<UrlConnec
         return new UrlConnectionFormRequest(url, method);
     }
 
+    /**
+     * 创建请求
+     *
+     * @param url    url
+     * @param method 方法
+     */
+    public static UrlConnectionFormRequest create(String url, HttpMethodEnum method, UrlEncodedFormBody formBody) {
+        return new UrlConnectionFormRequest(url, method, formBody);
+    }
+
     public UrlConnectionFormRequest(String url, HttpMethodEnum method) {
+        this(url, method, UrlEncodedFormBody.create());
+    }
+
+    public UrlConnectionFormRequest(String url, HttpMethodEnum method, UrlEncodedFormBody formBody) {
         super(url, method);
-        this.formBody = UrlEncodedFormBody.create();
+        this.formBody = Objects.requireNonNull(formBody, "formBody can not be null");
         super.body = this.formBody;
     }
 
@@ -49,14 +63,5 @@ public class UrlConnectionFormRequest extends UrlConnectionBaseRequest<UrlConnec
     @Override
     public UrlConnectionFormRequest self() {
         return this;
-    }
-
-    @Override
-    protected void executeBefore() {
-        super.executeBefore();
-        String contentType = getHeaders().getContentType();
-        if (StringUtil.isBlank(contentType)) {
-            getHeaders().setContentType(MediaTypeEnum.APPLICATION_FORM_URLENCODED.getMediaType());
-        }
     }
 }

@@ -1,5 +1,7 @@
 package cn.zs.tool.http.core.body;
 
+import cn.zs.tool.http.core.MediaType;
+
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Objects;
@@ -9,7 +11,7 @@ import java.util.Objects;
  *
  * @author sheng
  */
-public class ByteArrayBody implements Body {
+public class ByteArrayBody extends Body {
     /**
      * 字节数组
      */
@@ -22,7 +24,19 @@ public class ByteArrayBody implements Body {
         return new ByteArrayBody(byteArray);
     }
 
+    /**
+     * 创建#{@link ByteArrayBody}
+     */
+    public static ByteArrayBody create(byte[] byteArray, MediaType contentType) {
+        return new ByteArrayBody(byteArray, contentType);
+    }
+
     public ByteArrayBody(byte[] byteArray) {
+        this(byteArray, MediaType.APPLICATION_OCTET_STREAM);
+    }
+
+    public ByteArrayBody(byte[] byteArray, MediaType contentType) {
+        super(contentType);
         this.byteArray = Objects.requireNonNull(byteArray, "byteArray must not be null");
     }
 

@@ -3,13 +3,13 @@ package cn.zs.tool.http.core.body;
 import cn.zs.tool.core.lang.Assert;
 import cn.zs.tool.core.text.StringUtil;
 import cn.zs.tool.core.util.RandomUtil;
+import cn.zs.tool.http.core.MediaType;
 import cn.zs.tool.http.core.body.multipart.BaseMultipart;
 import cn.zs.tool.http.core.body.multipart.ByteArrayMultipart;
 import cn.zs.tool.http.core.body.multipart.FileMultipart;
 import cn.zs.tool.http.core.body.multipart.InputStreamMultipart;
 import cn.zs.tool.http.core.body.multipart.StringMultipart;
 import cn.zs.tool.http.core.constant.HttpConstant;
-import lombok.Getter;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -27,7 +27,7 @@ import java.util.Objects;
  *
  * @author sheng
  */
-public class MultipartFormBody implements Body {
+public class MultipartFormBody extends Body {
     /**
      * 表单数据
      */
@@ -46,7 +46,6 @@ public class MultipartFormBody implements Body {
     /**
      * 边界
      */
-    @Getter
     private final String boundary;
 
     /**
@@ -61,21 +60,34 @@ public class MultipartFormBody implements Body {
         return new MultipartFormBody();
     }
 
-    public MultipartFormBody() {
-        this(generateBoundary());
-    }
-
-    public MultipartFormBody(String boundary) {
-        this.multipartList = new ArrayList<>();
-        Assert.isTrue(StringUtil.isNotBlank(boundary), "boundary must not be empty");
-        this.boundary = boundary;
+    /**
+     * 创建#{@link MultipartFormBody}
+     */
+    public static MultipartFormBody create(String boundary) {
+        return new MultipartFormBody(boundary);
     }
 
     /**
-     * 生成随机边界
+     * 创建#{@link MultipartFormBody}
      */
-    public static String generateBoundary() {
-        return "--------------------" + RandomUtil.generateUuid();
+    public static MultipartFormBody create(MediaType contentType) {
+        return new MultipartFormBody(contentType);
+    }
+
+    public MultipartFormBody() {
+        this(RandomUtil.generateUuid());
+    }
+
+    public MultipartFormBody(String boundary) {
+        this(MediaType.MULTIPART_FORM_DATA.withParameters(HttpConstant.BOUNDARY, boundary));
+    }
+
+    public MultipartFormBody(MediaType contentType) {
+        super(contentType);
+        this.multipartList = new ArrayList<>();
+        String boundary = contentType.getParameter(HttpConstant.BOUNDARY);
+        Assert.isTrue(StringUtil.isNotBlank(boundary), "contentType boundary must not be blank");
+        this.boundary = boundary;
     }
 
     @Override
@@ -125,7 +137,7 @@ public class MultipartFormBody implements Body {
                 .append("; name=\"")
                 .append(part.getName())
                 .append('"');
-        if (StringUtil.isNotBlank(fileName)) {
+        if (hasFileName) {
             builder.append("; filename=\"").append(fileName).append('"');
         }
         // Content-Disposition

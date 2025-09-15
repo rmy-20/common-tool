@@ -1,7 +1,6 @@
 package cn.zs.tool.http.core.body.multipart;
 
 import cn.zs.tool.http.core.MediaType;
-import cn.zs.tool.http.core.constant.MediaTypeEnum;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -23,7 +22,7 @@ public class ByteArrayMultipart extends BaseMultipart<ByteArrayMultipart> {
     }
 
     public ByteArrayMultipart(String name, String fileName, byte[] content) {
-        this(name, fileName, content, MediaTypeEnum.APPLICATION_OCTET_STREAM.getMediaType());
+        this(name, fileName, content, MediaType.APPLICATION_OCTET_STREAM);
     }
 
     public ByteArrayMultipart(String name, String fileName, byte[] content, MediaType contentType) {
