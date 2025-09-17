@@ -8,6 +8,8 @@ import lombok.Getter;
 import java.io.Closeable;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -18,9 +20,9 @@ import java.util.Objects;
 @Getter
 public abstract class BaseMultipart<T extends BaseMultipart<T>> implements Closeable {
     /**
-     * 内容描述
+     * 头信息
      */
-    protected String contentDisposition = "form-data";
+    protected final List<String> headerList = new ArrayList<>();
 
     /**
      * 字段名称
@@ -74,19 +76,18 @@ public abstract class BaseMultipart<T extends BaseMultipart<T>> implements Close
     protected abstract T self();
 
     /**
-     * 设置内容描述
-     */
-    public T contentDisposition(String contentDisposition) {
-        Assert.isTrue(StringUtil.isNotBlank(contentDisposition), "contentDisposition must not be blank");
-        this.contentDisposition = contentDisposition;
-        return self();
-    }
-
-    /**
      * 设置文件名
      */
     public T fileName(String fileName) {
         this.fileName = fileName;
+        return self();
+    }
+
+    /**
+     * 添加头信息
+     */
+    public T addHeader(String header) {
+        headerList.add(header);
         return self();
     }
 }

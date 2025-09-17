@@ -4,6 +4,7 @@ import cn.zs.tool.core.collection.CollectionUtil;
 import cn.zs.tool.core.lang.Assert;
 import cn.zs.tool.core.text.StringPool;
 import cn.zs.tool.core.text.StringUtil;
+import cn.zs.tool.http.core.constant.HttpConstant;
 import lombok.Getter;
 
 import java.nio.charset.Charset;
@@ -35,7 +36,7 @@ public class MediaType {
      * application/json;charset=UTF-8
      */
     public static final MediaType APPLICATION_JSON_UTF8 = new MediaType("application", "json",
-            Arrays.asList("charset", StandardCharsets.UTF_8.name()));
+            Arrays.asList(HttpConstant.CHARSET, StandardCharsets.UTF_8.name()));
 
     /**
      * application/xml，通用类型，用于指示资源是XML格式的，严格按照XML的规则来解析文档，不支持XML中的HTML兼容特性
@@ -165,13 +166,40 @@ public class MediaType {
         int index = 0;
         int length = mediaType.length();
         StringBuilder builder = new StringBuilder();
-        index = findAndAppendUntil(builder, index, mediaType, '/');
+        boolean hasSubType = false;
+        for (; index < mediaType.length(); index++) {
+            char ch = mediaType.charAt(index);
+            if (ch == '/') {
+                index++;
+                hasSubType = true;
+                break;
+            } else if (ch == ';') {
+                index++;
+                break;
+            } else if (Character.isWhitespace(ch)) {
+                continue;
+            }
+            builder.append(ch);
+        }
         String type = builder.toString();
         builder.setLength(0);
 
-        index = findAndAppendUntil(builder, index, mediaType, ';');
-        String subType = builder.toString();
-        builder.setLength(0);
+        String subType = StringPool.EMPTY;
+        if (hasSubType) {
+            for (; index < mediaType.length(); index++) {
+                char ch = mediaType.charAt(index);
+                if (ch == ';') {
+                    index++;
+                    break;
+                } else if (Character.isWhitespace(ch)) {
+                    continue;
+                }
+                builder.append(ch);
+            }
+            subType = builder.toString();
+            builder.setLength(0);
+        }
+
         Charset charset = null;
         List<String> parameters = null;
         if (index < length) {
@@ -195,7 +223,7 @@ public class MediaType {
             }
             for (int i = 0; i < parameters.size(); i += 2) {
                 String key = parameters.get(i);
-                if ("charset".equalsIgnoreCase(key)) {
+                if (HttpConstant.CHARSET.equalsIgnoreCase(key)) {
                     charset = Charset.forName(parameters.get(i + 1));
                     break;
                 }
@@ -204,33 +232,21 @@ public class MediaType {
         return new MediaType(type, subType, parameters, charset);
     }
 
-    private static int findAndAppendUntil(StringBuilder builder, int index, String mediaType, char target) {
-        for (; index < mediaType.length(); index++) {
-            char ch = mediaType.charAt(index);
-            if (ch == target) {
-                index++;
-                break;
-            } else if (Character.isWhitespace(ch)) {
-                continue;
-            }
-            builder.append(ch);
-        }
-        return index;
-    }
-
     /**
      * 构造媒体类型
      */
     private String generateMediaType() {
-        StringBuilder builder = new StringBuilder();
-        // 媒体类型
-        builder.append(getType())
-                .append(StringPool.SLASH_SIGN)
-                .append(getSubType());
+        StringBuilder builder = new StringBuilder(getType());
+        // 子类型
+        if (StringUtil.isNotEmpty(getSubType())) {
+            builder.append(StringPool.SLASH_SIGN)
+                    .append(getSubType());
+        }
         if (CollectionUtil.isNotEmpty(parameters)) {
             // 参数
             for (int i = 0; i < parameters.size(); i += 2) {
                 builder.append(StringPool.SEMICOLON_SIGN)
+                        .append(' ')
                         .append(parameters.get(i));
                 String value = parameters.get(i + 1);
                 if (StringUtil.isNotBlank(value)) {

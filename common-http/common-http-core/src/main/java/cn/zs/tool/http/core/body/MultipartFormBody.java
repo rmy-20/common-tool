@@ -110,7 +110,10 @@ public class MultipartFormBody extends Body {
             outputStream.write(HttpConstant.CR_LF_ENCODED);
 
             // form header
-            doWriteHeaders(part, outputStream);
+            for (String header : part.getHeaderList()) {
+                outputStream.write(StringUtil.encoded(getDefaultCharset(), header));
+                outputStream.write(HttpConstant.CR_LF_ENCODED);
+            }
             outputStream.write(HttpConstant.CR_LF_ENCODED);
 
             if (writeBody) {
@@ -128,30 +131,6 @@ public class MultipartFormBody extends Body {
             outputStream.write(HttpConstant.CR_LF_ENCODED);
         }
         outputStream.flush();
-    }
-
-    protected void doWriteHeaders(BaseMultipart<?> part, OutputStream outputStream) throws IOException {
-        String fileName = part.getFileName();
-        boolean hasFileName = StringUtil.isNotBlank(fileName);
-        StringBuilder builder = new StringBuilder(part.getContentDisposition())
-                .append("; name=\"")
-                .append(part.getName())
-                .append('"');
-        if (hasFileName) {
-            builder.append("; filename=\"").append(fileName).append('"');
-        }
-        // Content-Disposition
-        outputStream.write(HttpConstant.CONTENT_DISPOSITION_ENCODED);
-        outputStream.write(HttpConstant.FIELD_SEP_ENCODED);
-        outputStream.write(StringUtil.encoded(getDefaultCharset(), StringUtil.stripLineBreaks(builder.toString())));
-        outputStream.write(HttpConstant.CR_LF_ENCODED);
-        // Content-Type
-        if (hasFileName) {
-            outputStream.write(HttpConstant.CONTENT_TYPE_ENCODED);
-            outputStream.write(HttpConstant.FIELD_SEP_ENCODED);
-            outputStream.write(StringUtil.encoded(getDefaultCharset(), StringUtil.stripLineBreaks(part.getContentType().toString())));
-            outputStream.write(HttpConstant.CR_LF_ENCODED);
-        }
     }
 
     @Override
@@ -215,55 +194,109 @@ public class MultipartFormBody extends Body {
      * 添加表单数据
      */
     public MultipartFormBody addText(String name, String value) {
-        multipartList.add(new StringMultipart(name, value, getDefaultCharset()));
-        return this;
+        return addPart(new StringMultipart(name, value, getDefaultCharset()));
     }
 
     /**
      * 添加表单数据
      */
     public MultipartFormBody addText(String name, String value, Charset charset) {
-        multipartList.add(new StringMultipart(name, value, charset));
-        return this;
+        return addPart(new StringMultipart(name, value, charset));
     }
 
     /**
      * 添加表单数据
      */
     public MultipartFormBody addBinary(String name, File file) {
-        multipartList.add(new FileMultipart(name, file));
-        return this;
+        return addPart(new FileMultipart(name, file));
     }
 
     /**
      * 添加表单数据
      */
     public MultipartFormBody addBinary(String name, String filename, File file) {
-        multipartList.add(new FileMultipart(name, filename, file));
-        return this;
+        return addPart(new FileMultipart(name, filename, file));
     }
 
     /**
      * 添加表单数据
      */
     public MultipartFormBody addBinary(String name, String filename, byte[] bytes) {
-        multipartList.add(new ByteArrayMultipart(name, filename, bytes));
-        return this;
+        return addPart(new ByteArrayMultipart(name, filename, bytes));
     }
 
     /**
      * 添加表单数据
      */
     public MultipartFormBody addBinary(String name, String filename, InputStream stream) {
-        multipartList.add(new InputStreamMultipart(name, filename, stream));
-        return this;
+        return addPart(new InputStreamMultipart(name, filename, stream));
     }
 
     /**
      * 添加表单数据
      */
     public MultipartFormBody addPart(BaseMultipart<?> part) {
-        multipartList.add(Objects.requireNonNull(part, "part must not be null"));
+        multipartList.add(addPartHeader(Objects.requireNonNull(part, "part must not be null")));
         return this;
+    }
+
+    /**
+     * 添加表单数据头
+     */
+    protected BaseMultipart<?> addPartHeader(BaseMultipart<?> part) {
+        String fileName = part.getFileName();
+        boolean hasFileName = StringUtil.isNotBlank(fileName);
+        StringBuilder builder = new StringBuilder("Content-Disposition: form-data; name=\"")
+                .append(removeSpecialCharacters(part.getName()))
+                .append('"');
+        if (hasFileName) {
+            builder.append("; filename=\"").append(removeSpecialCharacters(fileName)).append('"');
+        }
+        part.addHeader(builder.toString());
+        if (hasFileName) {
+            builder.setLength(0);
+            builder.append("Content-Type: ").append(part.getContentType().toString());
+            part.addHeader(builder.toString());
+        }
+        return part;
+    }
+
+    /**
+     * 去除字符串中的特殊字符
+     */
+    protected CharSequence removeSpecialCharacters(final CharSequence text) {
+        if (Objects.isNull(text)) {
+            return null;
+        }
+        boolean requiresRewrite = false;
+        int n = 0;
+        for (; n < text.length(); n++) {
+            final char ch = text.charAt(n);
+            if (isSpecialChar(ch)) {
+                requiresRewrite = true;
+                break;
+            }
+        }
+        if (!requiresRewrite) {
+            return text;
+        }
+        final StringBuilder builder = new StringBuilder();
+        builder.append(text, 0, n);
+        for (; n < text.length(); n++) {
+            final char ch = text.charAt(n);
+            if (isSpecialChar(ch)) {
+                builder.append(' ');
+            } else {
+                builder.append(ch);
+            }
+        }
+        return builder.toString();
+    }
+
+    /**
+     * 是否是特殊字符
+     */
+    protected boolean isSpecialChar(int ch) {
+        return ch == '\r' || ch == '\n' || ch == '\f' || ch == 11 || ch == '"';
     }
 }

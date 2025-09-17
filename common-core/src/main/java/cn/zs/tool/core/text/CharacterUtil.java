@@ -21,11 +21,4 @@ public class CharacterUtil {
     public static boolean isHexDigit(int c) {
         return ('a' <= c && c <= 'f') || ('A' <= c && c <= 'F') || ('0' <= c && c <= '9');
     }
-
-    /**
-     * 判断字符是否是换行符
-     */
-    public static boolean isLineBreak(final char ch) {
-        return ch == '\r' || ch == '\n' || ch == '\f' || ch == 11;
-    }
 }
