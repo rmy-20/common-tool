@@ -58,7 +58,7 @@ public class OkHttpExecutor<R> extends BaseExecutor<R> {
                     result = msgConverter.apply(clientResponse.getBody());
                 }
             } catch (Throwable e) {
-                statusMsg = e.getMessage();
+                setStatusMsg(e.getMessage(), "okhttp execute error");
                 errorHandler(e);
             }
         }

@@ -51,7 +51,7 @@ public class HttpClient5AsyncExecutor<R> extends BaseExecutor<R> {
                     result = msgConverter.apply(httpClient5Response.getBody());
                 }
             } catch (Throwable e) {
-                statusMsg = e.getMessage();
+                setStatusMsg(e.getMessage(), "httpclient async handle result error");
                 errorHandler(e);
             }
         }

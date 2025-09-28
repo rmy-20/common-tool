@@ -11,6 +11,7 @@ import cn.zs.tool.urlconnection.response.UrlConnectionResponse;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Predicate;
 
 /**
@@ -33,6 +34,11 @@ public class UrlConnectionExecutor<R> extends BaseExecutor<R> {
      * 响应
      */
     private UrlConnectionResponse urlConnectionResponse;
+
+    /**
+     * 是否已执行
+     */
+    private final AtomicBoolean isExecute = new AtomicBoolean(false);
 
     /**
      * 创建#{@link UrlConnectionExecutor}
@@ -60,7 +66,7 @@ public class UrlConnectionExecutor<R> extends BaseExecutor<R> {
     }
 
     protected void execute() {
-        if (Objects.isNull(urlConnectionResponse)) {
+        if (isExecute.compareAndSet(false, true)) {
             try {
                 connection.connect();
                 if (connection.getDoOutput() && Objects.nonNull(body)) {
@@ -77,7 +83,7 @@ public class UrlConnectionExecutor<R> extends BaseExecutor<R> {
                     }
                 }
             } catch (Throwable e) {
-                statusMsg = e.getMessage();
+                setStatusMsg(e.getMessage(), "urlConnection execute error");
                 errorHandler(e);
             }
         }

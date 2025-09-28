@@ -12,6 +12,7 @@ import org.apache.hc.client5.http.classic.methods.HttpUriRequestBase;
 import org.apache.hc.core5.http.protocol.HttpContext;
 
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Predicate;
 
 /**
@@ -44,7 +45,7 @@ public class HttpClient5Executor<R> extends BaseExecutor<R> {
     /**
      * 是否已执行
      */
-    private boolean isExecute = false;
+    private final AtomicBoolean isExecute = new AtomicBoolean(false);
 
     /**
      * 创建#{@link HttpClient5Executor}
@@ -71,15 +72,22 @@ public class HttpClient5Executor<R> extends BaseExecutor<R> {
     }
 
     protected void execute() {
-        if (Objects.isNull(httpClient5Response) && !isExecute) {
-            isExecute = true;
-            try (HttpClient5Response client5Response = HttpClient5Response.create(httpClient.executeOpen(null, request, httpContext))) {
-                this.httpClient5Response = client5Response;
-                if (isOk() || (mustHandleResult && Objects.nonNull(client5Response.getBody()))) {
-                    result = msgConverter.apply(httpClient5Response.getBody());
-                }
+        if (isExecute.compareAndSet(false, true)) {
+            try {
+                httpClient.execute(null, request, httpContext, classicHttpResponse -> {
+                    try (HttpClient5Response client5Response = HttpClient5Response.create(classicHttpResponse)) {
+                        httpClient5Response = client5Response;
+                        if (isOk() || (mustHandleResult && Objects.nonNull(client5Response.getBody()))) {
+                            result = msgConverter.apply(client5Response.getBody());
+                        }
+                    } catch (Throwable e) {
+                        setStatusMsg(e.getMessage(), "httpclient handle result error");
+                        errorHandler(e);
+                    }
+                    return result;
+                });
             } catch (Throwable e) {
-                statusMsg = e.getMessage();
+                setStatusMsg(e.getMessage(), "httpclient execute error");
                 errorHandler(e);
             }
         }

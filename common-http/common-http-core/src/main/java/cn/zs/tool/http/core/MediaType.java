@@ -245,9 +245,7 @@ public class MediaType {
         if (CollectionUtil.isNotEmpty(parameters)) {
             // 参数
             for (int i = 0; i < parameters.size(); i += 2) {
-                builder.append(StringPool.SEMICOLON_SIGN)
-                        .append(' ')
-                        .append(parameters.get(i));
+                builder.append(StringPool.SEMICOLON_SIGN).append(parameters.get(i));
                 String value = parameters.get(i + 1);
                 if (StringUtil.isNotBlank(value)) {
                     builder.append(StringPool.EQUAL_SIGN)

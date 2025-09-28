@@ -54,7 +54,7 @@ public class OkHttpAsyncExecutor<R> extends BaseExecutor<R> {
                 this.result = msgConverter.apply(httpResponse.getBody());
             }
         } catch (Throwable e) {
-            statusMsg = e.getMessage();
+            setStatusMsg(e.getMessage(), "okhttp async handle result error");
             errorHandler(e);
         }
     }

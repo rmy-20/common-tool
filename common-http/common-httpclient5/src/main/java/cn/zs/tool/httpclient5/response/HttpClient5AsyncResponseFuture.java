@@ -5,31 +5,23 @@ import cn.zs.tool.core.fuction.throwing.ThrowingFunc;
 import cn.zs.tool.core.fuction.throwing.ThrowingSupplier;
 import cn.zs.tool.http.core.converter.HttpMsgConverter;
 import cn.zs.tool.httpclient5.executor.HttpClient5AsyncExecutor;
-import cn.zs.tool.httpclient5.support.classic.FunctionalClassicEntityConsumer;
+import cn.zs.tool.httpclient5.support.classic.BasicClassicAsyncResponseConsumer;
 import cn.zs.tool.httpclient5.support.classic.HttpEntityClassicEntityProducer;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.hc.client5.http.async.HttpAsyncClient;
 import org.apache.hc.client5.http.classic.HttpClient;
 import org.apache.hc.client5.http.classic.methods.HttpUriRequestBase;
 import org.apache.hc.core5.concurrent.FutureCallback;
-import org.apache.hc.core5.http.ContentType;
-import org.apache.hc.core5.http.Header;
 import org.apache.hc.core5.http.HttpEntity;
 import org.apache.hc.core5.http.HttpException;
-import org.apache.hc.core5.http.HttpResponse;
-import org.apache.hc.core5.http.io.entity.InputStreamEntity;
 import org.apache.hc.core5.http.message.BasicClassicHttpResponse;
 import org.apache.hc.core5.http.nio.AsyncPushConsumer;
 import org.apache.hc.core5.http.nio.AsyncRequestProducer;
 import org.apache.hc.core5.http.nio.AsyncResponseConsumer;
 import org.apache.hc.core5.http.nio.HandlerFactory;
-import org.apache.hc.core5.http.nio.support.AbstractAsyncResponseConsumer;
 import org.apache.hc.core5.http.nio.support.BasicRequestProducer;
 import org.apache.hc.core5.http.protocol.HttpContext;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Locale;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Predicate;
@@ -138,7 +130,7 @@ public class HttpClient5AsyncResponseFuture<R> extends CompletableFuture<HttpCli
         try {
             httpClient.execute(getAsyncRequestProducer(), getAsyncResponseConsumer(), getPushHandlerFactory(), httpContext, this);
         } catch (Throwable e) {
-            log.error("执行okhttp异步请求异常", e);
+            log.error("执行http client异步请求异常", e);
             completeExceptionally(e);
         }
     }
@@ -155,33 +147,8 @@ public class HttpClient5AsyncResponseFuture<R> extends CompletableFuture<HttpCli
     }
 
     public AsyncResponseConsumer<BasicClassicHttpResponse> getAsyncResponseConsumer() throws Throwable {
-        if (Objects.nonNull(asyncResponseConsumerSupplier)) {
-            return asyncResponseConsumerSupplier.get();
-        }
-        return new AbstractAsyncResponseConsumer<BasicClassicHttpResponse, InputStream>(
-                FunctionalClassicEntityConsumer.create((contentType, inputStream) -> inputStream)) {
-            @Override
-            public void informationResponse(HttpResponse response, HttpContext context) throws HttpException, IOException {
-            }
-
-            @Override
-            protected BasicClassicHttpResponse buildResult(HttpResponse response, InputStream entity, ContentType contentType) {
-                BasicClassicHttpResponse classicHttpResponse = new BasicClassicHttpResponse(response.getCode(), response.getReasonPhrase());
-                classicHttpResponse.setEntity(new InputStreamEntity(entity, contentType));
-                Header[] headerArr = response.getHeaders();
-                if (Objects.nonNull(headerArr)) {
-                    for (Header header : headerArr) {
-                        classicHttpResponse.addHeader(header);
-                    }
-                }
-                classicHttpResponse.setVersion(response.getVersion());
-                Locale locale = response.getLocale();
-                if (Objects.nonNull(locale)) {
-                    classicHttpResponse.setLocale(locale);
-                }
-                return classicHttpResponse;
-            }
-        };
+        return Objects.nonNull(asyncResponseConsumerSupplier) ? asyncResponseConsumerSupplier.get()
+                : BasicClassicAsyncResponseConsumer.create();
     }
 
     public HandlerFactory<AsyncPushConsumer> getPushHandlerFactory() throws Throwable {

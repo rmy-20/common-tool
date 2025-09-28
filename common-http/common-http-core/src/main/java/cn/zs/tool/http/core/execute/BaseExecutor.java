@@ -1,6 +1,7 @@
 package cn.zs.tool.http.core.execute;
 
 import cn.zs.tool.core.fuction.throwing.ThrowingConsumer;
+import cn.zs.tool.core.text.StringUtil;
 import cn.zs.tool.http.core.HttpHeaders;
 import cn.zs.tool.http.core.converter.HttpMsgConverter;
 import lombok.extern.slf4j.Slf4j;
@@ -61,6 +62,13 @@ public abstract class BaseExecutor<R> {
     @SuppressWarnings("unchecked")
     protected void errorHandler(Throwable ex) {
         ((ThrowingConsumer<Throwable, RuntimeException>) errHandler).accept(ex);
+    }
+
+    /**
+     * 响应状态信息
+     */
+    protected void setStatusMsg(String statusMsg, String defaultMsg) {
+        this.statusMsg = StringUtil.isNotBlank(statusMsg) ? statusMsg : defaultMsg;
     }
 
     /**
