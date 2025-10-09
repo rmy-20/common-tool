@@ -29,5 +29,5 @@
     </root>
 
     <!-- 自定义包的日志级别 -->
-    <logger name="cn.zs" level="info"/>
+    <logger name="io.github.rmy20" level="info"/>
 </configuration>

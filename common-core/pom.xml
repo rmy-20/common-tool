@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>cn.zs</groupId>
+        <groupId>io.github.rmy-20</groupId>
         <artifactId>common-tool</artifactId>
         <version>1.0.0</version>
     </parent>
@@ -15,7 +15,7 @@
 
     <dependencies>
         <dependency>
-            <groupId>cn.zs</groupId>
+            <groupId>io.github.rmy-20</groupId>
             <artifactId>common-log</artifactId>
             <version>${parent.version}</version>
         </dependency>
