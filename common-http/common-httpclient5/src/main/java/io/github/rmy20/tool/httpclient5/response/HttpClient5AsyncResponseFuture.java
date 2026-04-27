@@ -3,7 +3,7 @@ package io.github.rmy20.tool.httpclient5.response;
 import io.github.rmy20.tool.core.function.throwing.ThrowingConsumer;
 import io.github.rmy20.tool.core.function.throwing.ThrowingFunc;
 import io.github.rmy20.tool.core.function.throwing.ThrowingSupplier;
-import io.github.rmy20.tool.http.core.converter.HttpMsgConverter;
+import io.github.rmy20.tool.http.core.result.HttpResultHandle;
 import io.github.rmy20.tool.httpclient5.executor.HttpClient5AsyncExecutor;
 import io.github.rmy20.tool.httpclient5.support.classic.BasicClassicAsyncResponseConsumer;
 import io.github.rmy20.tool.httpclient5.support.classic.HttpEntityClassicEntityProducer;
@@ -36,7 +36,7 @@ public class HttpClient5AsyncResponseFuture<R> extends CompletableFuture<HttpCli
     /**
      * 响应处理器
      */
-    protected final HttpMsgConverter<R> msgConverter;
+    protected final HttpResultHandle<R> resultHandle;
 
     /**
      * 成功判断
@@ -86,7 +86,7 @@ public class HttpClient5AsyncResponseFuture<R> extends CompletableFuture<HttpCli
     /**
      * 创建异步响应结果
      *
-     * @param msgConverter                  消息转换器
+     * @param resultHandle                  结果处理器
      * @param okPredicate                   响应成功判断
      * @param errHandler                    错误处理器
      * @param mustHandleResult              true 为必须处理结果
@@ -97,23 +97,23 @@ public class HttpClient5AsyncResponseFuture<R> extends CompletableFuture<HttpCli
      * @param asyncResponseConsumerSupplier #{@link AsyncResponseConsumer} 提供者
      * @param pushHandlerFactorySupplier    #{@link AsyncPushConsumer} 提供者
      */
-    public static <R> HttpClient5AsyncResponseFuture<R> create(HttpMsgConverter<R> msgConverter, Predicate<Integer> okPredicate,
+    public static <R> HttpClient5AsyncResponseFuture<R> create(HttpResultHandle<R> resultHandle, Predicate<Integer> okPredicate,
                                                                ThrowingConsumer<Throwable, Throwable> errHandler, boolean mustHandleResult,
                                                                HttpAsyncClient httpClient, HttpUriRequestBase request, HttpContext httpContext,
                                                                ThrowingFunc<HttpUriRequestBase, AsyncRequestProducer, Throwable> asyncRequestProducerFunc,
                                                                ThrowingSupplier<AsyncResponseConsumer<BasicClassicHttpResponse>, Throwable> asyncResponseConsumerSupplier,
                                                                ThrowingSupplier<HandlerFactory<AsyncPushConsumer>, Throwable> pushHandlerFactorySupplier) {
-        return new HttpClient5AsyncResponseFuture<>(msgConverter, okPredicate, errHandler, mustHandleResult,
+        return new HttpClient5AsyncResponseFuture<>(resultHandle, okPredicate, errHandler, mustHandleResult,
                 httpClient, request, httpContext, asyncRequestProducerFunc, asyncResponseConsumerSupplier, pushHandlerFactorySupplier);
     }
 
-    public HttpClient5AsyncResponseFuture(HttpMsgConverter<R> msgConverter, Predicate<Integer> okPredicate,
+    public HttpClient5AsyncResponseFuture(HttpResultHandle<R> resultHandle, Predicate<Integer> okPredicate,
                                           ThrowingConsumer<Throwable, Throwable> errHandler, boolean mustHandleResult,
                                           HttpAsyncClient httpClient, HttpUriRequestBase request, HttpContext httpContext,
                                           ThrowingFunc<HttpUriRequestBase, AsyncRequestProducer, Throwable> asyncRequestProducerFunc,
                                           ThrowingSupplier<AsyncResponseConsumer<BasicClassicHttpResponse>, Throwable> asyncResponseConsumerSupplier,
                                           ThrowingSupplier<HandlerFactory<AsyncPushConsumer>, Throwable> pushHandlerFactorySupplier) {
-        this.msgConverter = Objects.requireNonNull(msgConverter, "msgConverter must not be null");
+        this.resultHandle = Objects.requireNonNull(resultHandle, "resultHandle must not be null");
         this.errHandler = Objects.requireNonNull(errHandler, "errHandler must not be null");
         this.okPredicate = Objects.requireNonNull(okPredicate, "okPredicate must not be null");
         this.mustHandleResult = mustHandleResult;
@@ -158,7 +158,7 @@ public class HttpClient5AsyncResponseFuture<R> extends CompletableFuture<HttpCli
     @Override
     public void completed(BasicClassicHttpResponse basicHttpResponse) {
         try {
-            complete(HttpClient5AsyncExecutor.create(basicHttpResponse, msgConverter, okPredicate, errHandler, mustHandleResult));
+            complete(HttpClient5AsyncExecutor.create(basicHttpResponse, resultHandle, okPredicate, errHandler, mustHandleResult));
         } catch (Throwable e) {
             log.error("构建http client异步响应处理器异常", e);
             completeExceptionally(e);

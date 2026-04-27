@@ -5,12 +5,11 @@ import io.github.rmy20.tool.core.date.DateTool;
 import io.github.rmy20.tool.core.lang.Assert;
 import io.github.rmy20.tool.core.util.RandomUtil;
 import io.github.rmy20.tool.http.core.MediaType;
-import io.github.rmy20.tool.http.core.converter.JsonHttpMsgConverter;
+import io.github.rmy20.tool.http.core.result.HttpJsonResultHandle;
 import io.github.rmy20.tool.http.core.execute.BaseExecutor;
 import io.github.rmy20.tool.http.core.request.BaseMultipartRequest;
 import io.github.rmy20.tool.http.core.request.BaseRequestTool;
-import io.github.rmy20.tool.jackson.JsonTool;
-import io.github.rmy20.tool.urlconnection.request.UrlConnectionRequestTool;
+import io.github.rmy20.tool.jackson.JsonUtil;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;
@@ -87,9 +86,9 @@ class UrlConnectionRequestTest {
         map.put("version", "1.0");
         BaseExecutor<Map<String, Object>> executor = tool.post(uri).pathsEncoded("/test/post")
                 .setContentType(MediaType.APPLICATION_JSON_UTF8)
-                .body(JsonTool.JSON_TOOL.toJson(map))
-                .executor(JsonHttpMsgConverter.create(JsonTool.JSON_TOOL, new TypeReference<Map<String, Object>>() {
-                })).mustHandleResult(true).execute();
+                .body(JsonUtil.toJson(map))
+                .executor(HttpJsonResultHandle.create(JsonUtil.JSON_TOOL, new TypeReference<Map<String, Object>>() {
+                })).mustHandleResult().execute();
         Assert.isTrue(executor.isOk(), "URLConnection post请求失败");
         System.out.println("URLConnection post结果：" + executor.get());
         executor.getHeaders().forEach((name, value) -> System.out.println("header --> " + name + "：" + value));
@@ -109,8 +108,8 @@ class UrlConnectionRequestTest {
         map.put("version", "1.0");
         CompletableFuture<? extends BaseExecutor<Map<String, Object>>> future = tool.post(uri).pathsEncoded("/test/post")
                 .setContentType(MediaType.APPLICATION_JSON_UTF8)
-                .body(JsonTool.JSON_TOOL.toJson(map))
-                .jsonExecutor(JsonHttpMsgConverter.create(JsonTool.JSON_TOOL, new TypeReference<Map<String, Object>>() {
+                .body(JsonUtil.toJson(map))
+                .jsonExecutor(HttpJsonResultHandle.create(JsonUtil.JSON_TOOL, new TypeReference<Map<String, Object>>() {
                 })).executeAsync();
         for (int i = 0; i < 20; i++) {
             System.out.println(i);
@@ -127,10 +126,10 @@ class UrlConnectionRequestTest {
         if (skip) {
             return;
         }
-        BaseExecutor<Boolean> executor = tool.get(uri).paths("download")
+        BaseExecutor<Long> executor = tool.get(uri).paths("download")
                 .setContentType(MediaType.APPLICATION_OCTET_STREAM.getMediaType())
                 .downloadExecutor(new File("/opt/urlconnection/" + "SM2公私钥对.txt")).execute();
-        Assert.isTrue(executor.isOk() && executor.get(), "URLConnection 下载文件失败");
+        Assert.isTrue(executor.isOk() && executor.get() >= 0, "URLConnection 下载文件失败");
         executor.getHeaders().forEach((name, value) -> System.out.println("header --> " + name + "：" + value));
     }
 
@@ -139,15 +138,15 @@ class UrlConnectionRequestTest {
         if (skip) {
             return;
         }
-        CompletableFuture<? extends BaseExecutor<Boolean>> future = tool.get(uri).paths("download")
+        CompletableFuture<? extends BaseExecutor<Long>> future = tool.get(uri).paths("download")
                 .setContentType(MediaType.APPLICATION_OCTET_STREAM)
                 .downloadExecutor(new File("/opt/urlconnection/async/" + "SM2公私钥对.txt")).executeAsync();
         for (int i = 0; i < 20; i++) {
             System.out.println(i);
             TimeUnit.MILLISECONDS.sleep(200L);
         }
-        BaseExecutor<Boolean> executor = future.join();
-        Assert.isTrue(executor.isOk() && executor.get(), "URLConnection 异步下载文件失败");
+        BaseExecutor<Long> executor = future.join();
+        Assert.isTrue(executor.isOk() && executor.get() >= 0, "URLConnection 异步下载文件失败");
         executor.getHeaders().forEach((name, value) -> System.out.println("header --> " + name + "：" + value));
     }
 

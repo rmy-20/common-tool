@@ -1,7 +1,7 @@
 package io.github.rmy20.tool.okhttp.response;
 
 import io.github.rmy20.tool.core.function.throwing.ThrowingConsumer;
-import io.github.rmy20.tool.http.core.converter.HttpMsgConverter;
+import io.github.rmy20.tool.http.core.result.HttpResultHandle;
 import io.github.rmy20.tool.okhttp.executor.OkHttpAsyncExecutor;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.Call;
@@ -23,7 +23,7 @@ public class OkHttpAsyncResponseFuture<R> extends CompletableFuture<OkHttpAsyncE
     /**
      * 结果处理器
      */
-    private final HttpMsgConverter<R> msgConverter;
+    private final HttpResultHandle<R> resultHandle;
 
     /**
      * 错误处理器
@@ -44,19 +44,19 @@ public class OkHttpAsyncResponseFuture<R> extends CompletableFuture<OkHttpAsyncE
      * 创建{@link OkHttpAsyncResponseFuture}
      *
      * @param call         {@link Call}
-     * @param msgConverter 结果处理器
+     * @param resultHandle 结果处理器
      * @param errHandler   错误处理器
      * @param okPredicate  成功判断
      */
-    public static <R> OkHttpAsyncResponseFuture<R> create(Call call, HttpMsgConverter<R> msgConverter,
+    public static <R> OkHttpAsyncResponseFuture<R> create(Call call, HttpResultHandle<R> resultHandle,
                                                           ThrowingConsumer<Throwable, Throwable> errHandler,
                                                           Predicate<Integer> okPredicate, Boolean mustHandleResult) {
-        return new OkHttpAsyncResponseFuture<>(call, msgConverter, errHandler, okPredicate, mustHandleResult);
+        return new OkHttpAsyncResponseFuture<>(call, resultHandle, errHandler, okPredicate, mustHandleResult);
     }
 
-    public OkHttpAsyncResponseFuture(Call call, HttpMsgConverter<R> msgConverter, ThrowingConsumer<Throwable, Throwable> errHandler,
+    public OkHttpAsyncResponseFuture(Call call, HttpResultHandle<R> resultHandle, ThrowingConsumer<Throwable, Throwable> errHandler,
                                      Predicate<Integer> okPredicate, Boolean mustHandleResult) {
-        this.msgConverter = Objects.requireNonNull(msgConverter, "msgConverter must not be null");
+        this.resultHandle = Objects.requireNonNull(resultHandle, "resultHandle must not be null");
         this.errHandler = Objects.requireNonNull(errHandler, "errHandler must not be null");
         this.okPredicate = Objects.requireNonNull(okPredicate, "okPredicate must not be null");
         this.mustHandleResult = mustHandleResult;
@@ -83,7 +83,7 @@ public class OkHttpAsyncResponseFuture<R> extends CompletableFuture<OkHttpAsyncE
     @Override
     public void onResponse(Call call, Response response) throws IOException {
         try {
-            complete(OkHttpAsyncExecutor.create(call, response, msgConverter, errHandler, okPredicate, mustHandleResult));
+            complete(OkHttpAsyncExecutor.create(call, response, resultHandle, errHandler, okPredicate, mustHandleResult));
         } catch (Throwable e) {
             log.error("构建okhttp异步响应处理器异常", e);
             completeExceptionally(e);

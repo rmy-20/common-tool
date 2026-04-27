@@ -1,22 +1,19 @@
 package io.github.rmy20.tool.httpclient5.request;
 
-import io.github.rmy20.tool.core.function.throwing.ThrowingFunc;
-import io.github.rmy20.tool.core.function.throwing.ThrowingSupplier;
 import io.github.rmy20.tool.http.core.HttpHeaders;
-import io.github.rmy20.tool.http.core.converter.ByteArrayHttpMsgConverter;
-import io.github.rmy20.tool.http.core.converter.FileHttpMsgConverter;
-import io.github.rmy20.tool.http.core.converter.HttpMsgConverter;
-import io.github.rmy20.tool.http.core.converter.JsonHttpMsgConverter;
-import io.github.rmy20.tool.http.core.converter.OutputStreamHttpMsgConverter;
-import io.github.rmy20.tool.http.core.converter.StringHttpMsgConverter;
-import io.github.rmy20.tool.http.core.converter.XmlHttpMsgConverter;
+import io.github.rmy20.tool.http.core.constant.HttpMethodEnum;
 import io.github.rmy20.tool.http.core.decorator.RfcUriBuilderDecorator;
 import io.github.rmy20.tool.http.core.exception.HttpException;
 import io.github.rmy20.tool.http.core.request.BaseRequest;
+import io.github.rmy20.tool.http.core.result.HttpByteArrayResultHandle;
+import io.github.rmy20.tool.http.core.result.HttpFileResultHandle;
+import io.github.rmy20.tool.http.core.result.HttpJsonResultHandle;
+import io.github.rmy20.tool.http.core.result.HttpOutputStreamResultHandle;
+import io.github.rmy20.tool.http.core.result.HttpResultHandle;
+import io.github.rmy20.tool.http.core.result.HttpStringResultHandle;
+import io.github.rmy20.tool.http.core.result.HttpXmlResultHandle;
 import io.github.rmy20.tool.http.core.uri.RfcUri;
-import io.github.rmy20.tool.httpclient5.constant.HttpRequestMethodEnum;
 import io.github.rmy20.tool.httpclient5.executor.HttpClient5ExecutorBuilder;
-import org.apache.hc.client5.http.async.HttpAsyncClient;
 import org.apache.hc.client5.http.classic.HttpClient;
 import org.apache.hc.client5.http.classic.methods.HttpUriRequestBase;
 import org.apache.hc.client5.http.config.RequestConfig;
@@ -24,11 +21,6 @@ import org.apache.hc.core5.concurrent.Cancellable;
 import org.apache.hc.core5.http.HttpEntity;
 import org.apache.hc.core5.http.ProtocolVersion;
 import org.apache.hc.core5.http.io.entity.NullEntity;
-import org.apache.hc.core5.http.message.BasicClassicHttpResponse;
-import org.apache.hc.core5.http.nio.AsyncPushConsumer;
-import org.apache.hc.core5.http.nio.AsyncRequestProducer;
-import org.apache.hc.core5.http.nio.AsyncResponseConsumer;
-import org.apache.hc.core5.http.nio.HandlerFactory;
 import org.apache.hc.core5.http.protocol.HttpContext;
 
 import java.io.File;
@@ -36,6 +28,7 @@ import java.io.OutputStream;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.Objects;
+import java.util.concurrent.ExecutorService;
 
 /**
  * httpclient5 请求基类
@@ -52,7 +45,7 @@ public abstract class HttpClient5BaseRequest<T extends HttpClient5BaseRequest<T>
     /**
      * 请求方法
      */
-    private final HttpRequestMethodEnum method;
+    private final HttpMethodEnum method;
 
     /**
      * 请求体
@@ -89,36 +82,41 @@ public abstract class HttpClient5BaseRequest<T extends HttpClient5BaseRequest<T>
      */
     private HttpClient httpClient;
 
-    /**
-     * 异步请求 #{@link HttpAsyncClient}
-     */
-    private HttpAsyncClient httpAsyncClient;
+    // /**
+    //  * 异步请求 #{@link HttpAsyncClient}
+    //  */
+    // private HttpAsyncClient httpAsyncClient;
 
     /**
      * 请求上下文
      */
     private HttpContext httpContext;
 
-    /**
-     * #{@link AsyncRequestProducer} 提供者
-     */
-    private ThrowingFunc<HttpUriRequestBase, AsyncRequestProducer, Throwable> asyncRequestProducerFunc;
+    // /**
+    //  * #{@link AsyncRequestProducer} 提供者
+    //  */
+    // private ThrowingFunc<HttpUriRequestBase, AsyncRequestProducer, Throwable> asyncRequestProducerFunc;
+    //
+    // /**
+    //  * #{@link AsyncResponseConsumer} 提供者
+    //  */
+    // private ThrowingSupplier<AsyncResponseConsumer<BasicClassicHttpResponse>, Throwable> asyncResponseConsumerSupplier;
+    //
+    // /**
+    //  * #{@link AsyncPushConsumer} 提供者
+    //  */
+    // private ThrowingSupplier<HandlerFactory<AsyncPushConsumer>, Throwable> pushHandlerFactorySupplier;
 
     /**
-     * #{@link AsyncResponseConsumer} 提供者
+     * 异步执行线程池
      */
-    private ThrowingSupplier<AsyncResponseConsumer<BasicClassicHttpResponse>, Throwable> asyncResponseConsumerSupplier;
+    protected ExecutorService executorService;
 
-    /**
-     * #{@link AsyncPushConsumer} 提供者
-     */
-    private ThrowingSupplier<HandlerFactory<AsyncPushConsumer>, Throwable> pushHandlerFactorySupplier;
-
-    public HttpClient5BaseRequest(String url, HttpRequestMethodEnum method) {
+    public HttpClient5BaseRequest(String url, HttpMethodEnum method) {
         this.method = Objects.requireNonNull(method, "Http method must not be null");
         RfcUri rfcUri = RfcUri.parse(url);
         if (Objects.isNull(rfcUri)) {
-            throw new HttpException(String.format("RfcUri解析url[%s]-[%s]失败", url, method.getMethod().getMethod()));
+            throw new HttpException(String.format("RfcUri解析url[%s]-[%s]失败", url, method.getMethod()));
         }
         this.uriBuilder = rfcUri.newBuilder();
         this.headers = HttpHeaders.create();
@@ -172,13 +170,13 @@ public abstract class HttpClient5BaseRequest<T extends HttpClient5BaseRequest<T>
         return self();
     }
 
-    /**
-     * 设置 HttpAsyncClient
-     */
-    public T httpAsyncClient(HttpAsyncClient httpAsyncClient) {
-        this.httpAsyncClient = httpAsyncClient;
-        return self();
-    }
+    // /**
+    //  * 设置 HttpAsyncClient
+    //  */
+    // public T httpAsyncClient(HttpAsyncClient httpAsyncClient) {
+    //     this.httpAsyncClient = httpAsyncClient;
+    //     return self();
+    // }
 
     /**
      * 请求上下文
@@ -188,27 +186,36 @@ public abstract class HttpClient5BaseRequest<T extends HttpClient5BaseRequest<T>
         return self();
     }
 
-    /**
-     * 设置 #{@link AsyncRequestProducer} 提供者
-     */
-    public T asyncRequestProducerFunc(ThrowingFunc<HttpUriRequestBase, AsyncRequestProducer, Throwable> asyncRequestProducerFunc) {
-        this.asyncRequestProducerFunc = asyncRequestProducerFunc;
-        return self();
-    }
+    // /**
+    //  * 设置 #{@link AsyncRequestProducer} 提供者
+    //  */
+    // public T asyncRequestProducerFunc(ThrowingFunc<HttpUriRequestBase, AsyncRequestProducer, Throwable> asyncRequestProducerFunc) {
+    //     this.asyncRequestProducerFunc = asyncRequestProducerFunc;
+    //     return self();
+    // }
+
+    // /**
+    //  * 设置 #{@link AsyncResponseConsumer} 提供者
+    //  */
+    // public T asyncResponseConsumerSupplier(ThrowingSupplier<AsyncResponseConsumer<BasicClassicHttpResponse>, Throwable>
+    // asyncResponseConsumerSupplier) {
+    //     this.asyncResponseConsumerSupplier = asyncResponseConsumerSupplier;
+    //     return self();
+    // }
+
+    // /**
+    //  * 设置 #{@link AsyncPushConsumer} 提供者
+    //  */
+    // public T pushHandlerFactorySupplier(ThrowingSupplier<HandlerFactory<AsyncPushConsumer>, Throwable> pushHandlerFactorySupplier) {
+    //     this.pushHandlerFactorySupplier = pushHandlerFactorySupplier;
+    //     return self();
+    // }
 
     /**
-     * 设置 #{@link AsyncResponseConsumer} 提供者
+     * 设置线程池
      */
-    public T asyncResponseConsumerSupplier(ThrowingSupplier<AsyncResponseConsumer<BasicClassicHttpResponse>, Throwable> asyncResponseConsumerSupplier) {
-        this.asyncResponseConsumerSupplier = asyncResponseConsumerSupplier;
-        return self();
-    }
-
-    /**
-     * 设置 #{@link AsyncPushConsumer} 提供者
-     */
-    public T pushHandlerFactorySupplier(ThrowingSupplier<HandlerFactory<AsyncPushConsumer>, Throwable> pushHandlerFactorySupplier) {
-        this.pushHandlerFactorySupplier = pushHandlerFactorySupplier;
+    public T executorService(ExecutorService executorService) {
+        this.executorService = executorService;
         return self();
     }
 
@@ -236,7 +243,7 @@ public abstract class HttpClient5BaseRequest<T extends HttpClient5BaseRequest<T>
      */
     @Override
     public HttpClient5ExecutorBuilder<String> stringExecutor() {
-        return executor(StringHttpMsgConverter.UTF_8_INSTANCE);
+        return executor(HttpStringResultHandle.UTF_8_INSTANCE);
     }
 
     /**
@@ -246,27 +253,27 @@ public abstract class HttpClient5BaseRequest<T extends HttpClient5BaseRequest<T>
      */
     @Override
     public HttpClient5ExecutorBuilder<String> stringExecutor(Charset charset) {
-        return executor(StringHttpMsgConverter.create(charset));
+        return executor(HttpStringResultHandle.create(charset));
     }
 
     /**
      * 获取处理 json 结果的请求执行器
      *
-     * @param msgConverter {@link JsonHttpMsgConverter}
+     * @param resultHandle {@link HttpJsonResultHandle}
      */
     @Override
-    public <R> HttpClient5ExecutorBuilder<R> jsonExecutor(JsonHttpMsgConverter<R> msgConverter) {
-        return executor(msgConverter);
+    public <R> HttpClient5ExecutorBuilder<R> jsonExecutor(HttpJsonResultHandle<R> resultHandle) {
+        return executor(resultHandle);
     }
 
     /**
      * 获取处理 xml 结果的请求执行器
      *
-     * @param msgConverter {@link XmlHttpMsgConverter}
+     * @param resultHandle {@link HttpXmlResultHandle}
      */
     @Override
-    public <R> HttpClient5ExecutorBuilder<R> xmlExecutor(XmlHttpMsgConverter<R> msgConverter) {
-        return executor(msgConverter);
+    public <R> HttpClient5ExecutorBuilder<R> xmlExecutor(HttpXmlResultHandle<R> resultHandle) {
+        return executor(resultHandle);
     }
 
     /**
@@ -274,62 +281,62 @@ public abstract class HttpClient5BaseRequest<T extends HttpClient5BaseRequest<T>
      */
     @Override
     public HttpClient5ExecutorBuilder<byte[]> bytesExecutor() {
-        return executor(ByteArrayHttpMsgConverter.INSTANCE);
+        return executor(HttpByteArrayResultHandle.INSTANCE);
     }
 
     /**
      * 获取下载文件的请求执行器
      *
      * @param targetFile 目标文件
-     * @return true 为成功
+     * @return 下载文件大小
      */
     @Override
-    public HttpClient5ExecutorBuilder<Boolean> downloadExecutor(File targetFile) {
-        return executor(FileHttpMsgConverter.create(targetFile));
+    public HttpClient5ExecutorBuilder<Long> downloadExecutor(File targetFile) {
+        return executor(HttpFileResultHandle.create(targetFile));
     }
 
     /**
      * 获取下载文件的请求执行器
      *
-     * @param msgConverter 结果处理器
-     * @return true 为成功
+     * @param resultHandle 结果处理器
+     * @return 下载文件大小
      */
     @Override
-    public HttpClient5ExecutorBuilder<Boolean> downloadExecutor(FileHttpMsgConverter msgConverter) {
-        return executor(msgConverter);
+    public HttpClient5ExecutorBuilder<Long> downloadExecutor(HttpFileResultHandle resultHandle) {
+        return executor(resultHandle);
     }
 
     /**
      * 获取下载文件的请求执行器
      *
      * @param outputStream 输出流
-     * @return true 为成功
+     * @return 下载文件大小
      */
     @Override
-    public HttpClient5ExecutorBuilder<Boolean> downloadExecutor(OutputStream outputStream) {
-        return executor(OutputStreamHttpMsgConverter.create(outputStream));
+    public HttpClient5ExecutorBuilder<Long> downloadExecutor(OutputStream outputStream) {
+        return executor(HttpOutputStreamResultHandle.create(outputStream));
     }
 
     /**
      * 获取下载文件的请求执行器
      *
-     * @param msgConverter 结果处理器
-     * @return true 为成功
+     * @param resultHandle 结果处理器
+     * @return 下载文件大小
      */
     @Override
-    public HttpClient5ExecutorBuilder<Boolean> downloadExecutor(OutputStreamHttpMsgConverter msgConverter) {
-        return executor(msgConverter);
+    public HttpClient5ExecutorBuilder<Long> downloadExecutor(HttpOutputStreamResultHandle resultHandle) {
+        return executor(resultHandle);
     }
 
     /**
      * 获取请求执行器
      *
-     * @param msgConverter 结果处理器
+     * @param resultHandle 结果处理器
      */
     @Override
-    public <R> HttpClient5ExecutorBuilder<R> executor(HttpMsgConverter<R> msgConverter) {
-        return HttpClient5ExecutorBuilder.create(createRequest(), msgConverter, httpClient, httpAsyncClient,
-                httpContext, asyncRequestProducerFunc, asyncResponseConsumerSupplier, pushHandlerFactorySupplier);
+    public <R> HttpClient5ExecutorBuilder<R> executor(HttpResultHandle<R> resultHandle) {
+        return HttpClient5ExecutorBuilder.create(createRequest(), resultHandle, httpClient, httpContext, executorService
+                /*, httpAsyncClient, asyncRequestProducerFunc, asyncResponseConsumerSupplier, pushHandlerFactorySupplier*/);
     }
 
     // endregion
@@ -342,7 +349,7 @@ public abstract class HttpClient5BaseRequest<T extends HttpClient5BaseRequest<T>
 
     protected HttpUriRequestBase createRequest() {
         executeBefore();
-        HttpUriRequestBase requestBase = method.create(uriBuilder.build().uri());
+        HttpUriRequestBase requestBase = new HttpUriRequestBase(method.getMethod(), uriBuilder.build().uri());
         if (Objects.nonNull(requestConfig)) {
             requestBase.setConfig(requestConfig);
         }
@@ -356,7 +363,7 @@ public abstract class HttpClient5BaseRequest<T extends HttpClient5BaseRequest<T>
         getHeaders().forEach((name, valueList) -> valueList.forEach(value -> requestBase.addHeader(name, value)));
         // 请求体
         HttpEntity requestBody = getRequestBody();
-        if (Objects.isNull(requestBody) && method.getMethod().isNeedBody()) {
+        if (Objects.isNull(requestBody) && method.isNeedBody()) {
             requestBody = NullEntity.INSTANCE;
         }
         requestBase.setEntity(requestBody);

@@ -1,4 +1,4 @@
-package io.github.rmy20.tool.http.core.converter;
+package io.github.rmy20.tool.http.core.result;
 
 import io.github.rmy20.tool.core.io.IOUtil;
 
@@ -12,11 +12,11 @@ import java.util.Objects;
  *
  * @author sheng
  */
-public class StringHttpMsgConverter implements HttpMsgConverter<String> {
+public class HttpStringResultHandle implements HttpResultHandle<String> {
     /**
      * UTF-8
      */
-    public static final StringHttpMsgConverter UTF_8_INSTANCE = create(StandardCharsets.UTF_8);
+    public static final HttpStringResultHandle UTF_8_INSTANCE = create(StandardCharsets.UTF_8);
 
     /**
      * 字符编码
@@ -24,15 +24,15 @@ public class StringHttpMsgConverter implements HttpMsgConverter<String> {
     private final Charset charset;
 
     /**
-     * 创建{@link StringHttpMsgConverter}
+     * 创建{@link HttpStringResultHandle}
      *
      * @param charset 字符编码
      */
-    public static StringHttpMsgConverter create(Charset charset) {
-        return new StringHttpMsgConverter(charset);
+    public static HttpStringResultHandle create(Charset charset) {
+        return new HttpStringResultHandle(charset);
     }
 
-    public StringHttpMsgConverter(Charset charset) {
+    public HttpStringResultHandle(Charset charset) {
         this.charset = Objects.requireNonNull(charset, "charset must not be null");
     }
 

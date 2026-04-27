@@ -1,8 +1,8 @@
 package io.github.rmy20.tool.httpclient5.request;
 
 import io.github.rmy20.tool.http.core.MediaType;
+import io.github.rmy20.tool.http.core.constant.HttpMethodEnum;
 import io.github.rmy20.tool.http.core.request.BaseHttpRequest;
-import io.github.rmy20.tool.httpclient5.constant.HttpRequestMethodEnum;
 import org.apache.hc.core5.http.ContentType;
 import org.apache.hc.core5.http.HttpEntity;
 import org.apache.hc.core5.http.io.entity.ByteArrayEntity;
@@ -19,7 +19,7 @@ import java.util.Objects;
  * @author sheng
  */
 public class HttpClient5Request extends HttpClient5BaseRequest<HttpClient5Request> implements BaseHttpRequest<HttpClient5Request> {
-    public HttpClient5Request(String url, HttpRequestMethodEnum method) {
+    public HttpClient5Request(String url, HttpMethodEnum method) {
         super(url, method);
     }
 
@@ -29,7 +29,7 @@ public class HttpClient5Request extends HttpClient5BaseRequest<HttpClient5Reques
      * @param url    url
      * @param method 方法
      */
-    public static HttpClient5Request create(String url, HttpRequestMethodEnum method) {
+    public static HttpClient5Request create(String url, HttpMethodEnum method) {
         return new HttpClient5Request(url, method);
     }
 

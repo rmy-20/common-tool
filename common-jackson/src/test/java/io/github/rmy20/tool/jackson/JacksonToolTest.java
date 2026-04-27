@@ -36,28 +36,28 @@ class JacksonToolTest {
 
     @Test
     void readValue() {
-        Map<String, Object> jsonToMap = JsonTool.JSON_TOOL.readValue(json, new TypeReference<Map<String, Object>>() {
+        Map<String, Object> jsonToMap = JsonUtil.readValue(json, new TypeReference<Map<String, Object>>() {
         });
         Assertions.assertNotNull(jsonToMap, "read json error");
-        String xml = XmlTool.XML_TOOL.toXml(jsonToMap);
+        String xml = XmlUtil.toXml(jsonToMap);
         Assertions.assertNotNull(xml, "to xml error");
         byte[] bytes = xml.getBytes(StandardCharsets.UTF_8);
         ByteArrayInputStream bai = new ByteArrayInputStream(bytes);
-        Map<String, Object> xmlToMap = XmlTool.XML_TOOL.readValue(bai, new TypeReference<Map<String, Object>>() {
+        Map<String, Object> xmlToMap = XmlUtil.readValue(bai, new TypeReference<Map<String, Object>>() {
         });
-        Assertions.assertEquals(xmlToMap, XmlTool.XML_TOOL.readValue(bytes, new TypeReference<Map<String, Object>>() {
+        Assertions.assertEquals(xmlToMap, XmlUtil.readValue(bytes, new TypeReference<Map<String, Object>>() {
         }), "read byte error");
         Assertions.assertEquals(jsonToMap.size(), xmlToMap.size(), "read xml error");
-        JsonNode jsonNode = JsonTool.JSON_TOOL.readTree(json);
-        JsonNode xmlNode = XmlTool.XML_TOOL.toJsonNode(xmlToMap);
+        JsonNode jsonNode = JsonUtil.readTree(json);
+        JsonNode xmlNode = XmlUtil.toJsonNode(xmlToMap);
         Assertions.assertEquals(jsonNode, xmlNode, "readTree error");
-        Map<String, Object> jsonNodeToMap = XmlTool.XML_TOOL.readValue(xmlNode, new TypeReference<Map<String, Object>>() {
+        Map<String, Object> jsonNodeToMap = XmlUtil.readValue(xmlNode, new TypeReference<Map<String, Object>>() {
         });
         System.out.println(jsonNode);
         Assertions.assertEquals(jsonToMap, jsonNodeToMap, "readValue error");
-        Map<String, Object> convertValue = JsonTool.JSON_TOOL.convertValue(jsonNode, new TypeReference<Map<String, Object>>() {
+        Map<String, Object> convertValue = JsonUtil.convertValue(jsonNode, new TypeReference<Map<String, Object>>() {
         });
         Assertions.assertNotNull(convertValue, "convertValue error");
-        System.out.println(JsonTool.JSON_TOOL.toJson(convertValue));
+        System.out.println(JsonUtil.toJson(convertValue));
     }
 }

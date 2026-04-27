@@ -3,8 +3,8 @@ package io.github.rmy20.tool.okhttp.executor;
 import io.github.rmy20.tool.core.function.throwing.ThrowingConsumer;
 import io.github.rmy20.tool.core.text.StringUtil;
 import io.github.rmy20.tool.http.core.HttpHeaders;
-import io.github.rmy20.tool.http.core.converter.HttpMsgConverter;
 import io.github.rmy20.tool.http.core.execute.BaseExecutor;
+import io.github.rmy20.tool.http.core.result.HttpResultHandle;
 import io.github.rmy20.tool.okhttp.response.OkHttpResponse;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.Call;
@@ -33,19 +33,19 @@ public class OkHttpExecutor<R> extends BaseExecutor<R> {
      * 创建okhttp交换机
      *
      * @param call             okhttp调用
-     * @param msgConverter     结果处理器
+     * @param resultHandle     结果处理器
      * @param errHandler       异常处理器
      * @param okPredicate      ok响应码判断
      * @param mustHandleResult 是否强制处理结果
      */
-    public static <R> OkHttpExecutor<R> create(Call call, HttpMsgConverter<R> msgConverter, ThrowingConsumer<Throwable, Throwable> errHandler,
+    public static <R> OkHttpExecutor<R> create(Call call, HttpResultHandle<R> resultHandle, ThrowingConsumer<Throwable, Throwable> errHandler,
                                                Predicate<Integer> okPredicate, boolean mustHandleResult) {
-        return new OkHttpExecutor<>(call, msgConverter, errHandler, okPredicate, mustHandleResult);
+        return new OkHttpExecutor<>(call, resultHandle, errHandler, okPredicate, mustHandleResult);
     }
 
-    public OkHttpExecutor(Call call, HttpMsgConverter<R> msgConverter, ThrowingConsumer<Throwable, Throwable> errHandler,
+    public OkHttpExecutor(Call call, HttpResultHandle<R> resultHandle, ThrowingConsumer<Throwable, Throwable> errHandler,
                           Predicate<Integer> okPredicate, boolean mustHandleResult) {
-        super(msgConverter, okPredicate, errHandler, mustHandleResult);
+        super(resultHandle, okPredicate, errHandler, mustHandleResult);
         this.call = Objects.requireNonNull(call, "okhttp call must not be null");
         execute();
     }
@@ -55,7 +55,7 @@ public class OkHttpExecutor<R> extends BaseExecutor<R> {
             try (OkHttpResponse clientResponse = OkHttpResponse.create(call.execute())) {
                 this.okHttpResponse = clientResponse;
                 if (isOk() || (mustHandleResult && Objects.nonNull(clientResponse.getBody()))) {
-                    result = msgConverter.apply(clientResponse.getBody());
+                    result = resultHandle.apply(clientResponse.getBody());
                 }
             } catch (Throwable e) {
                 setStatusMsg(e.getMessage(), "okhttp execute error");

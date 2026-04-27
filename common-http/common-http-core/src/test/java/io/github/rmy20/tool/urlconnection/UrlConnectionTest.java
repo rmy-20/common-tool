@@ -5,9 +5,9 @@ import io.github.rmy20.tool.core.date.DateTool;
 import io.github.rmy20.tool.core.lang.Assert;
 import io.github.rmy20.tool.core.util.RandomUtil;
 import io.github.rmy20.tool.http.core.MediaType;
-import io.github.rmy20.tool.http.core.converter.JsonHttpMsgConverter;
+import io.github.rmy20.tool.http.core.result.HttpJsonResultHandle;
 import io.github.rmy20.tool.http.core.execute.BaseExecutor;
-import io.github.rmy20.tool.jackson.JsonTool;
+import io.github.rmy20.tool.jackson.JsonUtil;
 import io.github.rmy20.tool.urlconnection.executor.UrlConnectionExecutor;
 import io.github.rmy20.tool.urlconnection.request.UrlConnectionMultipartRequest;
 import org.junit.jupiter.api.Test;
@@ -85,11 +85,11 @@ public class UrlConnectionTest {
         map.put("version", "1.0");
         UrlConnectionExecutor<Map<String, Object>> executor = UrlConnectionTool.post(uri).pathsEncoded("/test/post")
                 .setContentType(MediaType.APPLICATION_JSON_UTF8)
-                .body(JsonTool.JSON_TOOL.toJson(map))
-                .executor(JsonHttpMsgConverter.create(JsonTool.JSON_TOOL, new TypeReference<Map<String, Object>>() {
-                })).mustHandleResult(true).execute();
+                .body(JsonUtil.toJson(map))
+                .executor(HttpJsonResultHandle.create(JsonUtil.JSON_TOOL, new TypeReference<Map<String, Object>>() {
+                })).mustHandleResult().execute();
         Assert.isTrue(executor.isOk(), "UrlConnection post请求失败");
-        System.out.println("UrlConnection post结果：" + JsonTool.JSON_TOOL.toJson(executor.get()));
+        System.out.println("UrlConnection post结果：" + JsonUtil.toJson(executor.get()));
         executor.getHeaders().forEach((name, value) -> System.out.println("header --> " + name + "：" + value));
     }
 
@@ -107,8 +107,8 @@ public class UrlConnectionTest {
         map.put("version", "1.0");
         CompletableFuture<UrlConnectionExecutor<Map<String, Object>>> future = UrlConnectionTool.post(uri).pathsEncoded("/test/post")
                 .setContentType(MediaType.APPLICATION_JSON_UTF8)
-                .body(JsonTool.JSON_TOOL.toJson(map))
-                .jsonExecutor(JsonHttpMsgConverter.create(JsonTool.JSON_TOOL, new TypeReference<Map<String, Object>>() {
+                .body(JsonUtil.toJson(map))
+                .jsonExecutor(HttpJsonResultHandle.create(JsonUtil.JSON_TOOL, new TypeReference<Map<String, Object>>() {
                 })).executeAsync();
         for (int i = 0; i < 20; i++) {
             System.out.println(i);
@@ -125,10 +125,10 @@ public class UrlConnectionTest {
         if (skip) {
             return;
         }
-        UrlConnectionExecutor<Boolean> executor = UrlConnectionTool.get(uri).paths("download")
+        UrlConnectionExecutor<Long> executor = UrlConnectionTool.get(uri).paths("download")
                 .setContentType(MediaType.APPLICATION_OCTET_STREAM)
                 .downloadExecutor(new File("/opt/urlconnection/" + "SM2公私钥对.txt")).execute();
-        Assert.isTrue(executor.isOk() && executor.get(), "UrlConnection 下载文件失败");
+        Assert.isTrue(executor.isOk() && executor.get() >= 0, "UrlConnection 下载文件失败");
         executor.getHeaders().forEach((name, value) -> System.out.println("header --> " + name + "：" + value));
     }
 
@@ -137,15 +137,15 @@ public class UrlConnectionTest {
         if (skip) {
             return;
         }
-        CompletableFuture<UrlConnectionExecutor<Boolean>> future = UrlConnectionTool.get(uri).paths("download")
+        CompletableFuture<UrlConnectionExecutor<Long>> future = UrlConnectionTool.get(uri).paths("download")
                 .setContentType(MediaType.APPLICATION_OCTET_STREAM)
                 .downloadExecutor(new File("/opt/urlconnection/async/" + "SM2公私钥对.txt")).executeAsync();
         for (int i = 0; i < 20; i++) {
             System.out.println(i);
             TimeUnit.MILLISECONDS.sleep(200L);
         }
-        UrlConnectionExecutor<Boolean> executor = future.join();
-        Assert.isTrue(executor.isOk() && executor.get(), "UrlConnection 异步下载文件失败");
+        UrlConnectionExecutor<Long> executor = future.join();
+        Assert.isTrue(executor.isOk() && executor.get() >= 0, "UrlConnection 异步下载文件失败");
         executor.getHeaders().forEach((name, value) -> System.out.println("header --> " + name + "：" + value));
     }
 

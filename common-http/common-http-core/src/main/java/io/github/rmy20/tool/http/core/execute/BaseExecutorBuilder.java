@@ -2,7 +2,7 @@ package io.github.rmy20.tool.http.core.execute;
 
 import io.github.rmy20.tool.core.function.throwing.ThrowingConsumer;
 import io.github.rmy20.tool.http.core.constant.HttpConstant;
-import io.github.rmy20.tool.http.core.converter.HttpMsgConverter;
+import io.github.rmy20.tool.http.core.result.HttpResultHandle;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
@@ -27,7 +27,7 @@ public abstract class BaseExecutorBuilder<R, SyncExecutor extends BaseExecutor<R
      * 响应结果处理器
      */
     @Getter
-    protected final HttpMsgConverter<R> msgConverter;
+    protected final HttpResultHandle<R> resultHandle;
 
     /**
      * 成功判断
@@ -45,8 +45,8 @@ public abstract class BaseExecutorBuilder<R, SyncExecutor extends BaseExecutor<R
     @Getter
     protected boolean mustHandleResult = false;
 
-    public BaseExecutorBuilder(HttpMsgConverter<R> msgConverter) {
-        this.msgConverter = Objects.requireNonNull(msgConverter, "msgConverter must not be null");
+    public BaseExecutorBuilder(HttpResultHandle<R> resultHandle) {
+        this.resultHandle = Objects.requireNonNull(resultHandle, "resultHandle must not be null");
     }
 
     /**
@@ -85,10 +85,10 @@ public abstract class BaseExecutorBuilder<R, SyncExecutor extends BaseExecutor<R
     }
 
     /**
-     * 是否必须处理结果
+     * 必须处理结果
      */
-    public T mustHandleResult(boolean mustHandleResult) {
-        this.mustHandleResult = mustHandleResult;
+    public T mustHandleResult() {
+        this.mustHandleResult = true;
         return self();
     }
 

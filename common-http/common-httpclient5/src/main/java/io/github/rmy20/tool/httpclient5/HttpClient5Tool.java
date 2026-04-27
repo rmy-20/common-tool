@@ -1,6 +1,6 @@
 package io.github.rmy20.tool.httpclient5;
 
-import io.github.rmy20.tool.httpclient5.constant.HttpRequestMethodEnum;
+import io.github.rmy20.tool.http.core.constant.HttpMethodEnum;
 import io.github.rmy20.tool.httpclient5.request.HttpClient5FormRequest;
 import io.github.rmy20.tool.httpclient5.request.HttpClient5MultipartRequest;
 import io.github.rmy20.tool.httpclient5.request.HttpClient5Request;
@@ -20,7 +20,7 @@ public class HttpClient5Tool {
      * @param url 请求地址
      */
     public static HttpClient5Request get(String url) {
-        return HttpClient5Request.create(url, HttpRequestMethodEnum.GET);
+        return HttpClient5Request.create(url, HttpMethodEnum.GET);
     }
 
     /**
@@ -38,7 +38,7 @@ public class HttpClient5Tool {
      * @param url 请求地址
      */
     public static HttpClient5Request post(String url) {
-        return HttpClient5Request.create(url, HttpRequestMethodEnum.POST);
+        return HttpClient5Request.create(url, HttpMethodEnum.POST);
     }
 
     /**
@@ -56,7 +56,7 @@ public class HttpClient5Tool {
      * @param url 请求地址
      */
     public static HttpClient5Request put(String url) {
-        return HttpClient5Request.create(url, HttpRequestMethodEnum.PUT);
+        return HttpClient5Request.create(url, HttpMethodEnum.PUT);
     }
 
     /**
@@ -74,7 +74,7 @@ public class HttpClient5Tool {
      * @param url 请求地址
      */
     public static HttpClient5Request delete(String url) {
-        return HttpClient5Request.create(url, HttpRequestMethodEnum.DELETE);
+        return HttpClient5Request.create(url, HttpMethodEnum.DELETE);
     }
 
     /**
@@ -92,7 +92,7 @@ public class HttpClient5Tool {
      * @param url    请求地址
      * @param method 请求方法
      */
-    public static HttpClient5Request request(String url, HttpRequestMethodEnum method) {
+    public static HttpClient5Request request(String url, HttpMethodEnum method) {
         return HttpClient5Request.create(url, method);
     }
 
@@ -102,7 +102,7 @@ public class HttpClient5Tool {
      * @param url    请求地址
      * @param method 请求方法
      */
-    public static HttpClient5Request request(URI url, HttpRequestMethodEnum method) {
+    public static HttpClient5Request request(URI url, HttpMethodEnum method) {
         return request(url.toString(), method);
     }
 
@@ -112,7 +112,7 @@ public class HttpClient5Tool {
      * @param url 请求地址
      */
     public static HttpClient5FormRequest form(String url) {
-        return HttpClient5FormRequest.create(url, HttpRequestMethodEnum.POST);
+        return HttpClient5FormRequest.create(url, HttpMethodEnum.POST);
     }
 
     /**
@@ -120,7 +120,7 @@ public class HttpClient5Tool {
      *
      * @param url 请求地址
      */
-    public static HttpClient5FormRequest form(String url, HttpRequestMethodEnum method) {
+    public static HttpClient5FormRequest form(String url, HttpMethodEnum method) {
         return HttpClient5FormRequest.create(url, method);
     }
 
@@ -130,7 +130,7 @@ public class HttpClient5Tool {
      * @param url 请求地址
      */
     public static HttpClient5MultipartRequest multipart(String url) {
-        return HttpClient5MultipartRequest.create(url, HttpRequestMethodEnum.POST);
+        return HttpClient5MultipartRequest.create(url, HttpMethodEnum.POST);
     }
 
     /**
@@ -138,7 +138,7 @@ public class HttpClient5Tool {
      *
      * @param url 请求地址
      */
-    public static HttpClient5MultipartRequest multipart(String url, HttpRequestMethodEnum method) {
+    public static HttpClient5MultipartRequest multipart(String url, HttpMethodEnum method) {
         return HttpClient5MultipartRequest.create(url, method);
     }
 }

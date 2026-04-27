@@ -2,8 +2,8 @@ package io.github.rmy20.tool.urlconnection.executor;
 
 import io.github.rmy20.tool.core.constant.CommonConstant;
 import io.github.rmy20.tool.http.core.body.Body;
-import io.github.rmy20.tool.http.core.converter.HttpMsgConverter;
 import io.github.rmy20.tool.http.core.execute.BaseExecutorBuilder;
+import io.github.rmy20.tool.http.core.result.HttpResultHandle;
 
 import java.net.HttpURLConnection;
 import java.util.Objects;
@@ -35,17 +35,17 @@ public class UrlConnectionExecutorBuilder<R>
     /**
      * 创建URLConnection执行器构建器
      *
-     * @param msgConverter 消息转换器
+     * @param resultHandle 结果处理器
      * @param connection   #{@link HttpURLConnection}
      */
-    public static <R> UrlConnectionExecutorBuilder<R> create(HttpMsgConverter<R> msgConverter, HttpURLConnection connection,
+    public static <R> UrlConnectionExecutorBuilder<R> create(HttpResultHandle<R> resultHandle, HttpURLConnection connection,
                                                              Body body, ExecutorService executorService) {
-        return new UrlConnectionExecutorBuilder<>(msgConverter, connection, body, executorService);
+        return new UrlConnectionExecutorBuilder<>(resultHandle, connection, body, executorService);
     }
 
-    public UrlConnectionExecutorBuilder(HttpMsgConverter<R> msgConverter, HttpURLConnection connection,
+    public UrlConnectionExecutorBuilder(HttpResultHandle<R> resultHandle, HttpURLConnection connection,
                                         Body body, ExecutorService executorService) {
-        super(msgConverter);
+        super(resultHandle);
         this.connection = Objects.requireNonNull(connection, "connection must not be null");
         this.body = body;
         this.executorService = executorService;
@@ -65,7 +65,7 @@ public class UrlConnectionExecutorBuilder<R>
 
     @Override
     public UrlConnectionExecutor<R> execute() {
-        return UrlConnectionExecutor.create(getMsgConverter(), getOkPredicate(), getErrHandler(), isMustHandleResult(), connection, body);
+        return UrlConnectionExecutor.create(getResultHandle(), getOkPredicate(), getErrHandler(), isMustHandleResult(), connection, body);
     }
 
     @Override

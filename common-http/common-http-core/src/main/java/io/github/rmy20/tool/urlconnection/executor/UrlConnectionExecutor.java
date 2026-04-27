@@ -4,8 +4,8 @@ import io.github.rmy20.tool.core.function.throwing.ThrowingConsumer;
 import io.github.rmy20.tool.core.text.StringUtil;
 import io.github.rmy20.tool.http.core.HttpHeaders;
 import io.github.rmy20.tool.http.core.body.Body;
-import io.github.rmy20.tool.http.core.converter.HttpMsgConverter;
 import io.github.rmy20.tool.http.core.execute.BaseExecutor;
+import io.github.rmy20.tool.http.core.result.HttpResultHandle;
 import io.github.rmy20.tool.urlconnection.response.UrlConnectionResponse;
 
 import java.io.OutputStream;
@@ -43,23 +43,23 @@ public class UrlConnectionExecutor<R> extends BaseExecutor<R> {
     /**
      * 创建#{@link UrlConnectionExecutor}
      *
-     * @param msgConverter     消息转换器
+     * @param resultHandle     结果处理器
      * @param okPredicate      响应码判断
      * @param errHandler       错误处理
      * @param mustHandleResult 是否处理结果
      * @param connection       #{@link HttpURLConnection}
      * @param body             请求体
      */
-    public static <R> UrlConnectionExecutor<R> create(HttpMsgConverter<R> msgConverter, Predicate<Integer> okPredicate,
+    public static <R> UrlConnectionExecutor<R> create(HttpResultHandle<R> resultHandle, Predicate<Integer> okPredicate,
                                                       ThrowingConsumer<Throwable, Throwable> errHandler, boolean mustHandleResult,
                                                       HttpURLConnection connection, Body body) {
-        return new UrlConnectionExecutor<>(msgConverter, okPredicate, errHandler, mustHandleResult, connection, body);
+        return new UrlConnectionExecutor<>(resultHandle, okPredicate, errHandler, mustHandleResult, connection, body);
     }
 
-    public UrlConnectionExecutor(HttpMsgConverter<R> msgConverter, Predicate<Integer> okPredicate,
+    public UrlConnectionExecutor(HttpResultHandle<R> resultHandle, Predicate<Integer> okPredicate,
                                  ThrowingConsumer<Throwable, Throwable> errHandler, boolean mustHandleResult,
                                  HttpURLConnection connection, Body body) {
-        super(msgConverter, okPredicate, errHandler, mustHandleResult);
+        super(resultHandle, okPredicate, errHandler, mustHandleResult);
         this.connection = Objects.requireNonNull(connection, "connection must not be null");
         this.body = body;
         execute();
@@ -79,7 +79,7 @@ public class UrlConnectionExecutor<R> extends BaseExecutor<R> {
                 try (UrlConnectionResponse urlConnectionResponse = UrlConnectionResponse.create(connection);) {
                     this.urlConnectionResponse = urlConnectionResponse;
                     if (isOk() || (mustHandleResult && Objects.nonNull(urlConnectionResponse.getBody()))) {
-                        result = msgConverter.apply(urlConnectionResponse.getBody());
+                        result = resultHandle.apply(urlConnectionResponse.getBody());
                     }
                 }
             } catch (Throwable e) {

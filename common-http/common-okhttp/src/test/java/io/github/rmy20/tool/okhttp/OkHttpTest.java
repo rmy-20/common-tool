@@ -5,8 +5,8 @@ import io.github.rmy20.tool.core.date.DateTool;
 import io.github.rmy20.tool.core.lang.Assert;
 import io.github.rmy20.tool.core.util.RandomUtil;
 import io.github.rmy20.tool.http.core.MediaType;
-import io.github.rmy20.tool.http.core.converter.JsonHttpMsgConverter;
-import io.github.rmy20.tool.jackson.JsonTool;
+import io.github.rmy20.tool.http.core.result.HttpJsonResultHandle;
+import io.github.rmy20.tool.jackson.JsonUtil;
 import io.github.rmy20.tool.okhttp.executor.OkHttpAsyncExecutor;
 import io.github.rmy20.tool.okhttp.executor.OkHttpExecutor;
 import io.github.rmy20.tool.okhttp.request.OkHttpMultipartRequest;
@@ -64,9 +64,9 @@ class OkHttpTest {
         map.put("version", "1.0");
         OkHttpExecutor<Map<String, Object>> executor = OkHttpTool.post(uri).pathsEncoded("/test/post")
                 .setContentType(MediaType.APPLICATION_JSON_UTF8)
-                .body(JsonTool.JSON_TOOL.toJson(map))
-                .executor(JsonHttpMsgConverter.create(JsonTool.JSON_TOOL, new TypeReference<Map<String, Object>>() {
-                })).mustHandleResult(true).execute();
+                .body(JsonUtil.toJson(map))
+                .executor(HttpJsonResultHandle.create(JsonUtil.JSON_TOOL, new TypeReference<Map<String, Object>>() {
+                })).mustHandleResult().execute();
         Assert.isTrue(executor.isOk(), "okhttp post请求失败");
         System.out.println("okhttp post结果：" + executor.get());
         executor.getHeaders().forEach((name, value) -> System.out.println("header --> " + name + "：" + value));
@@ -86,8 +86,8 @@ class OkHttpTest {
         map.put("version", "1.0");
         CompletableFuture<OkHttpAsyncExecutor<Map<String, Object>>> future = OkHttpTool.post(uri).pathsEncoded("/test/post")
                 .setContentType(MediaType.APPLICATION_JSON_UTF8)
-                .body(JsonTool.JSON_TOOL.toJson(map))
-                .jsonExecutor(JsonHttpMsgConverter.create(JsonTool.JSON_TOOL, new TypeReference<Map<String, Object>>() {
+                .body(JsonUtil.toJson(map))
+                .jsonExecutor(HttpJsonResultHandle.create(JsonUtil.JSON_TOOL, new TypeReference<Map<String, Object>>() {
                 })).executeAsync();
         for (int i = 0; i < 20; i++) {
             log.info("{}", i);
@@ -104,11 +104,11 @@ class OkHttpTest {
         if (skip) {
             return;
         }
-        OkHttpExecutor<Boolean> executor = OkHttpTool.get(uri).paths("download")
+        OkHttpExecutor<Long> executor = OkHttpTool.get(uri).paths("download")
                 .setContentType(MediaType.APPLICATION_OCTET_STREAM)
                 .downloadExecutor(new File("/opt/okhttp/" + "SM2公私钥对.txt"))
                 .execute();
-        Assert.isTrue(executor.isOk() && executor.get(), "okhttp 下载文件失败");
+        Assert.isTrue(executor.isOk() && executor.get() >= 0, "okhttp 下载文件失败");
         executor.getHeaders().forEach((name, value) -> System.out.println("header --> " + name + "：" + value));
     }
 

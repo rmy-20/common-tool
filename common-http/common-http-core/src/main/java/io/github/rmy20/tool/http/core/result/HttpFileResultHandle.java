@@ -1,4 +1,4 @@
-package io.github.rmy20.tool.http.core.converter;
+package io.github.rmy20.tool.http.core.result;
 
 import io.github.rmy20.tool.core.function.throwing.ThrowingConsumer;
 import io.github.rmy20.tool.core.io.IOUtil;
@@ -12,7 +12,7 @@ import java.util.Objects;
  *
  * @author sheng
  */
-public class FileHttpMsgConverter implements HttpMsgConverter<Boolean> {
+public class HttpFileResultHandle implements HttpResultHandle<Long> {
     /**
      * 目标文件
      */
@@ -33,8 +33,8 @@ public class FileHttpMsgConverter implements HttpMsgConverter<Boolean> {
      *
      * @param targetFile 目标文件
      */
-    public static FileHttpMsgConverter create(File targetFile) {
-        return new FileHttpMsgConverter(targetFile);
+    public static HttpFileResultHandle create(File targetFile) {
+        return new HttpFileResultHandle(targetFile);
     }
 
     /**
@@ -44,15 +44,15 @@ public class FileHttpMsgConverter implements HttpMsgConverter<Boolean> {
      * @param buffer     缓冲区
      * @param errHandler 错误处理
      */
-    public static FileHttpMsgConverter create(File targetFile, byte[] buffer, ThrowingConsumer<Throwable, Throwable> errHandler) {
-        return new FileHttpMsgConverter(targetFile, buffer, errHandler);
+    public static HttpFileResultHandle create(File targetFile, byte[] buffer, ThrowingConsumer<Throwable, Throwable> errHandler) {
+        return new HttpFileResultHandle(targetFile, buffer, errHandler);
     }
 
-    public FileHttpMsgConverter(File targetFile) {
+    public HttpFileResultHandle(File targetFile) {
         this(targetFile, null, null);
     }
 
-    public FileHttpMsgConverter(File targetFile, byte[] buffer, ThrowingConsumer<Throwable, Throwable> errHandler) {
+    public HttpFileResultHandle(File targetFile, byte[] buffer, ThrowingConsumer<Throwable, Throwable> errHandler) {
         this.targetFile = Objects.requireNonNull(targetFile, "targetFile must not be null");
         this.buffer = Objects.nonNull(buffer) ? buffer : new byte[2048];
         this.errHandler = Objects.nonNull(errHandler) ? errHandler : ex -> {
@@ -61,7 +61,7 @@ public class FileHttpMsgConverter implements HttpMsgConverter<Boolean> {
     }
 
     @Override
-    public Boolean apply(InputStream inputStream) throws Throwable {
-        return IOUtil.copy(inputStream, targetFile, buffer, errHandler) >= 0;
+    public Long apply(InputStream inputStream) throws Throwable {
+        return IOUtil.copy(inputStream, targetFile, buffer, errHandler);
     }
 }

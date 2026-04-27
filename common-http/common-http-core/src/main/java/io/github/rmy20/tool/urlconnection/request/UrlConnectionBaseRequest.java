@@ -4,16 +4,16 @@ import io.github.rmy20.tool.core.text.StringUtil;
 import io.github.rmy20.tool.http.core.HttpHeaders;
 import io.github.rmy20.tool.http.core.body.Body;
 import io.github.rmy20.tool.http.core.constant.HttpMethodEnum;
-import io.github.rmy20.tool.http.core.converter.ByteArrayHttpMsgConverter;
-import io.github.rmy20.tool.http.core.converter.FileHttpMsgConverter;
-import io.github.rmy20.tool.http.core.converter.HttpMsgConverter;
-import io.github.rmy20.tool.http.core.converter.JsonHttpMsgConverter;
-import io.github.rmy20.tool.http.core.converter.OutputStreamHttpMsgConverter;
-import io.github.rmy20.tool.http.core.converter.StringHttpMsgConverter;
-import io.github.rmy20.tool.http.core.converter.XmlHttpMsgConverter;
+import io.github.rmy20.tool.http.core.result.HttpByteArrayResultHandle;
+import io.github.rmy20.tool.http.core.result.HttpFileResultHandle;
+import io.github.rmy20.tool.http.core.result.HttpJsonResultHandle;
+import io.github.rmy20.tool.http.core.result.HttpOutputStreamResultHandle;
+import io.github.rmy20.tool.http.core.result.HttpResultHandle;
+import io.github.rmy20.tool.http.core.result.HttpStringResultHandle;
 import io.github.rmy20.tool.http.core.decorator.RfcUriBuilderDecorator;
 import io.github.rmy20.tool.http.core.exception.HttpException;
 import io.github.rmy20.tool.http.core.request.BaseRequest;
+import io.github.rmy20.tool.http.core.result.HttpXmlResultHandle;
 import io.github.rmy20.tool.http.core.uri.RfcUri;
 import io.github.rmy20.tool.urlconnection.executor.UrlConnectionExecutorBuilder;
 
@@ -52,7 +52,7 @@ public abstract class UrlConnectionBaseRequest<T extends UrlConnectionBaseReques
     /**
      * 请求头
      */
-    private final HttpHeaders headers;
+    protected final HttpHeaders headers;
 
     /**
      * 代理
@@ -174,7 +174,7 @@ public abstract class UrlConnectionBaseRequest<T extends UrlConnectionBaseReques
      */
     @Override
     public UrlConnectionExecutorBuilder<String> stringExecutor() {
-        return executor(StringHttpMsgConverter.UTF_8_INSTANCE);
+        return executor(HttpStringResultHandle.UTF_8_INSTANCE);
     }
 
     /**
@@ -184,27 +184,27 @@ public abstract class UrlConnectionBaseRequest<T extends UrlConnectionBaseReques
      */
     @Override
     public UrlConnectionExecutorBuilder<String> stringExecutor(Charset charset) {
-        return executor(StringHttpMsgConverter.create(charset));
+        return executor(HttpStringResultHandle.create(charset));
     }
 
     /**
      * 获取处理 json 结果的请求执行器
      *
-     * @param msgConverter {@link JsonHttpMsgConverter}
+     * @param resultHandle {@link HttpJsonResultHandle}
      */
     @Override
-    public <R> UrlConnectionExecutorBuilder<R> jsonExecutor(JsonHttpMsgConverter<R> msgConverter) {
-        return executor(msgConverter);
+    public <R> UrlConnectionExecutorBuilder<R> jsonExecutor(HttpJsonResultHandle<R> resultHandle) {
+        return executor(resultHandle);
     }
 
     /**
      * 获取处理 xml 结果的请求执行器
      *
-     * @param msgConverter {@link XmlHttpMsgConverter}
+     * @param resultHandle {@link HttpXmlResultHandle}
      */
     @Override
-    public <R> UrlConnectionExecutorBuilder<R> xmlExecutor(XmlHttpMsgConverter<R> msgConverter) {
-        return executor(msgConverter);
+    public <R> UrlConnectionExecutorBuilder<R> xmlExecutor(HttpXmlResultHandle<R> resultHandle) {
+        return executor(resultHandle);
     }
 
     /**
@@ -212,56 +212,56 @@ public abstract class UrlConnectionBaseRequest<T extends UrlConnectionBaseReques
      */
     @Override
     public UrlConnectionExecutorBuilder<byte[]> bytesExecutor() {
-        return executor(ByteArrayHttpMsgConverter.INSTANCE);
+        return executor(HttpByteArrayResultHandle.INSTANCE);
     }
 
     /**
      * 获取下载文件的请求执行器
      *
      * @param targetFile 目标文件
-     * @return true 为成功
+     * @return 下载文件大小
      */
     @Override
-    public UrlConnectionExecutorBuilder<Boolean> downloadExecutor(File targetFile) {
-        return executor(FileHttpMsgConverter.create(targetFile));
+    public UrlConnectionExecutorBuilder<Long> downloadExecutor(File targetFile) {
+        return executor(HttpFileResultHandle.create(targetFile));
     }
 
     /**
      * 获取下载文件的请求执行器
      *
-     * @param msgConverter 结果处理器
-     * @return true 为成功
+     * @param resultHandle 结果处理器
+     * @return 下载文件大小
      */
     @Override
-    public UrlConnectionExecutorBuilder<Boolean> downloadExecutor(FileHttpMsgConverter msgConverter) {
-        return executor(msgConverter);
+    public UrlConnectionExecutorBuilder<Long> downloadExecutor(HttpFileResultHandle resultHandle) {
+        return executor(resultHandle);
     }
 
     /**
      * 获取下载文件的请求执行器
      *
      * @param outputStream 输出流
-     * @return true 为成功
+     * @return 下载文件大小
      */
     @Override
-    public UrlConnectionExecutorBuilder<Boolean> downloadExecutor(OutputStream outputStream) {
-        return executor(OutputStreamHttpMsgConverter.create(outputStream));
+    public UrlConnectionExecutorBuilder<Long> downloadExecutor(OutputStream outputStream) {
+        return executor(HttpOutputStreamResultHandle.create(outputStream));
     }
 
     /**
      * 获取下载文件的请求执行器
      *
-     * @param msgConverter 结果处理器
-     * @return true 为成功
+     * @param resultHandle 结果处理器
+     * @return 下载文件大小
      */
     @Override
-    public UrlConnectionExecutorBuilder<Boolean> downloadExecutor(OutputStreamHttpMsgConverter msgConverter) {
-        return executor(msgConverter);
+    public UrlConnectionExecutorBuilder<Long> downloadExecutor(HttpOutputStreamResultHandle resultHandle) {
+        return executor(resultHandle);
     }
 
     @Override
-    public <R> UrlConnectionExecutorBuilder<R> executor(HttpMsgConverter<R> msgConverter) {
-        return UrlConnectionExecutorBuilder.create(msgConverter, openConnection(), getRequestBody(), executorService);
+    public <R> UrlConnectionExecutorBuilder<R> executor(HttpResultHandle<R> resultHandle) {
+        return UrlConnectionExecutorBuilder.create(resultHandle, openConnection(), getRequestBody(), executorService);
     }
 
     // endregion

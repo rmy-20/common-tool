@@ -1,7 +1,11 @@
-package io.github.rmy20.tool.urlconnection.request;
+package io.github.rmy20.tool.urlconnection;
 
 import io.github.rmy20.tool.http.core.constant.HttpMethodEnum;
 import io.github.rmy20.tool.http.core.request.BaseRequestTool;
+import io.github.rmy20.tool.urlconnection.request.UrlConnectionBaseRequest;
+import io.github.rmy20.tool.urlconnection.request.UrlConnectionFormRequest;
+import io.github.rmy20.tool.urlconnection.request.UrlConnectionMultipartRequest;
+import io.github.rmy20.tool.urlconnection.request.UrlConnectionRequest;
 
 import java.net.Proxy;
 import java.net.URI;

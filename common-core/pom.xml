@@ -17,7 +17,7 @@
         <dependency>
             <groupId>io.github.rmy-20</groupId>
             <artifactId>common-log</artifactId>
-            <version>${parent.version}</version>
+            <version>${project.parent.version}</version>
         </dependency>
     </dependencies>
 </project>

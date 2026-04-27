@@ -1,7 +1,6 @@
 package io.github.rmy20.tool.http.core.decorator;
 
 import io.github.rmy20.tool.core.text.StringPool;
-import io.github.rmy20.tool.http.core.HttpHeaders;
 import io.github.rmy20.tool.http.core.MediaType;
 
 import java.util.List;
@@ -12,17 +11,7 @@ import java.util.Objects;
  *
  * @author sheng
  */
-public interface HttpHeaderDecorator<T extends HttpHeaderDecorator<T>> {
-    /**
-     * 获取当前实例
-     */
-    T self();
-
-    /**
-     * 获取请求头
-     */
-    HttpHeaders getHeaders();
-
+public interface HttpHeaderDecorator<T extends HttpHeaderDecorator<T>> extends ContentTypeDecorator<T> {
     /**
      * 添加请求头
      *
@@ -46,25 +35,9 @@ public interface HttpHeaderDecorator<T extends HttpHeaderDecorator<T>> {
     }
 
     /**
-     * 设置Content-Type
-     */
-    default T setContentType(String value) {
-        getHeaders().setContentType(value);
-        return self();
-    }
-
-    /**
-     * 设置Content-Type
-     */
-    default T setContentType(MediaType value) {
-        getHeaders().setContentType(value);
-        return self();
-    }
-
-    /**
      * 设置Content-Length
      */
-    default T setContentType(long contentLength) {
+    default T setContentLength(long contentLength) {
         getHeaders().setContentLength(contentLength);
         return self();
     }

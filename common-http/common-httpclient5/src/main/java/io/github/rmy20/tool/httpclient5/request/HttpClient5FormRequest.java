@@ -3,8 +3,8 @@ package io.github.rmy20.tool.httpclient5.request;
 import io.github.rmy20.tool.core.text.StringPool;
 import io.github.rmy20.tool.core.text.StringUtil;
 import io.github.rmy20.tool.http.core.MediaType;
+import io.github.rmy20.tool.http.core.constant.HttpMethodEnum;
 import io.github.rmy20.tool.http.core.request.BaseFormRequest;
-import io.github.rmy20.tool.httpclient5.constant.HttpRequestMethodEnum;
 import org.apache.hc.client5.http.entity.UrlEncodedFormEntity;
 import org.apache.hc.core5.http.NameValuePair;
 import org.apache.hc.core5.http.message.BasicNameValuePair;
@@ -31,11 +31,11 @@ public class HttpClient5FormRequest extends HttpClient5BaseRequest<HttpClient5Fo
      * @param url    url
      * @param method 方法
      */
-    public static HttpClient5FormRequest create(String url, HttpRequestMethodEnum method) {
+    public static HttpClient5FormRequest create(String url, HttpMethodEnum method) {
         return new HttpClient5FormRequest(url, method);
     }
 
-    public HttpClient5FormRequest(String url, HttpRequestMethodEnum method) {
+    public HttpClient5FormRequest(String url, HttpMethodEnum method) {
         super(url, method);
     }
 

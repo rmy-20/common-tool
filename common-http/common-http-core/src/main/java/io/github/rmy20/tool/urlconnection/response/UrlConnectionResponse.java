@@ -106,11 +106,15 @@ public class UrlConnectionResponse implements ClientHttpResponse {
     @Override
     public void close() throws IOException {
         try {
-            if (Objects.isNull(responseStream)) {
-                getBody();
-            }
-            if (Objects.nonNull(responseStream)) {
-                responseStream.close();
+            try {
+                if (Objects.isNull(responseStream)) {
+                    getBody();
+                }
+                if (Objects.nonNull(responseStream)) {
+                    responseStream.close();
+                }
+            } finally {
+                connection.disconnect();
             }
         } catch (Exception ignore) {
         }

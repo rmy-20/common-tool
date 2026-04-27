@@ -3,8 +3,8 @@ package io.github.rmy20.tool.httpclient5.executor;
 import io.github.rmy20.tool.core.function.throwing.ThrowingConsumer;
 import io.github.rmy20.tool.core.text.StringUtil;
 import io.github.rmy20.tool.http.core.HttpHeaders;
-import io.github.rmy20.tool.http.core.converter.HttpMsgConverter;
 import io.github.rmy20.tool.http.core.execute.BaseExecutor;
+import io.github.rmy20.tool.http.core.result.HttpResultHandle;
 import io.github.rmy20.tool.httpclient5.response.HttpClient5Response;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.hc.client5.http.classic.HttpClient;
@@ -51,20 +51,20 @@ public class HttpClient5Executor<R> extends BaseExecutor<R> {
      * 创建#{@link HttpClient5Executor}
      *
      * @param request          请求
-     * @param msgConverter     响应结果处理器
+     * @param resultHandle     响应结果处理器
      * @param errHandler       异常处理器
      * @param okPredicate      ok响应码判断
      * @param mustHandleResult 是否强制处理结果
      */
     public static <R> HttpClient5Executor<R> create(HttpClient httpClient, HttpUriRequestBase request, HttpContext httpContext,
-                                                    HttpMsgConverter<R> msgConverter, Predicate<Integer> okPredicate,
+                                                    HttpResultHandle<R> resultHandle, Predicate<Integer> okPredicate,
                                                     ThrowingConsumer<Throwable, Throwable> errHandler, boolean mustHandleResult) {
-        return new HttpClient5Executor<R>(httpClient, request, httpContext, msgConverter, okPredicate, errHandler, mustHandleResult);
+        return new HttpClient5Executor<R>(httpClient, request, httpContext, resultHandle, okPredicate, errHandler, mustHandleResult);
     }
 
-    public HttpClient5Executor(HttpClient httpClient, HttpUriRequestBase request, HttpContext httpContext, HttpMsgConverter<R> msgConverter,
+    public HttpClient5Executor(HttpClient httpClient, HttpUriRequestBase request, HttpContext httpContext, HttpResultHandle<R> resultHandle,
                                Predicate<Integer> okPredicate, ThrowingConsumer<Throwable, Throwable> errHandler, boolean mustHandleResult) {
-        super(msgConverter, okPredicate, errHandler, mustHandleResult);
+        super(resultHandle, okPredicate, errHandler, mustHandleResult);
         this.httpClient = Objects.requireNonNull(httpClient, "httpClient can not be null");
         this.request = Objects.requireNonNull(request, "request can not be null");
         this.httpContext = httpContext;
@@ -74,11 +74,11 @@ public class HttpClient5Executor<R> extends BaseExecutor<R> {
     protected void execute() {
         if (isExecute.compareAndSet(false, true)) {
             try {
-                httpClient.execute(null, request, httpContext, classicHttpResponse -> {
+                httpClient.execute(request, httpContext, classicHttpResponse -> {
                     try (HttpClient5Response client5Response = HttpClient5Response.create(classicHttpResponse)) {
                         httpClient5Response = client5Response;
                         if (isOk() || (mustHandleResult && Objects.nonNull(client5Response.getBody()))) {
-                            result = msgConverter.apply(client5Response.getBody());
+                            result = resultHandle.apply(client5Response.getBody());
                         }
                     } catch (Throwable e) {
                         setStatusMsg(e.getMessage(), "httpclient handle result error");

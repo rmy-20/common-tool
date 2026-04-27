@@ -1,7 +1,7 @@
 package io.github.rmy20.tool.okhttp.executor;
 
-import io.github.rmy20.tool.http.core.converter.HttpMsgConverter;
 import io.github.rmy20.tool.http.core.execute.BaseExecutorBuilder;
+import io.github.rmy20.tool.http.core.result.HttpResultHandle;
 import io.github.rmy20.tool.okhttp.response.OkHttpAsyncResponseFuture;
 import okhttp3.Call;
 
@@ -23,14 +23,14 @@ public class OkHttpExecutorBuilder<R> extends BaseExecutorBuilder<R, OkHttpExecu
      * 创建执行器构建器
      *
      * @param call         请求对象
-     * @param msgConverter 消息转换器
+     * @param resultHandle 结果处理器
      */
-    public static <R> OkHttpExecutorBuilder<R> create(Call call, HttpMsgConverter<R> msgConverter) {
-        return new OkHttpExecutorBuilder<>(call, msgConverter);
+    public static <R> OkHttpExecutorBuilder<R> create(Call call, HttpResultHandle<R> resultHandle) {
+        return new OkHttpExecutorBuilder<>(call, resultHandle);
     }
 
-    public OkHttpExecutorBuilder(Call call, HttpMsgConverter<R> msgConverter) {
-        super(msgConverter);
+    public OkHttpExecutorBuilder(Call call, HttpResultHandle<R> resultHandle) {
+        super(resultHandle);
         this.call = Objects.requireNonNull(call, "call must not be null");
     }
 
@@ -41,11 +41,11 @@ public class OkHttpExecutorBuilder<R> extends BaseExecutorBuilder<R, OkHttpExecu
 
     @Override
     public OkHttpExecutor<R> execute() {
-        return OkHttpExecutor.create(call, getMsgConverter(), getErrHandler(), getOkPredicate(), isMustHandleResult());
+        return OkHttpExecutor.create(call, getResultHandle(), getErrHandler(), getOkPredicate(), isMustHandleResult());
     }
 
     @Override
     public CompletableFuture<OkHttpAsyncExecutor<R>> executeAsync() {
-        return OkHttpAsyncResponseFuture.create(call, getMsgConverter(), getErrHandler(), getOkPredicate(), isMustHandleResult());
+        return OkHttpAsyncResponseFuture.create(call, getResultHandle(), getErrHandler(), getOkPredicate(), isMustHandleResult());
     }
 }

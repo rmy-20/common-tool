@@ -1,4 +1,4 @@
-package io.github.rmy20.tool.http.core.converter;
+package io.github.rmy20.tool.http.core.result;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import io.github.rmy20.tool.jackson.JacksonTool;
@@ -11,7 +11,7 @@ import java.util.Objects;
  *
  * @author sheng
  */
-public class JacksonHttpMsgConverter<R> implements HttpMsgConverter<R> {
+public class HttpJacksonResultHandle<R> implements HttpResultHandle<R> {
     /**
      * 结果类型
      */
@@ -32,8 +32,8 @@ public class JacksonHttpMsgConverter<R> implements HttpMsgConverter<R> {
      *
      * @param type 结果类型
      */
-    public static <R> JacksonHttpMsgConverter<R> create(JacksonTool jacksonTool, Class<R> type) {
-        return new JacksonHttpMsgConverter<>(jacksonTool, type);
+    public static <R> HttpJacksonResultHandle<R> create(JacksonTool jacksonTool, Class<R> type) {
+        return new HttpJacksonResultHandle<>(jacksonTool, type);
     }
 
     /**
@@ -41,17 +41,17 @@ public class JacksonHttpMsgConverter<R> implements HttpMsgConverter<R> {
      *
      * @param typeReference 结果类型
      */
-    public static <R> JacksonHttpMsgConverter<R> create(JacksonTool jacksonTool, TypeReference<R> typeReference) {
-        return new JacksonHttpMsgConverter<>(jacksonTool, typeReference);
+    public static <R> HttpJacksonResultHandle<R> create(JacksonTool jacksonTool, TypeReference<R> typeReference) {
+        return new HttpJacksonResultHandle<>(jacksonTool, typeReference);
     }
 
-    public JacksonHttpMsgConverter(JacksonTool jacksonTool, Class<R> resultType) {
+    public HttpJacksonResultHandle(JacksonTool jacksonTool, Class<R> resultType) {
         this.jacksonTool = Objects.requireNonNull(jacksonTool, "jacksonTool must not be null");
         this.resultType = Objects.requireNonNull(resultType, "resultType must not be null");
         this.typeReference = null;
     }
 
-    public JacksonHttpMsgConverter(JacksonTool jacksonTool, TypeReference<R> typeReference) {
+    public HttpJacksonResultHandle(JacksonTool jacksonTool, TypeReference<R> typeReference) {
         this.jacksonTool = Objects.requireNonNull(jacksonTool, "jacksonTool must not be null");
         this.typeReference = Objects.requireNonNull(typeReference, "typeReference must not be null");
         this.resultType = null;

@@ -5,11 +5,10 @@ import io.github.rmy20.tool.core.date.DateTool;
 import io.github.rmy20.tool.core.lang.Assert;
 import io.github.rmy20.tool.core.util.RandomUtil;
 import io.github.rmy20.tool.http.core.MediaType;
-import io.github.rmy20.tool.http.core.converter.JsonHttpMsgConverter;
-import io.github.rmy20.tool.httpclient5.executor.HttpClient5AsyncExecutor;
+import io.github.rmy20.tool.http.core.result.HttpJsonResultHandle;
 import io.github.rmy20.tool.httpclient5.executor.HttpClient5Executor;
 import io.github.rmy20.tool.httpclient5.request.HttpClient5MultipartRequest;
-import io.github.rmy20.tool.jackson.JsonTool;
+import io.github.rmy20.tool.jackson.JsonUtil;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,7 +28,7 @@ import java.util.concurrent.TimeUnit;
  * @author sheng
  */
 class HttpClient5Test {
-    static final boolean skip = true;
+    static final boolean skip = false;
     static final String uri = "http://127.0.0.1:6021/";
     private static final Logger log = LoggerFactory.getLogger(HttpClient5Test.class);
 
@@ -55,7 +54,7 @@ class HttpClient5Test {
         if (skip) {
             return;
         }
-        CompletableFuture<HttpClient5AsyncExecutor<String>> future = HttpClient5Tool.get(uri).paths("/test/get")
+        CompletableFuture<HttpClient5Executor<String>> future = HttpClient5Tool.get(uri).paths("/test/get")
                 .setContentType(MediaType.APPLICATION_JSON)
                 .queryEncoded("name", "小明")
                 .queryEncoded("age", 18)
@@ -68,7 +67,7 @@ class HttpClient5Test {
             TimeUnit.MILLISECONDS.sleep(200L);
         }
 
-        HttpClient5AsyncExecutor<String> executor = future.join();
+        HttpClient5Executor<String> executor = future.join();
         Assert.isTrue(executor.isOk(), "http client get 异步请求失败");
         System.out.println("http client get 异步结果：" + executor.get());
         executor.getHeaders().forEach((name, value) -> System.out.println("header --> " + name + "：" + value));
@@ -88,9 +87,9 @@ class HttpClient5Test {
         map.put("version", "1.0");
         HttpClient5Executor<Map<String, Object>> executor = HttpClient5Tool.post(uri).pathsEncoded("/test/post")
                 .setContentType(MediaType.APPLICATION_JSON_UTF8)
-                .body(JsonTool.JSON_TOOL.toJson(map))
-                .executor(JsonHttpMsgConverter.create(JsonTool.JSON_TOOL, new TypeReference<Map<String, Object>>() {
-                })).mustHandleResult(true).execute();
+                .body(JsonUtil.toJson(map))
+                .executor(HttpJsonResultHandle.create(JsonUtil.JSON_TOOL, new TypeReference<Map<String, Object>>() {
+                })).mustHandleResult().execute();
         Assert.isTrue(executor.isOk(), "http client post请求失败");
         System.out.println("http client post结果：" + executor.get());
         executor.getHeaders().forEach((name, value) -> System.out.println("header --> " + name + "：" + value));
@@ -108,16 +107,16 @@ class HttpClient5Test {
         map.put("timestamp", Instant.now().toEpochMilli());
         map.put("sessionId", "");
         map.put("version", "1.0");
-        CompletableFuture<HttpClient5AsyncExecutor<Map<String, Object>>> future = HttpClient5Tool.post(uri).pathsEncoded("/test/post")
+        CompletableFuture<HttpClient5Executor<Map<String, Object>>> future = HttpClient5Tool.post(uri).pathsEncoded("/test/post")
                 .setContentType(MediaType.APPLICATION_JSON_UTF8)
-                .body(JsonTool.JSON_TOOL.toJson(map))
-                .jsonExecutor(JsonHttpMsgConverter.create(JsonTool.JSON_TOOL, new TypeReference<Map<String, Object>>() {
+                .body(JsonUtil.toJson(map))
+                .jsonExecutor(HttpJsonResultHandle.create(JsonUtil.JSON_TOOL, new TypeReference<Map<String, Object>>() {
                 })).executeAsync();
         for (int i = 0; i < 20; i++) {
             log.info("{}", i);
             TimeUnit.MILLISECONDS.sleep(200L);
         }
-        HttpClient5AsyncExecutor<Map<String, Object>> executor = future.join();
+        HttpClient5Executor<Map<String, Object>> executor = future.join();
         Assert.isTrue(executor.isOk(), "http client post 异步请求失败");
         System.out.println("http client post 异步结果：" + executor.get());
         executor.getHeaders().forEach((name, value) -> System.out.println("header --> " + name + "：" + value));
@@ -128,10 +127,10 @@ class HttpClient5Test {
         if (skip) {
             return;
         }
-        HttpClient5Executor<Boolean> executor = HttpClient5Tool.get(uri).paths("download")
+        HttpClient5Executor<Long> executor = HttpClient5Tool.get(uri).paths("download")
                 .setContentType(MediaType.APPLICATION_OCTET_STREAM)
                 .downloadExecutor(new File("/opt/httpclient/" + "SM2公私钥对.txt")).execute();
-        Assert.isTrue(executor.isOk() && executor.get(), "http client 下载文件失败");
+        Assert.isTrue(executor.isOk() && executor.get() >= 0, "http client 下载文件失败");
         executor.getHeaders().forEach((name, value) -> System.out.println("header --> " + name + "：" + value));
     }
 
@@ -140,15 +139,15 @@ class HttpClient5Test {
         if (skip) {
             return;
         }
-        CompletableFuture<HttpClient5AsyncExecutor<Boolean>> future = HttpClient5Tool.get(uri).paths("download")
+        CompletableFuture<HttpClient5Executor<Long>> future = HttpClient5Tool.get(uri).paths("download")
                 .setContentType(MediaType.APPLICATION_OCTET_STREAM)
                 .downloadExecutor(new File("/opt/httpclient/async/" + "SM2公私钥对.txt")).executeAsync();
         for (int i = 0; i < 20; i++) {
             log.info("{}", i);
             TimeUnit.MILLISECONDS.sleep(200L);
         }
-        HttpClient5AsyncExecutor<Boolean> executor = future.join();
-        Assert.isTrue(executor.isOk() && executor.get(), "http client 异步下载文件失败");
+        HttpClient5Executor<Long> executor = future.join();
+        Assert.isTrue(executor.isOk() && executor.get() >= 0, "http client 异步下载文件失败");
         executor.getHeaders().forEach((name, value) -> System.out.println("header --> " + name + "：" + value));
     }
 
@@ -176,7 +175,7 @@ class HttpClient5Test {
         if (skip) {
             return;
         }
-        CompletableFuture<HttpClient5AsyncExecutor<String>> future = HttpClient5Tool.form(uri).paths("/test/form")
+        CompletableFuture<HttpClient5Executor<String>> future = HttpClient5Tool.form(uri).paths("/test/form")
                 .addTextEncoded("access_key", RandomUtil.generateUuidSimple())
                 .addTextEncoded("biz_content", RandomUtil.generateUuidSimple())
                 .addTextEncoded("format", "json")
@@ -189,7 +188,7 @@ class HttpClient5Test {
             log.info("{}", i);
             TimeUnit.MILLISECONDS.sleep(200L);
         }
-        HttpClient5AsyncExecutor<String> executor = future.join();
+        HttpClient5Executor<String> executor = future.join();
         Assert.isTrue(executor.isOk(), "http client form 异步请求失败");
         System.out.println("http client form 异步结果：" + executor.get());
         executor.getHeaders().forEach((name, value) -> System.out.println("header --> " + name + "：" + value));
@@ -249,12 +248,12 @@ class HttpClient5Test {
                 .addText("md5", RandomUtil.generateUuidSimple())
                 .addText("format", "哈哈faga---===");
         base64FileMap.forEach((k, v) -> multipartRequest.addBinary("file", k, Base64.getDecoder().decode(v.getBytes(StandardCharsets.UTF_8))));
-        CompletableFuture<HttpClient5AsyncExecutor<String>> future = multipartRequest.stringExecutor().executeAsync();
+        CompletableFuture<HttpClient5Executor<String>> future = multipartRequest.stringExecutor().executeAsync();
         for (int i = 0; i < 20; i++) {
             log.info("{}", i);
             TimeUnit.MILLISECONDS.sleep(200L);
         }
-        HttpClient5AsyncExecutor<String> executor = future.join();
+        HttpClient5Executor<String> executor = future.join();
         Assert.isTrue(executor.isOk(), "http client 异步上传失败");
         System.out.println("http client 异步上传结果：" + executor.get());
         executor.getHeaders().forEach((name, value) -> System.out.println("header --> " + name + "：" + value));

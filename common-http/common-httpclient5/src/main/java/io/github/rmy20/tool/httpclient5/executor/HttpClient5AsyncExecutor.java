@@ -3,8 +3,8 @@ package io.github.rmy20.tool.httpclient5.executor;
 import io.github.rmy20.tool.core.function.throwing.ThrowingConsumer;
 import io.github.rmy20.tool.core.text.StringUtil;
 import io.github.rmy20.tool.http.core.HttpHeaders;
-import io.github.rmy20.tool.http.core.converter.HttpMsgConverter;
 import io.github.rmy20.tool.http.core.execute.BaseExecutor;
+import io.github.rmy20.tool.http.core.result.HttpResultHandle;
 import io.github.rmy20.tool.httpclient5.response.HttpClient5Response;
 import org.apache.hc.core5.http.message.BasicClassicHttpResponse;
 
@@ -26,20 +26,20 @@ public class HttpClient5AsyncExecutor<R> extends BaseExecutor<R> {
      * 创建httpclient5异步请求处理
      *
      * @param basicHttpResponse httpclient 响应
-     * @param msgConverter      消息转换器
+     * @param resultHandle      结果处理器
      * @param okPredicate       响应码判断
      * @param errHandler        异常处理
      * @param mustHandleResult  是否必须处理结果
      */
-    public static <R> HttpClient5AsyncExecutor<R> create(BasicClassicHttpResponse basicHttpResponse, HttpMsgConverter<R> msgConverter,
+    public static <R> HttpClient5AsyncExecutor<R> create(BasicClassicHttpResponse basicHttpResponse, HttpResultHandle<R> resultHandle,
                                                          Predicate<Integer> okPredicate, ThrowingConsumer<Throwable, Throwable> errHandler,
                                                          boolean mustHandleResult) {
-        return new HttpClient5AsyncExecutor<>(basicHttpResponse, msgConverter, okPredicate, errHandler, mustHandleResult);
+        return new HttpClient5AsyncExecutor<>(basicHttpResponse, resultHandle, okPredicate, errHandler, mustHandleResult);
     }
 
-    protected HttpClient5AsyncExecutor(BasicClassicHttpResponse basicHttpResponse, HttpMsgConverter<R> msgConverter, Predicate<Integer> okPredicate,
+    protected HttpClient5AsyncExecutor(BasicClassicHttpResponse basicHttpResponse, HttpResultHandle<R> resultHandle, Predicate<Integer> okPredicate,
                                        ThrowingConsumer<Throwable, Throwable> errHandler, boolean mustHandleResult) {
-        super(msgConverter, okPredicate, errHandler, mustHandleResult);
+        super(resultHandle, okPredicate, errHandler, mustHandleResult);
         handleResult(Objects.requireNonNull(basicHttpResponse, "basicHttpResponse can not be null"));
     }
 
@@ -48,7 +48,7 @@ public class HttpClient5AsyncExecutor<R> extends BaseExecutor<R> {
             try (HttpClient5Response client5Response = HttpClient5Response.create(basicHttpResponse)) {
                 this.httpClient5Response = client5Response;
                 if (isOk() || (mustHandleResult && Objects.nonNull(client5Response.getBody()))) {
-                    result = msgConverter.apply(httpClient5Response.getBody());
+                    result = resultHandle.apply(httpClient5Response.getBody());
                 }
             } catch (Throwable e) {
                 setStatusMsg(e.getMessage(), "httpclient async handle result error");

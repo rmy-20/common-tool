@@ -96,6 +96,36 @@ public interface JacksonTool {
     }
 
     /**
+     * 将 ObjectMapper 对应可读取字节数组转化为 Java Bean
+     *
+     * @param target json 字节数组
+     * @param cls    Java Bean 的字节码对象
+     * @param <T>    泛型
+     * @return Java Bean
+     */
+    default <T> T readValue(byte[] target, Class<T> cls) {
+        return readValue(target, cls, e -> log.error("[{}] to bean [{}] 异常", target, cls, e));
+    }
+
+    /**
+     * 将 ObjectMapper 对应可读取字节数组转化为 Java Bean
+     *
+     * @param target       json 字节数组
+     * @param cls          Java Bean 的字节码对象
+     * @param errorHandler 异常处理
+     * @param <T>          泛型
+     * @return Java Bean
+     */
+    default <T> T readValue(byte[] target, Class<T> cls, ThrowingConsumer<Throwable, ? extends Throwable> errorHandler) {
+        try {
+            return mapper().readValue(target, cls);
+        } catch (Exception e) {
+            ((ThrowingConsumer<Throwable, RuntimeException>) errorHandler).accept(e);
+        }
+        return null;
+    }
+
+    /**
      * 将 ObjectMapper 对应可读取字节数组反序列化为 JavaBean
      *
      * @param bytes {@link InputStream} json 文件输入流
@@ -177,32 +207,6 @@ public interface JacksonTool {
      * 将 JsonNode 转化为 Java Bean
      *
      * @param target json
-     * @param type   {@link TypeReference} new TypeReference<T>{}
-     */
-    default <T> T readValue(JsonNode target, TypeReference<T> type) {
-        return readValue(target, type, e -> log.error("JsonNode to bean 异常", e));
-    }
-
-    /**
-     * 将 JsonNode 转化为 Java Bean
-     *
-     * @param target       json
-     * @param type         {@link TypeReference} new TypeReference<T>{}
-     * @param errorHandler 异常处理
-     */
-    default <T> T readValue(JsonNode target, TypeReference<T> type, ThrowingConsumer<Throwable, ? extends Throwable> errorHandler) {
-        try {
-            return mapper().treeToValue(target, type);
-        } catch (Exception e) {
-            ((ThrowingConsumer<Throwable, RuntimeException>) errorHandler).accept(e);
-        }
-        return null;
-    }
-
-    /**
-     * 将 JsonNode 转化为 Java Bean
-     *
-     * @param target json
      * @param clazz  待转换的 Java Bean 类型
      */
     default <T> T readValue(JsonNode target, Class<T> clazz) {
@@ -219,6 +223,32 @@ public interface JacksonTool {
     default <T> T readValue(JsonNode target, Class<T> clazz, ThrowingConsumer<Throwable, ? extends Throwable> errorHandler) {
         try {
             return mapper().treeToValue(target, clazz);
+        } catch (Exception e) {
+            ((ThrowingConsumer<Throwable, RuntimeException>) errorHandler).accept(e);
+        }
+        return null;
+    }
+
+    /**
+     * 将 JsonNode 转化为 Java Bean
+     *
+     * @param target json
+     * @param type   {@link TypeReference} new TypeReference<T>{}
+     */
+    default <T> T readValue(JsonNode target, TypeReference<T> type) {
+        return readValue(target, type, e -> log.error("JsonNode to bean 异常", e));
+    }
+
+    /**
+     * 将 JsonNode 转化为 Java Bean
+     *
+     * @param target       json
+     * @param type         {@link TypeReference} new TypeReference<T>{}
+     * @param errorHandler 异常处理
+     */
+    default <T> T readValue(JsonNode target, TypeReference<T> type, ThrowingConsumer<Throwable, ? extends Throwable> errorHandler) {
+        try {
+            return mapper().treeToValue(target, type);
         } catch (Exception e) {
             ((ThrowingConsumer<Throwable, RuntimeException>) errorHandler).accept(e);
         }

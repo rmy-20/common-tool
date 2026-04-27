@@ -1,7 +1,11 @@
-package io.github.rmy20.tool.okhttp.request;
+package io.github.rmy20.tool.okhttp;
 
 import io.github.rmy20.tool.http.core.constant.HttpMethodEnum;
 import io.github.rmy20.tool.http.core.request.BaseRequestTool;
+import io.github.rmy20.tool.okhttp.request.OkHttpBaseRequest;
+import io.github.rmy20.tool.okhttp.request.OkHttpFormRequest;
+import io.github.rmy20.tool.okhttp.request.OkHttpMultipartRequest;
+import io.github.rmy20.tool.okhttp.request.OkHttpRequest;
 import okhttp3.OkHttpClient;
 
 import java.net.URI;

@@ -3,7 +3,7 @@ package io.github.rmy20.tool.http.core.execute;
 import io.github.rmy20.tool.core.function.throwing.ThrowingConsumer;
 import io.github.rmy20.tool.core.text.StringUtil;
 import io.github.rmy20.tool.http.core.HttpHeaders;
-import io.github.rmy20.tool.http.core.converter.HttpMsgConverter;
+import io.github.rmy20.tool.http.core.result.HttpResultHandle;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.Objects;
@@ -19,7 +19,7 @@ public abstract class BaseExecutor<R> {
     /**
      * 响应处理器
      */
-    protected final HttpMsgConverter<R> msgConverter;
+    protected final HttpResultHandle<R> resultHandle;
 
     /**
      * 成功判断
@@ -46,9 +46,9 @@ public abstract class BaseExecutor<R> {
      */
     protected R result;
 
-    protected BaseExecutor(HttpMsgConverter<R> msgConverter, Predicate<Integer> okPredicate,
+    protected BaseExecutor(HttpResultHandle<R> resultHandle, Predicate<Integer> okPredicate,
                            ThrowingConsumer<Throwable, Throwable> errHandler, boolean mustHandleResult) {
-        this.msgConverter = Objects.requireNonNull(msgConverter, "msgConverter must not be null");
+        this.resultHandle = Objects.requireNonNull(resultHandle, "resultHandle must not be null");
         this.okPredicate = Objects.requireNonNull(okPredicate, "okPredicate must not be null");
         this.errHandler = Objects.requireNonNull(errHandler, "errHandler must not be null");
         this.mustHandleResult = mustHandleResult;

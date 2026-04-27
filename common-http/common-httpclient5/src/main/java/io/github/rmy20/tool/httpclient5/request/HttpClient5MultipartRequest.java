@@ -1,7 +1,7 @@
 package io.github.rmy20.tool.httpclient5.request;
 
+import io.github.rmy20.tool.http.core.constant.HttpMethodEnum;
 import io.github.rmy20.tool.http.core.request.BaseMultipartRequest;
-import io.github.rmy20.tool.httpclient5.constant.HttpRequestMethodEnum;
 import org.apache.hc.client5.http.entity.mime.ByteArrayBody;
 import org.apache.hc.client5.http.entity.mime.ContentBody;
 import org.apache.hc.client5.http.entity.mime.FileBody;
@@ -38,11 +38,11 @@ public class HttpClient5MultipartRequest extends HttpClient5BaseRequest<HttpClie
      * @param url    url
      * @param method 方法
      */
-    public static HttpClient5MultipartRequest create(String url, HttpRequestMethodEnum method) {
+    public static HttpClient5MultipartRequest create(String url, HttpMethodEnum method) {
         return new HttpClient5MultipartRequest(url, method);
     }
 
-    public HttpClient5MultipartRequest(String url, HttpRequestMethodEnum method) {
+    public HttpClient5MultipartRequest(String url, HttpMethodEnum method) {
         super(url, method);
         this.formBuilder = MultipartEntityBuilder.create().setContentType(ContentType.MULTIPART_FORM_DATA);
     }
