@@ -38,28 +38,28 @@ public interface ContentTypeDecorator<T extends ContentTypeDecorator<T>> {
     /**
      * 设置Content-Type为 application/json
      */
-    default T json() {
+    default T jsonContentType() {
         return setContentType(MediaType.APPLICATION_JSON);
     }
 
     /**
      * 设置Content-Type为 application/json;charset=UTF-8
      */
-    default T jsonUtf8() {
+    default T jsonUtf8ContentType() {
         return setContentType(MediaType.APPLICATION_JSON_UTF8);
     }
 
     /**
      * 设置Content-Type为 application/xml
      */
-    default T xml() {
+    default T xmlContentType() {
         return setContentType(MediaType.APPLICATION_XML);
     }
 
     /*
      * 设置Content-Type为 application/octet-stream
      */
-    default T octetStream() {
+    default T octetStreamContentType() {
         return setContentType(MediaType.APPLICATION_OCTET_STREAM);
     }
 }

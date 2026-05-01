@@ -84,4 +84,10 @@ public interface OkHttpUriBuilderDecorator<T extends OkHttpUriBuilderDecorator<T
         getUrlBuilder().addEncodedPathSegments(path);
         return self();
     }
+
+    @Override
+    default T fragment(String fragment) {
+        getUrlBuilder().fragment(fragment);
+        return self();
+    }
 }

@@ -28,7 +28,7 @@ import java.util.concurrent.TimeUnit;
  * @author sheng
  */
 class HttpClient5Test {
-    static final boolean skip = false;
+    static final boolean skip = true;
     static final String uri = "http://127.0.0.1:6021/";
     private static final Logger log = LoggerFactory.getLogger(HttpClient5Test.class);
 

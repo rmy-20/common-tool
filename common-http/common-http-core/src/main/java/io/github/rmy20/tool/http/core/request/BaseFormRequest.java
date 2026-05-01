@@ -17,8 +17,30 @@ public interface BaseFormRequest<T extends BaseFormRequest<T>> extends BaseReque
     /**
      * 添加表单
      *
+     * @param condition 是否添加
+     * @param name      key
+     * @param value     value
+     */
+    default T addText(boolean condition, String name, Object value) {
+        return condition ? addText(name, value) : self();
+    }
+
+    /**
+     * 添加表单
+     *
      * @param name  key
      * @param value value
      */
     T addTextEncoded(String name, Object value);
+
+    /**
+     * 添加表单
+     *
+     * @param condition 是否添加
+     * @param name      key
+     * @param value     value
+     */
+    default T addTextEncoded(boolean condition, String name, Object value) {
+        return condition ? addTextEncoded(name, value) : self();
+    }
 }

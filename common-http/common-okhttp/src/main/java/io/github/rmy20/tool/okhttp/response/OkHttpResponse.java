@@ -69,6 +69,9 @@ public class OkHttpResponse implements ClientHttpResponse {
 
     @Override
     public void close() throws IOException {
-        response.body().close();
+        try {
+            response.body().close();
+        } catch (Throwable ignored) {
+        }
     }
 }

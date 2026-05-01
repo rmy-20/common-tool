@@ -77,7 +77,7 @@ public class HttpClient5Executor<R> extends BaseExecutor<R> {
                 httpClient.execute(request, httpContext, classicHttpResponse -> {
                     try (HttpClient5Response client5Response = HttpClient5Response.create(classicHttpResponse)) {
                         httpClient5Response = client5Response;
-                        if (isOk() || (mustHandleResult && Objects.nonNull(client5Response.getBody()))) {
+                        if (client5Response.isOk() || (mustHandleResult && Objects.nonNull(client5Response.getBody()))) {
                             result = resultHandle.apply(client5Response.getBody());
                         }
                     } catch (Throwable e) {

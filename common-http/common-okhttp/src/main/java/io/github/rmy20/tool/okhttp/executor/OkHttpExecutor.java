@@ -54,7 +54,7 @@ public class OkHttpExecutor<R> extends BaseExecutor<R> {
         if (Objects.isNull(okHttpResponse) && !call.isExecuted()) {
             try (OkHttpResponse clientResponse = OkHttpResponse.create(call.execute())) {
                 this.okHttpResponse = clientResponse;
-                if (isOk() || (mustHandleResult && Objects.nonNull(clientResponse.getBody()))) {
+                if (clientResponse.isOk() || (mustHandleResult && Objects.nonNull(clientResponse.getBody()))) {
                     result = resultHandle.apply(clientResponse.getBody());
                 }
             } catch (Throwable e) {

@@ -63,8 +63,15 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
         if (StringUtil.isNotBlank(contentType)) {
             headers.set(HttpHeaderConstant.Content_Type, contentType);
         } else {
-            headers.remove(HttpHeaderConstant.Content_Type);
+            removeContentType();
         }
+    }
+
+    /**
+     * 去除 Content-type
+     */
+    public void removeContentType() {
+        headers.remove(HttpHeaderConstant.Content_Type);
     }
 
     /**

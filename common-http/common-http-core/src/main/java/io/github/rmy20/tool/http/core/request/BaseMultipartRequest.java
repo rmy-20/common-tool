@@ -18,6 +18,17 @@ public interface BaseMultipartRequest<T extends BaseMultipartRequest<T>> extends
     T addText(String name, String value);
 
     /**
+     * 添加字符串表单
+     *
+     * @param condition 是否添加
+     * @param name      key
+     * @param value     value
+     */
+    default T addText(boolean condition, String name, String value) {
+        return condition ? addText(name, value) : self();
+    }
+
+    /**
      * 添加文件
      *
      * @param name key

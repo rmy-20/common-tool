@@ -24,6 +24,17 @@ public interface HttpHeaderDecorator<T extends HttpHeaderDecorator<T>> extends C
     }
 
     /**
+     * 添加请求头
+     *
+     * @param condition 是否添加
+     * @param name      header
+     * @param value     value
+     */
+    default T addHeader(boolean condition, String name, Object value) {
+        return condition ? addHeader(name, value) : self();
+    }
+
+    /**
      * 覆盖添加请求头
      *
      * @param name  header
@@ -35,11 +46,31 @@ public interface HttpHeaderDecorator<T extends HttpHeaderDecorator<T>> extends C
     }
 
     /**
+     * 覆盖添加请求头
+     *
+     * @param condition 是否添加
+     * @param name      header
+     * @param value     value
+     */
+    default T setHeader(boolean condition, String name, Object value) {
+        return condition ? setHeader(name, value) : self();
+    }
+
+    /**
      * 设置Content-Length
      */
     default T setContentLength(long contentLength) {
         getHeaders().setContentLength(contentLength);
         return self();
+    }
+
+    /**
+     * 设置Content-Length
+     *
+     * @param condition 是否设置
+     */
+    default T setContentLength(boolean condition, long contentLength) {
+        return condition ? setContentLength(contentLength) : self();
     }
 
     /**
@@ -52,10 +83,28 @@ public interface HttpHeaderDecorator<T extends HttpHeaderDecorator<T>> extends C
 
     /**
      * 设置Accept
+     *
+     * @param condition 是否设置
+     */
+    default T setAccept(boolean condition, String... value) {
+        return condition ? setAccept(value) : self();
+    }
+
+    /**
+     * 设置Accept
      */
     default T setAccept(List<String> value) {
         getHeaders().setAccept(value);
         return self();
+    }
+
+    /**
+     * 设置Accept
+     *
+     * @param condition 是否设置
+     */
+    default T setAccept(boolean condition, List<String> value) {
+        return condition ? setAccept(value) : self();
     }
 
     /**
@@ -67,10 +116,28 @@ public interface HttpHeaderDecorator<T extends HttpHeaderDecorator<T>> extends C
     }
 
     /**
+     * 设置Accept
+     *
+     * @param condition 是否设置
+     */
+    default T setAccept(boolean condition, MediaType... value) {
+        return condition ? setAccept(value) : self();
+    }
+
+    /**
      * 移除请求头
      */
     default T removeHeader(String name) {
         getHeaders().remove(name);
         return self();
+    }
+
+    /**
+     * 移除请求头
+     *
+     * @param condition 是否移除
+     */
+    default T removeHeader(boolean condition, String name) {
+        return condition ? removeHeader(name) : self();
     }
 }

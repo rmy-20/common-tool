@@ -1,27 +1,28 @@
-package io.github.rmy20.tool.httpclient5.response;
+package io.github.rmy20.tool.httpclient4.response;
 
 import io.github.rmy20.tool.core.io.NullInputStream;
 import io.github.rmy20.tool.http.core.ClientHttpResponse;
 import io.github.rmy20.tool.http.core.HttpHeaders;
-import org.apache.hc.core5.http.ClassicHttpResponse;
-import org.apache.hc.core5.http.Header;
-import org.apache.hc.core5.http.HttpEntity;
-import org.apache.hc.core5.http.io.entity.EntityUtils;
+import org.apache.http.Header;
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.util.EntityUtils;
 
+import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Objects;
 
 /**
- * httpclient5响应
+ * httpclient4 响应
  *
  * @author sheng
  */
-public class HttpClient5Response implements ClientHttpResponse {
+public class HttpClient4Response implements ClientHttpResponse {
     /**
-     * httpclient5响应
+     * httpclient4响应
      */
-    private final ClassicHttpResponse response;
+    private final HttpResponse response;
 
     /**
      * 响应头
@@ -29,24 +30,24 @@ public class HttpClient5Response implements ClientHttpResponse {
     private HttpHeaders headers;
 
     /**
-     * 创建#{@link HttpClient5Response}
+     * 创建 {@link HttpClient4Response}
      */
-    public static HttpClient5Response create(ClassicHttpResponse response) {
-        return new HttpClient5Response(response);
+    public static HttpClient4Response create(HttpResponse response) {
+        return new HttpClient4Response(response);
     }
 
-    public HttpClient5Response(ClassicHttpResponse response) {
-        this.response = Objects.requireNonNull(response, "httpResponse cannot be null");
+    public HttpClient4Response(HttpResponse response) {
+        this.response = Objects.requireNonNull(response, "response must not be null");
     }
 
     @Override
     public int getStatus() {
-        return response.getCode();
+        return response.getStatusLine().getStatusCode();
     }
 
     @Override
     public String getMessage() {
-        return response.getReasonPhrase();
+        return response.getStatusLine().getReasonPhrase();
     }
 
     @Override
@@ -54,7 +55,7 @@ public class HttpClient5Response implements ClientHttpResponse {
         HttpHeaders headers = this.headers;
         if (Objects.isNull(headers)) {
             headers = HttpHeaders.create();
-            for (Header header : response.getHeaders()) {
+            for (Header header : response.getAllHeaders()) {
                 headers.add(header.getName(), header.getValue());
             }
             this.headers = headers;
@@ -77,7 +78,9 @@ public class HttpClient5Response implements ClientHttpResponse {
                     EntityUtils.consume(entity);
                 }
             } finally {
-                response.close();
+                if (response instanceof Closeable) {
+                    ((Closeable) response).close();
+                }
             }
         } catch (Throwable ignored) {
         }

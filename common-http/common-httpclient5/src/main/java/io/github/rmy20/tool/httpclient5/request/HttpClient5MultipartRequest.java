@@ -181,6 +181,7 @@ public class HttpClient5MultipartRequest extends HttpClient5BaseRequest<HttpClie
         if (Objects.isNull(mode)) {
             mode = HttpMultipartMode.LEGACY;
         }
+        getHeaders().removeContentType();
         this.httpEntity = formBuilder.setMode(mode).setCharset(getDefaultCharset()).build();
     }
 

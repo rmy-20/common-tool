@@ -126,4 +126,9 @@ public class OkHttpMultipartRequest extends OkHttpBaseRequest<OkHttpMultipartReq
     public RequestBody getRequestBody() {
         return formBuilder.setType(MultipartBody.FORM).build();
     }
+
+    @Override
+    protected void executeBefore() {
+        getHeaders().removeContentType();
+    }
 }

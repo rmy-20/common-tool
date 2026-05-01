@@ -17,6 +17,7 @@
         <module>common-http-core</module>
         <module>common-okhttp</module>
         <module>common-httpclient5</module>
+        <module>common-httpclient4</module>
     </modules>
 
     <dependencies>

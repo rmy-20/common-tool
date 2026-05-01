@@ -83,4 +83,10 @@ public interface RfcUriBuilderDecorator<T extends RfcUriBuilderDecorator<T>> ext
         getUriBuilder().pathSegmentsEncoded(path);
         return self();
     }
+
+    @Override
+    default T fragment(String fragment) {
+        getUriBuilder().fragment(fragment);
+        return self();
+    }
 }
