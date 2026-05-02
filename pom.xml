@@ -78,11 +78,11 @@
                 <version>${httpclient4.version}</version>
             </dependency>
 
-            <dependency>
-                <groupId>org.apache.httpcomponents</groupId>
-                <artifactId>httpmime</artifactId>
-                <version>${httpclient4.version}</version>
-            </dependency>
+            <!--<dependency>-->
+            <!--    <groupId>org.apache.httpcomponents</groupId>-->
+            <!--    <artifactId>httpmime</artifactId>-->
+            <!--    <version>${httpclient4.version}</version>-->
+            <!--</dependency>-->
             <!-- httpclient4 -->
 
             <!-- jackson -->

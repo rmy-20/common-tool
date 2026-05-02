@@ -38,7 +38,7 @@ public class HttpClient5Builder {
     /**
      * 每个路由（域名）连接数
      */
-    private int maxPerRoute = 50;
+    private int maxPerRoute = 500;
 
     /**
      * 默认的TLS策略
@@ -108,7 +108,7 @@ public class HttpClient5Builder {
     /**
      * 验证连接是否活跃
      */
-    private int validateAfterInactivity = 2;
+    private int validateAfterInactivity = 5;
 
     /**
      * 验证连接是否活跃单位
@@ -143,7 +143,7 @@ public class HttpClient5Builder {
     /**
      * 守护线程定时清理空闲连接的时间间隔
      */
-    private int evictIdleConnections = 30;
+    private int evictIdleConnections = 5;
 
     /**
      * 守护线程定时清理空闲连接的时间间隔单位
@@ -151,7 +151,7 @@ public class HttpClient5Builder {
     private TimeUnit evictIdleConnectionsUnit = TimeUnit.SECONDS;
 
     /**
-     * 创建工程
+     * 创建
      */
     public static HttpClient5Builder create() {
         return new HttpClient5Builder();
@@ -309,6 +309,15 @@ public class HttpClient5Builder {
     }
 
     /**
+     * 设置socket超时时间单位
+     */
+    public HttpClient5Builder socketTimeout(int socketTimeout, TimeUnit socketTimeoutUnit) {
+        this.socketTimeout = socketTimeout;
+        this.socketTimeoutUnit = socketTimeoutUnit;
+        return this;
+    }
+
+    /**
      * 设置连接超时时间
      */
     public HttpClient5Builder connectTimeout(int connectTimeout) {
@@ -320,6 +329,15 @@ public class HttpClient5Builder {
      * 设置连接超时时间单位
      */
     public HttpClient5Builder connectTimeoutUnit(TimeUnit connectTimeoutUnit) {
+        this.connectTimeoutUnit = connectTimeoutUnit;
+        return this;
+    }
+
+    /**
+     * 设置连接超时时间单位
+     */
+    public HttpClient5Builder connectTimeout(int connectTimeout, TimeUnit connectTimeoutUnit) {
+        this.connectTimeout = connectTimeout;
         this.connectTimeoutUnit = connectTimeoutUnit;
         return this;
     }
@@ -341,6 +359,15 @@ public class HttpClient5Builder {
     }
 
     /**
+     * 设置验证连接是否活跃单位
+     */
+    public HttpClient5Builder validateAfterInactivity(int validateAfterInactivity, TimeUnit validateAfterInactivityUnit) {
+        this.validateAfterInactivity = validateAfterInactivity;
+        this.validateAfterInactivityUnit = validateAfterInactivityUnit;
+        return this;
+    }
+
+    /**
      * 设置连接存活时间
      */
     public HttpClient5Builder timeToLive(int timeToLive) {
@@ -357,6 +384,15 @@ public class HttpClient5Builder {
     }
 
     /**
+     * 设置连接存活时间单位
+     */
+    public HttpClient5Builder timeToLive(int timeToLive, TimeUnit timeToLiveUnit) {
+        this.timeToLive = timeToLive;
+        this.timeToLiveUnit = timeToLiveUnit;
+        return this;
+    }
+
+    /**
      * 设置从连接池获取连接的超时时间
      */
     public HttpClient5Builder connectionRequestTimeout(int connectionRequestTimeout) {
@@ -368,6 +404,15 @@ public class HttpClient5Builder {
      * 设置从连接池获取连接的超时时间单位
      */
     public HttpClient5Builder connectionRequestTimeoutUnit(TimeUnit connectionRequestTimeoutUnit) {
+        this.connectionRequestTimeoutUnit = connectionRequestTimeoutUnit;
+        return this;
+    }
+
+    /**
+     * 设置从连接池获取连接的超时时间单位
+     */
+    public HttpClient5Builder connectionRequestTimeout(int connectionRequestTimeout, TimeUnit connectionRequestTimeoutUnit) {
+        this.connectionRequestTimeout = connectionRequestTimeout;
         this.connectionRequestTimeoutUnit = connectionRequestTimeoutUnit;
         return this;
     }
@@ -392,6 +437,15 @@ public class HttpClient5Builder {
      * 设置守护线程定时清理空闲连接的时间间隔单位
      */
     public HttpClient5Builder evictIdleConnectionsUnit(TimeUnit evictIdleConnectionsUnit) {
+        this.evictIdleConnectionsUnit = evictIdleConnectionsUnit;
+        return this;
+    }
+
+    /**
+     * 设置守护线程定时清理空闲连接的时间间隔
+     */
+    public HttpClient5Builder evictIdleConnections(int evictIdleConnections, TimeUnit evictIdleConnectionsUnit) {
+        this.evictIdleConnections = evictIdleConnections;
         this.evictIdleConnectionsUnit = evictIdleConnectionsUnit;
         return this;
     }

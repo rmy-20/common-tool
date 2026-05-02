@@ -12,6 +12,11 @@ public interface HttpHeaderConstant {
     String Content_Type = "Content-Type";
 
     /**
+     * Content-Encoding
+     */
+    String Content_Encoding = "Content-Encoding";
+
+    /**
      * Accept
      */
     String Accept = "Accept";

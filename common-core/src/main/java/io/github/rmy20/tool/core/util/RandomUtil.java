@@ -52,7 +52,7 @@ public class RandomUtil {
     /**
      * 根据指定格式的时间和字母生成特定长度的字符串。
      * <p>
-     * 如 String random = generateByTimeAndLetter(16, "yyMMddHHmmss"); // f43X10Rx43452108
+     * 如 String random = generateByTimeAndLetter(16, DateTool.yyyyMMddHHmmss); // f43X10Rx43452108
      *
      * @param length   生成字符串的长度，≤ format长度，以format长度为准
      * @param dateTool 指定的时间格式，用于格式化当前时间
@@ -60,12 +60,27 @@ public class RandomUtil {
      */
     public static String generateByTimeAndLetter(int length, DateTool dateTool) {
         String time = dateTool.format(ZonedDateTime.now(DateConstants.GMT_8_ZONE_ID));
-        return completeAndUnset(length, time, 10, 62);
+        return completeAndUnset(length, time, 10, 62, 0, length);
+    }
+
+    /**
+     * 根据指定格式的时间和字母生成特定长度的字符串。
+     * <p>
+     * 如 String random = generateByTimeAndLetter(16, DateTool.yyyyMMddHHmmss, 8, 18); // 20260502eA9K3212X5
+     *
+     * @param length        生成字符串的长度，≤ format长度，以format长度为准
+     * @param dateTool      指定的时间格式，用于格式化当前时间
+     * @param scrambleStart 打乱顺序开始索引
+     * @param scrambleEnd   打乱顺序结束索引
+     * @return 生成的字符串，其长度由length参数指定，内容包含当前时间信息和随机字母
+     */
+    public static String generateByTimeAndLetter(int length, DateTool dateTool, int scrambleStart, int scrambleEnd) {
+        String time = dateTool.format(ZonedDateTime.now(DateConstants.GMT_8_ZONE_ID));
+        return completeAndUnset(length, time, 10, 62, scrambleStart, scrambleEnd);
     }
 
     /**
      * 补全并打乱随机字符串
-     * <p>
      *
      * @param length 总长度，包括预设格式字符长度
      * @param preset 预设格式字符串，如果为空，则仅生成随机字符串
@@ -73,17 +88,19 @@ public class RandomUtil {
      * @param bound  seed < bound <= {@code RANDOM_PARAM.length}
      * @return 返回打乱顺序后，包含预设格式和随机字符的字符串。
      */
-    public static String completeAndUnset(int length, String preset, int seed, int bound) {
-        preset = Objects.toString(preset, StringPool.EMPTY);
-        StringBuilder origin = new StringBuilder(preset);
-        ThreadLocalRandom localRandom = ThreadLocalRandom.current();
-        // 拼接字母
-        for (int i = 0; i < length - preset.length(); i++) {
-            origin.append(RANDOM_PARAM[localRandom.nextInt(seed, bound)]);
+    public static String completeAndUnset(int length, String preset, int seed, int bound, int scrambleStart, int scrambleEnd) {
+        int index = 0;
+        char[] charArray = new char[length];
+        if (Objects.nonNull(preset)) {
+            for (; index < preset.length() && index < length; index++) {
+                charArray[index] = preset.charAt(index);
+            }
+        }
+        while (index < length) {
+            charArray[index++] = RANDOM_PARAM[ThreadLocalRandom.current().nextInt(seed, bound)];
         }
         // 随机打乱
-        char[] charArray = origin.toString().toCharArray();
-        randomScramble(charArray, 0, charArray.length);
+        randomScramble(charArray, scrambleStart, scrambleEnd);
         return new String(charArray);
     }
 

@@ -134,6 +134,11 @@ public class MultipartFormBody extends Body {
     }
 
     @Override
+    public boolean repeatable() {
+        return multipartList.stream().allMatch(BaseMultipart::repeatable);
+    }
+
+    @Override
     public long contentLength() {
         long length = 0L;
         for (BaseMultipart<?> multipart : multipartList) {
@@ -190,6 +195,8 @@ public class MultipartFormBody extends Body {
         return Objects.nonNull(defaultCharset) ? defaultCharset : StandardCharsets.UTF_8;
     }
 
+    // region 添加表单数据
+
     /**
      * 添加表单数据
      */
@@ -239,6 +246,8 @@ public class MultipartFormBody extends Body {
         multipartList.add(addPartHeader(Objects.requireNonNull(part, "part must not be null")));
         return this;
     }
+
+    // endregion
 
     /**
      * 添加表单数据头

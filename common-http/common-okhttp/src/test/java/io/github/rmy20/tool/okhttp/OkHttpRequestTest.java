@@ -5,10 +5,10 @@ import io.github.rmy20.tool.core.date.DateTool;
 import io.github.rmy20.tool.core.lang.Assert;
 import io.github.rmy20.tool.core.util.RandomUtil;
 import io.github.rmy20.tool.http.core.MediaType;
-import io.github.rmy20.tool.http.core.result.HttpJsonResultHandle;
 import io.github.rmy20.tool.http.core.execute.BaseExecutor;
 import io.github.rmy20.tool.http.core.request.BaseMultipartRequest;
 import io.github.rmy20.tool.http.core.request.BaseRequestTool;
+import io.github.rmy20.tool.http.core.result.HttpJsonResultHandle;
 import io.github.rmy20.tool.jackson.JsonUtil;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -16,7 +16,6 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.nio.charset.StandardCharsets;
-import java.time.Duration;
 import java.time.Instant;
 import java.util.Base64;
 import java.util.HashMap;
@@ -34,7 +33,7 @@ class OkHttpRequestTest {
     private static final String uri = "http://127.0.0.1:6021/";
     private static final Logger log = LoggerFactory.getLogger(OkHttpRequestTest.class);
     private static final BaseRequestTool tool = OkHttpRequestTool.create()
-            .httpClient(OkHttpClientBuilder.create().readTimeout(Duration.ofMinutes(1L)).build());
+            .httpClient(OkHttpClientBuilder.create().readTimeout(1, TimeUnit.MINUTES).build());
 
     @Test
     void get() throws Exception {

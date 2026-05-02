@@ -21,7 +21,6 @@ import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.X509TrustManager;
 import java.net.Proxy;
 import java.net.ProxySelector;
-import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -41,37 +40,67 @@ public class OkHttpClientBuilder {
     /**
      * 连接超时时间
      */
-    private Duration connectTimeout;
+    private long connectTimeout = 10L;
 
     /**
-     * 读取超时时间
+     * 连接超时时间单位
      */
-    private Duration readTimeout;
+    private TimeUnit connectTimeoutUnit = TimeUnit.SECONDS;
 
     /**
-     * 写超时时间
+     * 读取超时时间，数据传输过程中数据包之间间隔的最大时间
      */
-    private Duration writeTimeout;
+    private long readTimeout = 10L;
+
+    /**
+     * 读取超时时间单位
+     */
+    private TimeUnit readTimeoutUnit = TimeUnit.SECONDS;
+
+    /**
+     * 写超时时间，数据传输过程中数据包之间间隔的最大时间
+     */
+    private long writeTimeout = 10L;
+
+    /**
+     * 写超时时间单位
+     */
+    private TimeUnit writeTimeoutUnit = TimeUnit.SECONDS;
 
     /**
      * 最大空闲连接数
      */
-    private Integer maxIdleConnections;
+    private int maxIdleConnections = 20;
 
     /**
      * 保持连接时间
      */
-    private Duration keepAliveDuration;
+    private long keepAlive = 60L;
+
+    /**
+     * 保持连接时间单位
+     */
+    private TimeUnit keepAliveUnit = TimeUnit.SECONDS;
 
     /**
      * 全局请求超时时间，未完成的请求，超时后，会取消请求
      */
-    private Duration callTimeout;
+    private long callTimeout = 0L;
+
+    /**
+     * 全局请求超时时间单位
+     */
+    private TimeUnit callTimeoutUnit = TimeUnit.SECONDS;
 
     /**
      * ping间隔时间，心跳间隔时间确认连接是否有效
      */
-    private Duration pingInterval;
+    private long pingInterval = 0L;
+
+    /**
+     * ping间隔时间
+     */
+    private TimeUnit pingIntervalUnit = TimeUnit.SECONDS;
 
     /**
      * 任务分发器
@@ -159,36 +188,17 @@ public class OkHttpClientBuilder {
      * 构建{@link OkHttpClient}
      */
     public OkHttpClient build() {
-        if (Objects.isNull(connectTimeout)) {
-            connectTimeout = Duration.ofSeconds(10L);
-        }
-        if (Objects.isNull(readTimeout)) {
-            readTimeout = Duration.ofSeconds(10L);
-        }
-        if (Objects.isNull(writeTimeout)) {
-            writeTimeout = Duration.ofSeconds(10L);
-        }
-        if (Objects.isNull(maxIdleConnections) || maxIdleConnections < 1) {
-            maxIdleConnections = 20;
-        }
-        if (Objects.isNull(keepAliveDuration)) {
-            keepAliveDuration = Duration.ofMinutes(1L);
-        }
-        if (Objects.nonNull(logLevel) && OkHttpLogLevelEnum.NONE != logLevel && Objects.nonNull(logger)) {
-            addInterceptor(new HttpLoggingInterceptor(logger).setLevel(logLevel.getLogLevel()));
-        }
-
         OkHttpClient.Builder builder = new OkHttpClient.Builder()
-                .connectTimeout(connectTimeout.toMillis(), TimeUnit.MILLISECONDS)
-                .readTimeout(readTimeout.toMillis(), TimeUnit.MILLISECONDS)
-                .writeTimeout(writeTimeout.toMillis(), TimeUnit.MILLISECONDS)
-                .connectionPool(new ConnectionPool(maxIdleConnections, keepAliveDuration.toMillis(), TimeUnit.MILLISECONDS));
+                .connectTimeout(connectTimeout, connectTimeoutUnit)
+                .readTimeout(readTimeout, readTimeoutUnit)
+                .writeTimeout(writeTimeout, writeTimeoutUnit)
+                .connectionPool(new ConnectionPool(maxIdleConnections, keepAlive, keepAliveUnit));
 
-        if (Objects.nonNull(callTimeout)) {
-            builder.callTimeout(callTimeout.toMillis(), TimeUnit.MILLISECONDS);
+        if (callTimeout > 0L) {
+            builder.callTimeout(callTimeout, callTimeoutUnit);
         }
-        if (Objects.nonNull(pingInterval)) {
-            builder.pingInterval(pingInterval.toMillis(), TimeUnit.MILLISECONDS);
+        if (pingInterval > 0L) {
+            builder.pingInterval(pingInterval, pingIntervalUnit);
         }
         if (Objects.nonNull(dispatcher)) {
             builder.dispatcher(dispatcher);
@@ -230,6 +240,9 @@ public class OkHttpClientBuilder {
         if (Objects.nonNull(authenticator)) {
             builder.authenticator(authenticator);
         }
+        if (Objects.nonNull(logLevel) && OkHttpLogLevelEnum.NONE != logLevel && Objects.nonNull(logger)) {
+            addInterceptor(new HttpLoggingInterceptor(logger).setLevel(logLevel.getLogLevel()));
+        }
         interceptorList.forEach(builder::addInterceptor);
         return builder.build();
     }
@@ -237,31 +250,82 @@ public class OkHttpClientBuilder {
     /**
      * 连接超时时间
      */
-    public OkHttpClientBuilder connectTimeout(Duration connectTimeout) {
+    public OkHttpClientBuilder connectTimeout(long connectTimeout) {
         this.connectTimeout = connectTimeout;
+        return this;
+    }
+
+    /**
+     * 连接超时时间单位
+     */
+    public OkHttpClientBuilder connectTimeoutUnit(TimeUnit connectTimeoutUnit) {
+        this.connectTimeoutUnit = connectTimeoutUnit;
+        return this;
+    }
+
+    /**
+     * 连接超时时间
+     */
+    public OkHttpClientBuilder connectTimeout(long connectTimeout, TimeUnit connectTimeoutUnit) {
+        this.connectTimeout = connectTimeout;
+        this.connectTimeoutUnit = connectTimeoutUnit;
         return this;
     }
 
     /**
      * 读取超时时间
      */
-    public OkHttpClientBuilder readTimeout(Duration readTimeout) {
+    public OkHttpClientBuilder readTimeout(long readTimeout) {
         this.readTimeout = readTimeout;
+        return this;
+    }
+
+    /**
+     * 读取超时时间单位
+     */
+    public OkHttpClientBuilder readTimeout(TimeUnit readTimeoutUnit) {
+        this.readTimeoutUnit = readTimeoutUnit;
+        return this;
+    }
+
+    /**
+     * 读取超时时间
+     */
+    public OkHttpClientBuilder readTimeout(long readTimeout, TimeUnit readTimeoutUnit) {
+        this.readTimeout = readTimeout;
+        this.readTimeoutUnit = readTimeoutUnit;
         return this;
     }
 
     /**
      * 写超时时间
      */
-    public OkHttpClientBuilder writeTimeout(Duration writeTimeout) {
+    public OkHttpClientBuilder writeTimeout(long writeTimeout) {
         this.writeTimeout = writeTimeout;
+        return this;
+    }
+
+    /**
+     * 写超时时间单位
+     */
+    public OkHttpClientBuilder writeTimeoutUnit(TimeUnit writeTimeoutUnit) {
+        this.writeTimeoutUnit = writeTimeoutUnit;
+        return this;
+    }
+
+    /**
+     * 写超时时间
+     */
+    public OkHttpClientBuilder writeTimeout(long writeTimeout, TimeUnit writeTimeoutUnit) {
+        this.writeTimeout = writeTimeout;
+        this.writeTimeoutUnit = writeTimeoutUnit;
         return this;
     }
 
     /**
      * 最大空闲连接数
      */
-    public OkHttpClientBuilder maxIdleConnections(Integer maxIdleConnections) {
+    public OkHttpClientBuilder maxIdleConnections(int maxIdleConnections) {
         this.maxIdleConnections = maxIdleConnections;
         return this;
     }
@@ -269,24 +333,75 @@ public class OkHttpClientBuilder {
     /**
      * 保持连接时间
      */
-    public OkHttpClientBuilder keepAliveDuration(Duration keepAliveDuration) {
-        this.keepAliveDuration = keepAliveDuration;
+    public OkHttpClientBuilder keepAlive(long keepAlive) {
+        this.keepAlive = keepAlive;
+        return this;
+    }
+
+    /**
+     * 保持连接时间
+     */
+    public OkHttpClientBuilder keepAliveUnit(TimeUnit keepAliveUnit) {
+        this.keepAliveUnit = keepAliveUnit;
+        return this;
+    }
+
+    /**
+     * 保持连接时间
+     */
+    public OkHttpClientBuilder keepAlive(long keepAlive, TimeUnit keepAliveUnit) {
+        this.keepAlive = keepAlive;
+        this.keepAliveUnit = keepAliveUnit;
         return this;
     }
 
     /**
      * 全局请求超时时间，未完成的请求，超时后，会取消请求
      */
-    public OkHttpClientBuilder callTimeout(Duration callTimeout) {
+    public OkHttpClientBuilder callTimeout(long callTimeout) {
         this.callTimeout = callTimeout;
+        return this;
+    }
+
+    /**
+     * 全局请求超时时间，未完成的请求，超时后，会取消请求
+     */
+    public OkHttpClientBuilder callTimeoutUnit(TimeUnit callTimeoutUnit) {
+        this.callTimeoutUnit = callTimeoutUnit;
+        return this;
+    }
+
+    /**
+     * 全局请求超时时间，未完成的请求，超时后，会取消请求
+     */
+    public OkHttpClientBuilder callTimeout(long callTimeout, TimeUnit callTimeoutUnit) {
+        this.callTimeout = callTimeout;
+        this.callTimeoutUnit = callTimeoutUnit;
         return this;
     }
 
     /**
      * ping间隔时间，心跳间隔时间确认连接是否有效
      */
-    public OkHttpClientBuilder pingInterval(Duration pingInterval) {
+    public OkHttpClientBuilder pingInterval(long pingInterval) {
         this.pingInterval = pingInterval;
+        return this;
+    }
+
+    /**
+     * ping间隔时间，心跳间隔时间确认连接是否有效
+     */
+    public OkHttpClientBuilder pingIntervalUnit(TimeUnit pingIntervalUnit) {
+        this.pingIntervalUnit = pingIntervalUnit;
+        return this;
+    }
+
+    /**
+     * ping间隔时间，心跳间隔时间确认连接是否有效
+     */
+    public OkHttpClientBuilder pingInterval(long pingInterval, TimeUnit pingIntervalUnit) {
+        this.pingInterval = pingInterval;
+        this.pingIntervalUnit = pingIntervalUnit;
         return this;
     }
 

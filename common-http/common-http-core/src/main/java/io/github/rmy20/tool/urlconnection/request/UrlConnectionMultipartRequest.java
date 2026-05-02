@@ -47,6 +47,12 @@ public class UrlConnectionMultipartRequest extends UrlConnectionBaseRequest<UrlC
     }
 
     @Override
+    public UrlConnectionMultipartRequest defaultCharset(Charset defaultCharset) {
+        formBody.defaultCharset(defaultCharset);
+        return super.defaultCharset(defaultCharset);
+    }
+
+    @Override
     public UrlConnectionMultipartRequest addText(String name, String value) {
         formBody.addText(name, value);
         return this;
@@ -94,6 +100,12 @@ public class UrlConnectionMultipartRequest extends UrlConnectionBaseRequest<UrlC
     public UrlConnectionMultipartRequest addPart(BaseMultipart<?> part) {
         formBody.addPart(part);
         return this;
+    }
+
+    @Override
+    protected void executeBefore() {
+        super.executeBefore();
+        getHeaders().setContentType(formBody.getContentType());
     }
 
     @Override
