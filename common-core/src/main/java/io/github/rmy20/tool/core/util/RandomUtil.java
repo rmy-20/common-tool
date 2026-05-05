@@ -3,7 +3,10 @@ package io.github.rmy20.tool.core.util;
 import io.github.rmy20.tool.core.date.DateConstants;
 import io.github.rmy20.tool.core.date.DateTool;
 import io.github.rmy20.tool.core.text.StringPool;
+import io.github.rmy20.tool.core.util.ulid.Ulid;
+import io.github.rmy20.tool.core.util.ulid.UlidSequence;
 
+import java.security.SecureRandom;
 import java.time.ZonedDateTime;
 import java.util.Objects;
 import java.util.UUID;
@@ -25,6 +28,10 @@ public class RandomUtil {
             'Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P',
             'A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L',
             'Z', 'X', 'C', 'V', 'B', 'N', 'M'};
+    /**
+     * 真随机数种子
+     */
+    public static final SecureRandom ENTROPY_RANDOM = new SecureRandom();
 
     static {
         // 打乱数字，1-0，0-9
@@ -33,6 +40,24 @@ public class RandomUtil {
         randomScramble(RANDOM_PARAM, 10, 35);
         // 打乱大写字母，Q-36，M-61
         randomScramble(RANDOM_PARAM, 36, 61);
+    }
+
+    /**
+     * 真随机生成byte[]
+     */
+    public static byte[] entropyRandomBytes(int len) {
+        byte[] bytes = new byte[len];
+        ENTROPY_RANDOM.nextBytes(bytes);
+        return bytes;
+    }
+
+    /**
+     * 真随机生成byte[]，并对结果随机打乱
+     */
+    public static byte[] entropyRandomBytesAndScramble(int len) {
+        byte[] bytes = entropyRandomBytes(len);
+        randomScramble(bytes, 0, len);
+        return bytes;
     }
 
     /**
@@ -47,6 +72,20 @@ public class RandomUtil {
      */
     public static String generateUuid() {
         return UUID.randomUUID().toString();
+    }
+
+    /**
+     * 获取 ULID
+     */
+    public static String generateUlid() {
+        return Ulid.createUlid().toString();
+    }
+
+    /**
+     * 获取有序序列ULID，48位时间戳 + 24位序列 + 56位随机数
+     */
+    public static String generateSequenceUlid() {
+        return UlidSequence.createNextUlid().toString();
     }
 
     /**
@@ -102,6 +141,33 @@ public class RandomUtil {
         // 随机打乱
         randomScramble(charArray, scrambleStart, scrambleEnd);
         return new String(charArray);
+    }
+
+    /**
+     * 随机打乱字节数组
+     *
+     * @param bytes 待打乱数组
+     * @param start 索引范围开始
+     * @param end   索引范围结束
+     */
+    public static void randomScramble(byte[] bytes, int start, int end) {
+        if (start < 0) {
+            start = 0;
+        }
+        if (end >= bytes.length) {
+            end = bytes.length - 1;
+        }
+        if (start >= end) {
+            return;
+        }
+        int nextEnd = end + 1;
+        ThreadLocalRandom localRandom = ThreadLocalRandom.current();
+        for (int i = end; i >= start; i--) {
+            int j = localRandom.nextInt(start, nextEnd);
+            byte temp = bytes[i];
+            bytes[i] = bytes[j];
+            bytes[j] = temp;
+        }
     }
 
     /**
