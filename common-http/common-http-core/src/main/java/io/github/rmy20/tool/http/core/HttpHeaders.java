@@ -70,8 +70,8 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
     /**
      * 去除 Content-type
      */
-    public void removeContentType() {
-        headers.remove(HttpHeaderConstant.Content_Type);
+    public List<String> removeContentType() {
+        return headers.remove(HttpHeaderConstant.Content_Type);
     }
 
     /**

@@ -52,7 +52,7 @@ public class StringMultipart extends BaseMultipart<StringMultipart> {
     }
 
     @Override
-    protected StringMultipart self() {
+    public StringMultipart self() {
         return this;
     }
 }

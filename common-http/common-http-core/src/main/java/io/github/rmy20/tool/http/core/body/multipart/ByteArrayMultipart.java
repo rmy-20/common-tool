@@ -48,7 +48,7 @@ public class ByteArrayMultipart extends BaseMultipart<ByteArrayMultipart> {
     }
 
     @Override
-    protected ByteArrayMultipart self() {
+    public ByteArrayMultipart self() {
         return this;
     }
 }

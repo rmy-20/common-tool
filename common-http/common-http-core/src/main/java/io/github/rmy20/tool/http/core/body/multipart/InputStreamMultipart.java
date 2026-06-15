@@ -44,7 +44,7 @@ public class InputStreamMultipart extends BaseMultipart<InputStreamMultipart> {
     }
 
     @Override
-    protected InputStreamMultipart self() {
+    public InputStreamMultipart self() {
         return this;
     }
 }

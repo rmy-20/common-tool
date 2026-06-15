@@ -1,16 +1,13 @@
 package io.github.rmy20.tool.http.core.decorator;
 
+import io.github.rmy20.tool.core.function.Chainable;
+
 /**
  * URI 参数构建
  *
  * @author sheng
  */
-public interface UriBuilderDecorator<T extends UriBuilderDecorator<T>> {
-    /**
-     * 获取当前实例
-     */
-    T self();
-
+public interface UriBuilderDecorator<T extends UriBuilderDecorator<T>> extends Chainable<T> {
     /**
      * 添加参数
      *

@@ -35,7 +35,7 @@ public class OkHttpExecutorBuilder<R> extends BaseExecutorBuilder<R, OkHttpExecu
     }
 
     @Override
-    protected OkHttpExecutorBuilder<R> self() {
+    public OkHttpExecutorBuilder<R> self() {
         return this;
     }
 

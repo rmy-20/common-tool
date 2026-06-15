@@ -1,5 +1,6 @@
 package io.github.rmy20.tool.httpclient4;
 
+import io.github.rmy20.tool.http.core.MediaType;
 import io.github.rmy20.tool.http.core.constant.HttpMethodEnum;
 import io.github.rmy20.tool.httpclient4.request.HttpClient4FormRequest;
 import io.github.rmy20.tool.httpclient4.request.HttpClient4MultipartRequest;
@@ -139,5 +140,14 @@ public class HttpClient4Tool {
      */
     public static HttpClient4MultipartRequest multipart(String url, HttpMethodEnum method) {
         return HttpClient4MultipartRequest.create(url, method);
+    }
+
+    /**
+     * 多媒体请求
+     *
+     * @param url 请求地址
+     */
+    public static HttpClient4MultipartRequest multipart(String url, HttpMethodEnum method, MediaType contentType) {
+        return HttpClient4MultipartRequest.create(url, method, contentType);
     }
 }

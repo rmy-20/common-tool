@@ -79,7 +79,7 @@ public class HttpClient4ExecutorBuilder<R> extends BaseExecutorBuilder<R,
     }
 
     @Override
-    protected HttpClient4ExecutorBuilder<R> self() {
+    public HttpClient4ExecutorBuilder<R> self() {
         return this;
     }
 

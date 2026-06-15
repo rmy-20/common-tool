@@ -52,7 +52,7 @@ public class FileMultipart extends BaseMultipart<FileMultipart> {
     }
 
     @Override
-    protected FileMultipart self() {
+    public FileMultipart self() {
         return this;
     }
 }

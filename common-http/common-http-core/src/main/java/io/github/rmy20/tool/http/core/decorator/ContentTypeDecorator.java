@@ -1,5 +1,6 @@
 package io.github.rmy20.tool.http.core.decorator;
 
+import io.github.rmy20.tool.core.function.Chainable;
 import io.github.rmy20.tool.http.core.HttpHeaders;
 import io.github.rmy20.tool.http.core.MediaType;
 
@@ -8,11 +9,7 @@ import io.github.rmy20.tool.http.core.MediaType;
  *
  * @author sheng
  */
-public interface ContentTypeDecorator<T extends ContentTypeDecorator<T>> {
-    /**
-     * 获取当前实例
-     */
-    T self();
+public interface ContentTypeDecorator<T extends ContentTypeDecorator<T>> extends Chainable<T> {
 
     /**
      * 获取请求头

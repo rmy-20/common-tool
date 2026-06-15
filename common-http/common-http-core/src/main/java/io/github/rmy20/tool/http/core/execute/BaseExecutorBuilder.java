@@ -1,5 +1,6 @@
 package io.github.rmy20.tool.http.core.execute;
 
+import io.github.rmy20.tool.core.function.Chainable;
 import io.github.rmy20.tool.core.function.throwing.ThrowingConsumer;
 import io.github.rmy20.tool.http.core.constant.HttpConstant;
 import io.github.rmy20.tool.http.core.result.HttpResultHandle;
@@ -16,8 +17,8 @@ import java.util.function.Predicate;
  * @author sheng
  */
 @Slf4j
-public abstract class BaseExecutorBuilder<R, SyncExecutor extends BaseExecutor<R>,
-        AsyncExecutor extends BaseExecutor<R>, T extends BaseExecutorBuilder<R, SyncExecutor, AsyncExecutor, T>> {
+public abstract class BaseExecutorBuilder<R, SyncExecutor extends BaseExecutor<R>, AsyncExecutor extends BaseExecutor<R>,
+        T extends BaseExecutorBuilder<R, SyncExecutor, AsyncExecutor, T>> implements Chainable<T> {
     /**
      * 错误处理器
      */
@@ -48,11 +49,6 @@ public abstract class BaseExecutorBuilder<R, SyncExecutor extends BaseExecutor<R
     public BaseExecutorBuilder(HttpResultHandle<R> resultHandle) {
         this.resultHandle = Objects.requireNonNull(resultHandle, "resultHandle must not be null");
     }
-
-    /**
-     * 返回当前实例
-     */
-    protected abstract T self();
 
     /**
      * 设置成功判断

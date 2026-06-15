@@ -2,14 +2,14 @@ package io.github.rmy20.tool.okhttp.request;
 
 import io.github.rmy20.tool.http.core.HttpHeaders;
 import io.github.rmy20.tool.http.core.constant.HttpMethodEnum;
+import io.github.rmy20.tool.http.core.exception.HttpException;
+import io.github.rmy20.tool.http.core.request.BaseRequest;
 import io.github.rmy20.tool.http.core.result.HttpByteArrayResultHandle;
 import io.github.rmy20.tool.http.core.result.HttpFileResultHandle;
 import io.github.rmy20.tool.http.core.result.HttpJsonResultHandle;
 import io.github.rmy20.tool.http.core.result.HttpOutputStreamResultHandle;
 import io.github.rmy20.tool.http.core.result.HttpResultHandle;
 import io.github.rmy20.tool.http.core.result.HttpStringResultHandle;
-import io.github.rmy20.tool.http.core.exception.HttpException;
-import io.github.rmy20.tool.http.core.request.BaseRequest;
 import io.github.rmy20.tool.http.core.result.HttpXmlResultHandle;
 import io.github.rmy20.tool.okhttp.constant.OkHttpConstant;
 import io.github.rmy20.tool.okhttp.decorator.OkHttpUriBuilderDecorator;
@@ -92,9 +92,6 @@ public abstract class OkHttpBaseRequest<T extends OkHttpBaseRequest<T>>
     public Charset getDefaultCharset() {
         return Objects.nonNull(defaultCharset) ? defaultCharset : BaseRequest.super.getDefaultCharset();
     }
-
-    @Override
-    public abstract T self();
 
     @Override
     public HttpUrl.Builder getUrlBuilder() {

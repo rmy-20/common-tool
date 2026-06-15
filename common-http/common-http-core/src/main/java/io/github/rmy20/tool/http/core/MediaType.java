@@ -281,7 +281,11 @@ public class MediaType {
      * 根据参数构建新的#{@link MediaType}
      */
     public MediaType withParameters(String... parameters) {
-        return MediaType.create(type, subType, Arrays.asList(parameters), charset);
+        List<String> oldParameterList = this.getParameters();
+        List<String> parameterList = CollectionUtil.isEmpty(oldParameterList)
+                ? new ArrayList<>() : new ArrayList<>(oldParameterList);
+        Collections.addAll(parameterList, parameters);
+        return MediaType.create(type, subType, parameterList, charset);
     }
 
     @Override

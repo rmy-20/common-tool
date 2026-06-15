@@ -1,5 +1,6 @@
 package io.github.rmy20.tool.urlconnection.request;
 
+import io.github.rmy20.tool.http.core.MediaType;
 import io.github.rmy20.tool.http.core.body.MultipartFormBody;
 import io.github.rmy20.tool.http.core.body.multipart.BaseMultipart;
 import io.github.rmy20.tool.http.core.constant.HttpMethodEnum;
@@ -32,12 +33,23 @@ public class UrlConnectionMultipartRequest extends UrlConnectionBaseRequest<UrlC
     /**
      * 创建#{@link UrlConnectionMultipartRequest}
      */
+    public static UrlConnectionMultipartRequest create(String url, HttpMethodEnum method, MediaType contentType) {
+        return new UrlConnectionMultipartRequest(url, method, contentType);
+    }
+
+    /**
+     * 创建#{@link UrlConnectionMultipartRequest}
+     */
     public static UrlConnectionMultipartRequest create(String url, HttpMethodEnum method, MultipartFormBody formBody) {
         return new UrlConnectionMultipartRequest(url, method, formBody);
     }
 
     public UrlConnectionMultipartRequest(String url, HttpMethodEnum method) {
         this(url, method, MultipartFormBody.create());
+    }
+
+    public UrlConnectionMultipartRequest(String url, HttpMethodEnum method, MediaType contentType) {
+        this(url, method, MultipartFormBody.create(contentType));
     }
 
     public UrlConnectionMultipartRequest(String url, HttpMethodEnum method, MultipartFormBody formBody) {
@@ -104,7 +116,6 @@ public class UrlConnectionMultipartRequest extends UrlConnectionBaseRequest<UrlC
 
     @Override
     protected void executeBefore() {
-        super.executeBefore();
         getHeaders().setContentType(formBody.getContentType());
     }
 

@@ -1,5 +1,6 @@
 package io.github.rmy20.tool.httpclient4.request;
 
+import io.github.rmy20.tool.http.core.MediaType;
 import io.github.rmy20.tool.http.core.body.MultipartFormBody;
 import io.github.rmy20.tool.http.core.constant.HttpMethodEnum;
 import io.github.rmy20.tool.http.core.request.BaseMultipartRequest;
@@ -38,6 +39,13 @@ public class HttpClient4MultipartRequest extends HttpClient4BaseRequest<HttpClie
     /**
      * 创建
      */
+    public static HttpClient4MultipartRequest create(String url, HttpMethodEnum method, MediaType contentType) {
+        return new HttpClient4MultipartRequest(url, method, contentType);
+    }
+
+    /**
+     * 创建
+     */
     public static HttpClient4MultipartRequest create(String url, HttpMethodEnum method, MultipartFormBody formBody) {
         return new HttpClient4MultipartRequest(url, method, formBody);
     }
@@ -46,6 +54,10 @@ public class HttpClient4MultipartRequest extends HttpClient4BaseRequest<HttpClie
         super(url, method);
         // this.formBuilder = MultipartEntityBuilder.create().setContentType(ContentType.MULTIPART_FORM_DATA);
         this.formBody = MultipartFormBody.create();
+    }
+
+    public HttpClient4MultipartRequest(String url, HttpMethodEnum method, MediaType contentType) {
+        this(url, method, MultipartFormBody.create(contentType));
     }
 
     public HttpClient4MultipartRequest(String url, HttpMethodEnum method, MultipartFormBody formBody) {

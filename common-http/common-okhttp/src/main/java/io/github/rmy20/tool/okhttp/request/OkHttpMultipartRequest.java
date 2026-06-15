@@ -1,16 +1,21 @@
 package io.github.rmy20.tool.okhttp.request;
 
+import io.github.rmy20.tool.core.collection.CollectionUtil;
 import io.github.rmy20.tool.core.text.StringPool;
+import io.github.rmy20.tool.core.text.StringUtil;
 import io.github.rmy20.tool.http.core.constant.HttpMethodEnum;
 import io.github.rmy20.tool.http.core.exception.HttpException;
 import io.github.rmy20.tool.http.core.request.BaseMultipartRequest;
+import okhttp3.MediaType;
 import okhttp3.MultipartBody;
 import okhttp3.RequestBody;
 import okio.Buffer;
 
 import java.io.File;
 import java.io.InputStream;
+import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 /**
  * okhttp multipart form
@@ -22,6 +27,11 @@ public class OkHttpMultipartRequest extends OkHttpBaseRequest<OkHttpMultipartReq
      * 表单
      */
     private final MultipartBody.Builder formBuilder;
+
+    /**
+     * 媒体类型
+     */
+    private MediaType mediaType = MultipartBody.FORM;
 
     public OkHttpMultipartRequest(String url, HttpMethodEnum method) {
         super(url, method);
@@ -124,11 +134,17 @@ public class OkHttpMultipartRequest extends OkHttpBaseRequest<OkHttpMultipartReq
 
     @Override
     public RequestBody getRequestBody() {
-        return formBuilder.setType(MultipartBody.FORM).build();
+        return formBuilder.setType(Optional.ofNullable(mediaType).orElse(MultipartBody.FORM)).build();
     }
 
     @Override
     protected void executeBefore() {
-        getHeaders().removeContentType();
+        List<String> contentTypeList = getHeaders().removeContentType();
+        if (CollectionUtil.isNotEmpty(contentTypeList)) {
+            String contendType = contentTypeList.get(0);
+            if (StringUtil.isNotBlank(contendType)) {
+                mediaType = MediaType.parse(contendType);
+            }
+        }
     }
 }

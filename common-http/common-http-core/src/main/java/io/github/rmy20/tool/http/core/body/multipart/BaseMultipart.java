@@ -1,5 +1,6 @@
 package io.github.rmy20.tool.http.core.body.multipart;
 
+import io.github.rmy20.tool.core.function.Chainable;
 import io.github.rmy20.tool.core.lang.Assert;
 import io.github.rmy20.tool.core.text.StringUtil;
 import io.github.rmy20.tool.http.core.MediaType;
@@ -18,7 +19,7 @@ import java.util.Objects;
  * @author sheng
  */
 @Getter
-public abstract class BaseMultipart<T extends BaseMultipart<T>> implements Closeable {
+public abstract class BaseMultipart<T extends BaseMultipart<T>> implements Closeable, Chainable<T> {
     /**
      * 头信息
      */
@@ -69,11 +70,6 @@ public abstract class BaseMultipart<T extends BaseMultipart<T>> implements Close
     @Override
     public void close() throws IOException {
     }
-
-    /**
-     * 获取当前实例
-     */
-    protected abstract T self();
 
     /**
      * 设置文件名

@@ -59,7 +59,7 @@ public class UrlConnectionExecutorBuilder<R>
     }
 
     @Override
-    protected UrlConnectionExecutorBuilder<R> self() {
+    public UrlConnectionExecutorBuilder<R> self() {
         return this;
     }
 

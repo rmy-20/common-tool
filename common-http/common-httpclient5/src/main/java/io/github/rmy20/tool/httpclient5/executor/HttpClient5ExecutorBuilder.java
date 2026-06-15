@@ -133,7 +133,7 @@ public class HttpClient5ExecutorBuilder<R> extends BaseExecutorBuilder<R,
     }
 
     @Override
-    protected HttpClient5ExecutorBuilder<R> self() {
+    public HttpClient5ExecutorBuilder<R> self() {
         return this;
     }
 

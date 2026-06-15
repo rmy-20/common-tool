@@ -1,6 +1,5 @@
 package io.github.rmy20.tool.http.core.body;
 
-import io.github.rmy20.tool.core.lang.Assert;
 import io.github.rmy20.tool.core.text.StringUtil;
 import io.github.rmy20.tool.core.util.RandomUtil;
 import io.github.rmy20.tool.http.core.MediaType;
@@ -83,11 +82,15 @@ public class MultipartFormBody extends Body {
     }
 
     public MultipartFormBody(MediaType contentType) {
-        super(contentType);
+        super((contentType = checkMediaType(contentType)));
         this.multipartList = new ArrayList<>();
+        this.boundary = contentType.getParameter(HttpConstant.BOUNDARY);
+    }
+
+    static MediaType checkMediaType(MediaType contentType) {
         String boundary = contentType.getParameter(HttpConstant.BOUNDARY);
-        Assert.isTrue(StringUtil.isNotBlank(boundary), "contentType boundary must not be blank");
-        this.boundary = boundary;
+        return StringUtil.isNotBlank(boundary) ? contentType
+                : contentType.withParameters(HttpConstant.BOUNDARY, RandomUtil.generateUuid());
     }
 
     @Override

@@ -1,5 +1,6 @@
 package io.github.rmy20.tool.urlconnection;
 
+import io.github.rmy20.tool.http.core.MediaType;
 import io.github.rmy20.tool.http.core.constant.HttpMethodEnum;
 import io.github.rmy20.tool.urlconnection.request.UrlConnectionFormRequest;
 import io.github.rmy20.tool.urlconnection.request.UrlConnectionMultipartRequest;
@@ -139,5 +140,14 @@ public class UrlConnectionTool {
      */
     public static UrlConnectionMultipartRequest multipart(String url, HttpMethodEnum method) {
         return UrlConnectionMultipartRequest.create(url, method);
+    }
+
+    /**
+     * 多媒体请求
+     *
+     * @param url 请求地址
+     */
+    public static UrlConnectionMultipartRequest multipart(String url, HttpMethodEnum method, MediaType contentType) {
+        return UrlConnectionMultipartRequest.create(url, method, contentType);
     }
 }
