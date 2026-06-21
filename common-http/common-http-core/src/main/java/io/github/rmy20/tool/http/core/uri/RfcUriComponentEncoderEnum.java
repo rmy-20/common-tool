@@ -1,7 +1,7 @@
 package io.github.rmy20.tool.http.core.uri;
 
 import io.github.rmy20.tool.core.text.CharacterUtil;
-import io.github.rmy20.tool.http.core.util.UriUtil;
+import io.github.rmy20.tool.http.core.constant.PercentCodecEnum;
 
 import java.nio.charset.Charset;
 
@@ -27,7 +27,7 @@ public enum RfcUriComponentEncoderEnum implements AllowedPredicate {
     AUTHORITY() {
         @Override
         public boolean isAllowed(int c) {
-            return UriUtil.isUnreservedOrSubDelimiter(c) || ':' == c || '@' == c;
+            return isUnreservedOrSubDelimiter(c) || ':' == c || '@' == c;
         }
     },
 
@@ -37,7 +37,7 @@ public enum RfcUriComponentEncoderEnum implements AllowedPredicate {
     USER_INFO() {
         @Override
         public boolean isAllowed(int c) {
-            return UriUtil.isUnreservedOrSubDelimiter(c) || ':' == c;
+            return isUnreservedOrSubDelimiter(c) || ':' == c;
         }
     },
 
@@ -47,7 +47,7 @@ public enum RfcUriComponentEncoderEnum implements AllowedPredicate {
     HOST_IPV4() {
         @Override
         public boolean isAllowed(int c) {
-            return UriUtil.isUnreservedOrSubDelimiter(c);
+            return isUnreservedOrSubDelimiter(c);
         }
     },
 
@@ -57,7 +57,7 @@ public enum RfcUriComponentEncoderEnum implements AllowedPredicate {
     HOST_IPV6() {
         @Override
         public boolean isAllowed(int c) {
-            return UriUtil.isUnreservedOrSubDelimiter(c) || '[' == c || ']' == c || ':' == c;
+            return isUnreservedOrSubDelimiter(c) || '[' == c || ']' == c || ':' == c;
         }
     },
 
@@ -77,7 +77,7 @@ public enum RfcUriComponentEncoderEnum implements AllowedPredicate {
     PATH() {
         @Override
         public boolean isAllowed(int c) {
-            return UriUtil.isPathChar(c) || '/' == c;
+            return isPathChar(c) || '/' == c;
         }
     },
 
@@ -87,7 +87,7 @@ public enum RfcUriComponentEncoderEnum implements AllowedPredicate {
     PATH_SEGMENT() {
         @Override
         public boolean isAllowed(int c) {
-            return UriUtil.isPathChar(c);
+            return isPathChar(c);
         }
     },
 
@@ -97,7 +97,7 @@ public enum RfcUriComponentEncoderEnum implements AllowedPredicate {
     QUERY() {
         @Override
         public boolean isAllowed(int c) {
-            return UriUtil.isPathChar(c) || '/' == c || '?' == c;
+            return isPathChar(c) || '/' == c || '?' == c;
         }
     },
 
@@ -107,7 +107,7 @@ public enum RfcUriComponentEncoderEnum implements AllowedPredicate {
     QUERY_PARAM() {
         @Override
         public boolean isAllowed(int c) {
-            return '=' != c && '&' != c && (UriUtil.isPathChar(c) || '/' == c || '?' == c);
+            return '=' != c && '&' != c && (isPathChar(c) || '/' == c || '?' == c);
         }
     },
 
@@ -117,7 +117,7 @@ public enum RfcUriComponentEncoderEnum implements AllowedPredicate {
     FRAGMENT() {
         @Override
         public boolean isAllowed(int c) {
-            return UriUtil.isPathChar(c) || '/' == c || '?' == c;
+            return isPathChar(c) || '/' == c || '?' == c;
         }
     },
 
@@ -127,7 +127,7 @@ public enum RfcUriComponentEncoderEnum implements AllowedPredicate {
     URI() {
         @Override
         public boolean isAllowed(int c) {
-            return UriUtil.isUnreserved(c);
+            return PercentCodecEnum.RFC3986.isAllowed(c);
         }
     },
     ;
@@ -139,6 +139,46 @@ public enum RfcUriComponentEncoderEnum implements AllowedPredicate {
      * @param charset 默认字符集
      */
     public String encode(String source, Charset charset) {
-        return UriUtil.encode(source, charset, this, false);
+        return PercentCodecEnum.encode(source, charset, this, false);
+    }
+
+    /**
+     * 未保留字符（可直接出现在 uri 中而无需编码）或子分隔符
+     */
+    private static final boolean[] UNRESERVED_OR_SUB_DELIMITER = new boolean[128];
+    /**
+     * 字符集 pchar
+     */
+    private static final boolean[] PATH_CHAR = new boolean[128];
+
+    static {
+        // 子分隔符
+        final char[] SUB_DELIMITER_CHAR_ARRAY = {'!', '$', '&', '\'', '(', ')', '*', '+', ',', ';', '='};
+        final boolean[] SUB_DELIMITER_ARRAY = new boolean[128];
+        for (char ch : SUB_DELIMITER_CHAR_ARRAY) {
+            SUB_DELIMITER_ARRAY[ch] = true;
+        }
+        // 未保留字符（可直接出现在 uri 中而无需编码）或子分隔符
+        for (int i = 0; i < 128; i++) {
+            boolean allowed = PercentCodecEnum.RFC3986.isAllowed(i) || SUB_DELIMITER_ARRAY[i];
+            UNRESERVED_OR_SUB_DELIMITER[i] = allowed;
+            PATH_CHAR[i] = allowed;
+        }
+        PATH_CHAR[':'] = true;
+        PATH_CHAR['@'] = true;
+    }
+
+    /**
+     * 判断是否是 uri 未保留字符（可直接出现在 uri 中而无需编码）或子分隔符
+     */
+    public static boolean isUnreservedOrSubDelimiter(int c) {
+        return c >= 0 && c < UNRESERVED_OR_SUB_DELIMITER.length && UNRESERVED_OR_SUB_DELIMITER[c];
+    }
+
+    /**
+     * 给定字符是否在 rfc uri 路径段允许字符集 pchar 中
+     */
+    public static boolean isPathChar(int c) {
+        return c >= 0 && c < PATH_CHAR.length && PATH_CHAR[c];
     }
 }

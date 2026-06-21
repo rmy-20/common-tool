@@ -2,6 +2,7 @@ package io.github.rmy20.tool.http.core.body;
 
 import io.github.rmy20.tool.core.text.StringPool;
 import io.github.rmy20.tool.http.core.MediaType;
+import io.github.rmy20.tool.http.core.constant.PercentCodecEnum;
 import io.github.rmy20.tool.http.core.util.UriUtil;
 
 import java.io.IOException;
@@ -94,8 +95,8 @@ public class UrlEncodedFormBody extends Body {
      * @param value value
      */
     public UrlEncodedFormBody addTextEncoded(String name, Object value) {
-        queryParameters.add(UriUtil.encode(name, charset, UriUtil::isUnreserved, true));
-        queryParameters.add(UriUtil.encode(Objects.toString(value, StringPool.EMPTY), charset, UriUtil::isUnreserved, true));
+        queryParameters.add(PercentCodecEnum.RFC3986.encode(name, charset, true));
+        queryParameters.add(PercentCodecEnum.RFC3986.encode(Objects.toString(value, StringPool.EMPTY), charset, true));
         return reset();
     }
 

@@ -1,5 +1,6 @@
 package io.github.rmy20.tool.http.core.body;
 
+import io.github.rmy20.tool.core.text.StringPool;
 import io.github.rmy20.tool.core.text.StringUtil;
 import io.github.rmy20.tool.core.util.RandomUtil;
 import io.github.rmy20.tool.http.core.MediaType;
@@ -9,6 +10,7 @@ import io.github.rmy20.tool.http.core.body.multipart.FileMultipart;
 import io.github.rmy20.tool.http.core.body.multipart.InputStreamMultipart;
 import io.github.rmy20.tool.http.core.body.multipart.StringMultipart;
 import io.github.rmy20.tool.http.core.constant.HttpConstant;
+import io.github.rmy20.tool.http.core.constant.PercentCodecEnum;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -16,6 +18,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.charset.Charset;
+import java.nio.charset.CharsetEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
@@ -51,6 +54,11 @@ public class MultipartFormBody extends Body {
      * 默认字符集
      */
     private Charset defaultCharset = StandardCharsets.UTF_8;
+
+    /**
+     * ISO-8859-1编码器
+     */
+    private static final CharsetEncoder ISO_8859_1_ENCODER = StandardCharsets.ISO_8859_1.newEncoder();
 
     /**
      * 创建#{@link MultipartFormBody}
@@ -99,14 +107,13 @@ public class MultipartFormBody extends Body {
     }
 
     protected void doWriteTo(OutputStream outputStream, boolean writeBody) throws IOException {
-        Charset charset = getDefaultCharset();
         // 序言
         if (this.preamble != null) {
-            outputStream.write(StringUtil.encoded(charset, this.preamble));
+            outputStream.write(StringUtil.encoded(this.defaultCharset, this.preamble));
             outputStream.write(HttpConstant.CR_LF_ENCODED);
         }
         // form data
-        byte[] boundaryEncoded = StringUtil.encoded(charset, boundary);
+        byte[] boundaryEncoded = StringUtil.encoded(this.defaultCharset, boundary);
         for (final BaseMultipart<?> part : multipartList) {
             outputStream.write(HttpConstant.TWO_HYPHENS_ENCODED);
             outputStream.write(boundaryEncoded);
@@ -114,7 +121,7 @@ public class MultipartFormBody extends Body {
 
             // form header
             for (String header : part.getHeaderList()) {
-                outputStream.write(StringUtil.encoded(getDefaultCharset(), header));
+                outputStream.write(StringUtil.encoded(this.defaultCharset, header));
                 outputStream.write(HttpConstant.CR_LF_ENCODED);
             }
             outputStream.write(HttpConstant.CR_LF_ENCODED);
@@ -130,7 +137,7 @@ public class MultipartFormBody extends Body {
         outputStream.write(HttpConstant.CR_LF_ENCODED);
         // 结束符
         if (this.epilogue != null) {
-            outputStream.write(StringUtil.encoded(charset, this.epilogue));
+            outputStream.write(StringUtil.encoded(this.defaultCharset, this.epilogue));
             outputStream.write(HttpConstant.CR_LF_ENCODED);
         }
         outputStream.flush();
@@ -162,8 +169,20 @@ public class MultipartFormBody extends Body {
 
     @Override
     public void close() throws IOException {
+        IOException firstException = null;
         for (BaseMultipart<?> multipart : multipartList) {
-            multipart.close();
+            try {
+                multipart.close();
+            } catch (IOException e) {
+                if (Objects.isNull(firstException)) {
+                    firstException = e;
+                } else {
+                    firstException.addSuppressed(e);
+                }
+            }
+        }
+        if (Objects.nonNull(firstException)) {
+            throw firstException;
         }
     }
 
@@ -187,15 +206,8 @@ public class MultipartFormBody extends Body {
      * 设置默认编码字符集
      */
     public MultipartFormBody defaultCharset(Charset defaultCharset) {
-        this.defaultCharset = defaultCharset;
+        this.defaultCharset = Objects.requireNonNull(defaultCharset, "charset must not be null");
         return this;
-    }
-
-    /**
-     * 获取默认编码字符集
-     */
-    public Charset getDefaultCharset() {
-        return Objects.nonNull(defaultCharset) ? defaultCharset : StandardCharsets.UTF_8;
     }
 
     // region 添加表单数据
@@ -204,7 +216,7 @@ public class MultipartFormBody extends Body {
      * 添加表单数据
      */
     public MultipartFormBody addText(String name, String value) {
-        return addPart(new StringMultipart(name, value, getDefaultCharset()));
+        return addPart(new StringMultipart(name, value, this.defaultCharset));
     }
 
     /**
@@ -262,7 +274,13 @@ public class MultipartFormBody extends Body {
                 .append(removeSpecialCharacters(part.getName()))
                 .append('"');
         if (hasFileName) {
-            builder.append("; filename=\"").append(removeSpecialCharacters(fileName)).append('"');
+            String normalFileName = removeSpecialCharacters(fileName);
+            builder.append("; filename=\"").append(normalFileName).append('"');
+            if (!ISO_8859_1_ENCODER.canEncode(normalFileName)) {
+                builder.append("; filename*=\"UTF-8''");
+                PercentCodecEnum.RFC5987.encode(builder, normalFileName, StandardCharsets.UTF_8, false);
+                builder.append('"');
+            }
         }
         part.addHeader(builder.toString());
         if (hasFileName) {
@@ -276,31 +294,25 @@ public class MultipartFormBody extends Body {
     /**
      * 去除字符串中的特殊字符
      */
-    protected CharSequence removeSpecialCharacters(final CharSequence text) {
-        if (Objects.isNull(text)) {
-            return null;
+    protected String removeSpecialCharacters(final String text) {
+        if (Objects.isNull(text) || text.isEmpty()) {
+            return StringPool.EMPTY;
         }
-        boolean requiresRewrite = false;
-        int n = 0;
-        for (; n < text.length(); n++) {
-            final char ch = text.charAt(n);
-            if (isSpecialChar(ch)) {
-                requiresRewrite = true;
+        int firstSpecialCharIndex = -1;
+        for (int i = 0; i < text.length(); i++) {
+            if (isSpecialChar(text.charAt(i))) {
+                firstSpecialCharIndex = i;
                 break;
             }
         }
-        if (!requiresRewrite) {
+        if (firstSpecialCharIndex == -1) {
             return text;
         }
-        final StringBuilder builder = new StringBuilder();
-        builder.append(text, 0, n);
-        for (; n < text.length(); n++) {
-            final char ch = text.charAt(n);
-            if (isSpecialChar(ch)) {
-                builder.append(' ');
-            } else {
-                builder.append(ch);
-            }
+        StringBuilder builder = new StringBuilder(text.length());
+        builder.append(text, 0, firstSpecialCharIndex);
+        for (int i = firstSpecialCharIndex; i < text.length(); i++) {
+            char ch = text.charAt(i);
+            builder.append(isSpecialChar(ch) ? ' ' : ch);
         }
         return builder.toString();
     }

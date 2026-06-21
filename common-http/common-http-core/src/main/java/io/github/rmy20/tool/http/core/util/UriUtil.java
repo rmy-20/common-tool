@@ -2,14 +2,10 @@ package io.github.rmy20.tool.http.core.util;
 
 import io.github.rmy20.tool.core.collection.CollectionUtil;
 import io.github.rmy20.tool.core.lang.Assert;
-import io.github.rmy20.tool.core.text.CharacterUtil;
 import io.github.rmy20.tool.core.text.StringPool;
 import io.github.rmy20.tool.core.text.StringUtil;
 import io.github.rmy20.tool.http.core.exception.UriException;
-import io.github.rmy20.tool.http.core.uri.AllowedPredicate;
 
-import java.io.ByteArrayOutputStream;
-import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -20,45 +16,6 @@ import java.util.List;
  * @author sheng
  */
 public class UriUtil {
-    /**
-     * 未保留字符（可直接出现在 uri 中而无需编码）或子分隔符
-     */
-    private static final boolean[] UNRESERVED_OR_SUB_DELIMITER_ARRAY = new boolean[128];
-
-    static {
-        for (int i = 0; i < 128; i++) {
-            UNRESERVED_OR_SUB_DELIMITER_ARRAY[i] = isUnreserved(i) || isSubDelimiter(i);
-        }
-    }
-
-    /**
-     * 判断是否是 uri 未保留字符（可直接出现在 uri 中而无需编码）或子分隔符
-     */
-    public static boolean isUnreservedOrSubDelimiter(int c) {
-        return c >= 0 && c < UNRESERVED_OR_SUB_DELIMITER_ARRAY.length && UNRESERVED_OR_SUB_DELIMITER_ARRAY[c];
-    }
-
-    /**
-     * 判断是否是 uri 未保留字符（可直接出现在 uri 中而无需编码）
-     */
-    public static boolean isUnreserved(int c) {
-        return CharacterUtil.isAlpha(c) || Character.isDigit(c) || '-' == c || '.' == c || '_' == c || '~' == c;
-    }
-
-    /**
-     * 判断是否是 uri 子分隔符
-     */
-    public static boolean isSubDelimiter(int c) {
-        return '!' == c || '$' == c || '&' == c || '\'' == c || '(' == c || ')' == c || '*' == c || '+' == c || ',' == c || ';' == c || '=' == c;
-    }
-
-    /**
-     * 给定字符是否在 rfc uri 路径段允许字符集 pchar 中
-     */
-    public static boolean isPathChar(int c) {
-        return isUnreservedOrSubDelimiter(c) || ':' == c || '@' == c;
-    }
-
     /**
      * 根据 / 截取路径段
      */
@@ -175,47 +132,5 @@ public class UriUtil {
             }
         }
         return builder.toString();
-    }
-
-    /**
-     * 对传入组件进行编码
-     *
-     * @param source      组件
-     * @param charset     默认字符集
-     * @param blankAsPlus 是否将空格编码为+
-     */
-    public static String encode(String source, Charset charset, AllowedPredicate allowed, boolean blankAsPlus) {
-        if (StringUtil.isEmpty(source)) {
-            return source;
-        }
-        Assert.nonNull(allowed, "AllowedPredicate must be not null");
-        Assert.nonNull(charset, "Charset must be not null");
-        byte[] sourceBytes = source.getBytes(charset);
-        // 检查给定字符串是否合法
-        boolean isAllowed = true;
-        for (byte sourceByte : sourceBytes) {
-            if (!allowed.isAllowed(sourceByte)) {
-                isAllowed = false;
-                break;
-            }
-        }
-        if (isAllowed) {
-            return source;
-        }
-
-        ByteArrayOutputStream stream = new ByteArrayOutputStream(sourceBytes.length);
-        for (byte sourceByte : sourceBytes) {
-            if (allowed.isAllowed(sourceByte)) {
-                stream.write(sourceByte);
-            } else if (blankAsPlus && sourceByte == 32) {
-                stream.write('+');
-            } else {
-                // 不合法字符进行编码
-                stream.write('%');
-                stream.write(Character.toUpperCase(Character.forDigit((sourceByte >> 4) & 0xF, 16)));
-                stream.write(Character.toUpperCase(Character.forDigit(sourceByte & 0xF, 16)));
-            }
-        }
-        return new String(stream.toByteArray(), charset);
     }
 }

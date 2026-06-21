@@ -1098,7 +1098,7 @@ public class RfcUri {
                         break;
                     default:
                         boolean isAllowed = parser.processCurlyBrackets() || parser.countDownPercentEncodingInHost()
-                                || UriUtil.isUnreservedOrSubDelimiter(currentChar);
+                                || RfcUriComponentEncoderEnum.isUnreservedOrSubDelimiter(currentChar);
                         Assert.isTrue(isAllowed, "Bad authority");
                         break;
                 }
@@ -1166,7 +1166,7 @@ public class RfcUri {
                 } else if (!Character.isDigit(currentChar)) {
                     if (parser.processCurlyBrackets()) {
                         return;
-                    } else if (currentChar == '%' || UriUtil.isUnreservedOrSubDelimiter(currentChar)) {
+                    } else if (currentChar == '%' || RfcUriComponentEncoderEnum.isUnreservedOrSubDelimiter(currentChar)) {
                         parser.switchPortForPassword();
                         parser.advanceTo(HOST);
                         return;

@@ -16,6 +16,13 @@ public class CharacterUtil {
     }
 
     /**
+     * 是否数字
+     */
+    public static boolean isDigit(int i) {
+        return Character.isDigit(i);
+    }
+
+    /**
      * 判断字符是否是16进制数字
      */
     public static boolean isHexDigit(int c) {
