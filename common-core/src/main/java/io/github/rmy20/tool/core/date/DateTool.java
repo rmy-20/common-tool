@@ -82,6 +82,11 @@ public enum DateTool {
     yyyyMMddHHmmss(DateConstants.yyyyMMddHHmmss),
 
     /**
+     * {@link DateConstants#yyyyMMddHHmmssSSS yyyyMMddHHmmssSSS}，如 20240707011427316
+     */
+    yyyyMMddHHmmssSSS(DateConstants.yyyyMMddHHmmssSSS),
+
+    /**
      * {@link DateConstants#yyMMddHHmmss yyMMddHHmmss}，如 240707011427
      */
     yyMMddHHmmss(DateConstants.yyMMddHHmmss),

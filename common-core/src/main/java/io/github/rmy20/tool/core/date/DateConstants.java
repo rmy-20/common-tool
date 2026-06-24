@@ -75,6 +75,11 @@ public class DateConstants {
     public static final String yyyyMMddHHmmss = "yyyyMMddHHmmss";
 
     /**
+     * yyyyMMddHHmmssSSS
+     */
+    public static final String yyyyMMddHHmmssSSS = "yyyyMMddHHmmssSSS";
+
+    /**
      * yyMMddHHmmss
      */
     public static final String yyMMddHHmmss = "yyMMddHHmmss";

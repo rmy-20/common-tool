@@ -534,16 +534,12 @@ public class RfcUri {
                 if (StringUtil.isNotBlank(scheme)) {
                     builder.append(scheme).append(':');
                 }
-                boolean hasUserInfo = Objects.nonNull(userinfo);
-                boolean hasHost = Objects.nonNull(host);
-                if (hasUserInfo || hasHost) {
+                if (StringUtil.isNotBlank(host)) {
                     builder.append(StringPool.DOUBLE_SLASH_SIGN);
-                    if (hasUserInfo) {
+                    if (StringUtil.isNotBlank(userinfo)) {
                         builder.append(userinfo).append('@');
                     }
-                    if (hasHost) {
-                        builder.append(host);
-                    }
+                    builder.append(host);
                     if (StringUtil.isNotBlank(port) && !StringPool.MINUS_ONE.equals(port)) {
                         builder.append(':').append(port);
                     }
@@ -925,7 +921,7 @@ public class RfcUri {
          * 存在 fragment 则截取 fragment
          */
         public void captureFragmentIfNotEmpty() {
-            if (index > componentIndex + 1) {
+            if (index > componentIndex) {
                 fragment = captureComponent();
             }
         }
@@ -1050,7 +1046,7 @@ public class RfcUri {
                         break;
                     case '#':
                         parser.capturePath();
-                        parser.advanceTo(FRAGMENT);
+                        parser.advanceTo(FRAGMENT, parser.currentIndex() + 1);
                         break;
                 }
             }
@@ -1122,14 +1118,22 @@ public class RfcUri {
                         parser.nextIndex();
                         parser.captureHost();
                         if (parser.hasNext()) {
-                            if (parser.currentChar() == ':') {
+                            currentChar = parser.currentChar();
+                            if (currentChar == ':') {
                                 parser.advanceTo(PORT, parser.currentIndex() + 1);
-                            } else {
+                            } else if (currentChar == '/') {
                                 parser.advanceTo(PATH, parser.currentIndex());
+                            } else if (currentChar == '?') {
+                                parser.advanceTo(QUERY, parser.currentIndex() + 1);
+                            } else if (currentChar == '#') {
+                                parser.advanceTo(FRAGMENT, parser.currentIndex() + 1);
+                            } else {
+                                throw new UriParseException("Bad authority");
                             }
                         }
                         break;
                     case ':':
+                    case '.':
                         break;
                     default:
                         Assert.isTrue(CharacterUtil.isHexDigit(currentChar), "Bad authority");
