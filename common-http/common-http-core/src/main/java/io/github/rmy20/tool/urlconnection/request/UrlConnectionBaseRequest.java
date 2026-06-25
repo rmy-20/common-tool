@@ -4,15 +4,15 @@ import io.github.rmy20.tool.core.text.StringUtil;
 import io.github.rmy20.tool.http.core.HttpHeaders;
 import io.github.rmy20.tool.http.core.body.Body;
 import io.github.rmy20.tool.http.core.constant.HttpMethodEnum;
+import io.github.rmy20.tool.http.core.decorator.RfcUriBuilderDecorator;
+import io.github.rmy20.tool.http.core.exception.HttpException;
+import io.github.rmy20.tool.http.core.request.BaseRequest;
 import io.github.rmy20.tool.http.core.result.HttpByteArrayResultHandle;
 import io.github.rmy20.tool.http.core.result.HttpFileResultHandle;
 import io.github.rmy20.tool.http.core.result.HttpJsonResultHandle;
 import io.github.rmy20.tool.http.core.result.HttpOutputStreamResultHandle;
 import io.github.rmy20.tool.http.core.result.HttpResultHandle;
 import io.github.rmy20.tool.http.core.result.HttpStringResultHandle;
-import io.github.rmy20.tool.http.core.decorator.RfcUriBuilderDecorator;
-import io.github.rmy20.tool.http.core.exception.HttpException;
-import io.github.rmy20.tool.http.core.request.BaseRequest;
 import io.github.rmy20.tool.http.core.result.HttpXmlResultHandle;
 import io.github.rmy20.tool.http.core.uri.RfcUri;
 import io.github.rmy20.tool.urlconnection.executor.UrlConnectionExecutorBuilder;
@@ -86,11 +86,11 @@ public abstract class UrlConnectionBaseRequest<T extends UrlConnectionBaseReques
 
     public UrlConnectionBaseRequest(String url, HttpMethodEnum method) {
         this.method = Objects.requireNonNull(method, "Http method must not be null");
-        RfcUri rfcUri = RfcUri.parse(url);
-        if (Objects.isNull(rfcUri)) {
+        RfcUri.Builder uriBuilder = RfcUri.fromUri(url);
+        if (Objects.isNull(uriBuilder)) {
             throw new HttpException(String.format("RfcUri解析url[%s]-[%s]失败", url, method.getMethod()));
         }
-        this.uriBuilder = rfcUri.newBuilder();
+        this.uriBuilder = uriBuilder;
         this.headers = HttpHeaders.create();
     }
 

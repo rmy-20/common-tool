@@ -114,11 +114,11 @@ public abstract class HttpClient5BaseRequest<T extends HttpClient5BaseRequest<T>
 
     public HttpClient5BaseRequest(String url, HttpMethodEnum method) {
         this.method = Objects.requireNonNull(method, "Http method must not be null");
-        RfcUri rfcUri = RfcUri.parse(url);
-        if (Objects.isNull(rfcUri)) {
+        RfcUri.Builder uriBuilder = RfcUri.fromUri(url);
+        if (Objects.isNull(uriBuilder)) {
             throw new HttpException(String.format("RfcUri解析url[%s]-[%s]失败", url, method.getMethod()));
         }
-        this.uriBuilder = rfcUri.newBuilder();
+        this.uriBuilder = uriBuilder;
         this.headers = HttpHeaders.create();
     }
 

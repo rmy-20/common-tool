@@ -20,7 +20,7 @@ class RfcUriTest {
         System.out.println(uri);
         System.out.println();
         System.out.println();
-        RfcUri rfcUri = RfcUri.parse(uri).newBuilder().pathSegmentsEncoded("/add1/add2/add3")
+        RfcUri rfcUri = RfcUri.fromUri(uri).pathSegmentsEncoded("/add1/add2/add3")
                 .queryEncoded("friend", "朋友1")
                 .queryEncoded("friend", "朋友2")
                 .queryEncoded("friend", "朋友3")

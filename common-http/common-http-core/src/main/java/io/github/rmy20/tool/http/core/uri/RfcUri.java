@@ -11,7 +11,6 @@ import io.github.rmy20.tool.http.core.util.UriUtil;
 import lombok.Getter;
 
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
@@ -79,7 +78,7 @@ public class RfcUri {
     /**
      * 编码时所用字符集
      */
-    private final Charset encodedCharset;
+    private final Charset charset;
 
     /**
      * url
@@ -96,10 +95,30 @@ public class RfcUri {
     /**
      * 创建 #{@link Builder}
      *
-     * @param encodedCharset 编码时所用字符集
+     * @param charset 编码时所用字符集
      */
-    public static Builder builder(Charset encodedCharset) {
-        return new Builder(encodedCharset);
+    public static Builder builder(Charset charset) {
+        return new Builder(charset);
+    }
+
+    /**
+     * 解析uri，使用 UTF-8 进行编码
+     *
+     * @param uri 待解析的uri
+     */
+    public static Builder fromUri(String uri) {
+        return fromUri(uri, true, StandardCharsets.UTF_8);
+    }
+
+    /**
+     * 解析uri
+     *
+     * @param uri              待解析的uri
+     * @param encodeComponents 对 uri 解析出来的组件是否进行编码
+     * @param charset          对 uri 解析出来的组件进行编码的字符集
+     */
+    public static Builder fromUri(String uri, boolean encodeComponents, Charset charset) {
+        return new InternalParse(uri).parse(encodeComponents, charset);
     }
 
     /**
@@ -114,16 +133,16 @@ public class RfcUri {
     /**
      * 解析uri
      *
-     * @param uri            待解析的uri
-     * @param encoded        对 uri 解析出来的组件是否进行编码
-     * @param encodedCharset 对 uri 解析出来的组件进行编码的字符集
+     * @param uri              待解析的uri
+     * @param encodeComponents 对 uri 解析出来的组件是否进行编码
+     * @param charset          对 uri 解析出来的组件进行编码的字符集
      */
-    public static RfcUri parse(String uri, boolean encoded, Charset encodedCharset) {
-        return new InternalParse(uri).parse(encoded, encodedCharset).build();
+    public static RfcUri parse(String uri, boolean encodeComponents, Charset charset) {
+        return new InternalParse(uri).parse(encodeComponents, charset).build();
     }
 
     private RfcUri(String scheme, String userinfo, String host, String port, List<String> pathSegments,
-                   List<String> queryParameters, String fragment, String schemeSpecificPart, Charset encodedCharset, URI uri) {
+                   List<String> queryParameters, String fragment, String schemeSpecificPart, Charset charset, URI uri) {
         this.scheme = scheme;
         this.userinfo = userinfo;
         this.host = host;
@@ -132,7 +151,7 @@ public class RfcUri {
         this.queryParameters = queryParameters;
         this.fragment = fragment;
         this.schemeSpecificPart = schemeSpecificPart;
-        this.encodedCharset = encodedCharset;
+        this.charset = charset;
         this.uri = uri;
     }
 
@@ -165,7 +184,7 @@ public class RfcUri {
      * 创建新的Builder，并设置当前Builder的组件
      */
     public Builder newBuilder() {
-        Builder builder = new Builder(encodedCharset).scheme(scheme);
+        Builder builder = new Builder(charset).scheme(scheme);
         if (StringUtil.isNotBlank(schemeSpecificPart)) {
             builder.schemeSpecificPart(schemeSpecificPart);
         } else {
@@ -556,8 +575,8 @@ public class RfcUri {
                     builder.append('#').append(fragment);
                 }
                 return new URI(builder.toString());
-            } catch (URISyntaxException e) {
-                throw new IllegalStateException("Can't not create URI Object :" + e.getMessage(), e);
+            } catch (Exception e) {
+                throw new UriParseException("Failed to create URI Object :" + e.getMessage(), e);
             }
         }
 
@@ -659,10 +678,10 @@ public class RfcUri {
         /**
          * 解析 uri
          *
-         * @param encode        解析结果为分层uri时是否编码
-         * @param encodeCharset 解析结果为分层uri时编码的字符集
+         * @param encodeComponents 解析结果为分层uri时是否编码
+         * @param charset          解析结果为分层uri时编码的字符集
          */
-        public Builder parse(boolean encode, Charset encodeCharset) {
+        public Builder parse(boolean encodeComponents, Charset charset) {
             Assert.isTrue(this.component == ComponentEnum.START && this.index == 0, () -> new UriParseException("Internal uri parse Error"));
             while (hasNext()) {
                 this.component.handleNext(this);
@@ -674,8 +693,8 @@ public class RfcUri {
                 String schemeSpecificPart = Objects.toString(path, StringPool.EMPTY) + Objects.toString(query, StringPool.EMPTY);
                 return new Builder().scheme(scheme).schemeSpecificPart(schemeSpecificPart).fragment(fragment);
             } else {
-                if (encode) {
-                    return new Builder(encodeCharset).schemeEncoded(scheme).userinfoEncoded(userinfo).hostEncoded(host)
+                if (encodeComponents) {
+                    return new Builder(charset).schemeEncoded(scheme).userinfoEncoded(userinfo).hostEncoded(host)
                             .port(port).pathSegmentsEncoded(path).queryEncoded(UriUtil.splitQueryParameters(query))
                             .fragmentEncoded(fragment);
                 } else {
@@ -1175,7 +1194,7 @@ public class RfcUri {
                         parser.advanceTo(HOST);
                         return;
                     }
-                    throw new IllegalArgumentException("Bad authority");
+                    throw new UriParseException("Bad authority");
                 }
             }
 
