@@ -78,33 +78,31 @@ public class UriUtil {
         int queryLen = query.length();
         List<String> queryParameters = new ArrayList<>();
         StringBuilder queryBuilder = new StringBuilder();
-        for (int i = 0, current = 0, last = queryLen - 1; i < queryLen; i++) {
-            boolean isGive = query.charAt(i) == '&';
-            if (isGive || (i == last)) {
-                // 添加 name
-                for (; current < i || (!isGive && current < queryLen); current++) {
-                    char c = query.charAt(current);
-                    if (c == '=') {
-                        queryParameters.add(queryBuilder.toString());
-                        queryBuilder.setLength(0);
-                        current++;
-                        break;
-                    }
-                    queryBuilder.append(c);
-                }
-                // 偶数则表明没有添加 name，该键值对没有 '='
-                if (queryParameters.size() % 2 == 0) {
-                    queryParameters.add(queryBuilder.toString());
-                    queryBuilder.setLength(0);
-                }
-                // 添加 value
-                for (; current < i || (!isGive && current < queryLen); current++) {
-                    queryBuilder.append(query.charAt(current));
-                }
+        boolean inValue = false;
+        for (int i = 0; i < queryLen; i++) {
+            char ch = query.charAt(i);
+            if (ch == '&') {
                 queryParameters.add(queryBuilder.toString());
                 queryBuilder.setLength(0);
-                current = i + 1;
+                inValue = false;
+                if (queryParameters.size() % 2 != 0) {
+                    queryParameters.add(StringPool.EMPTY);
+                }
+            } else if (ch == '=' && !inValue) {
+                queryParameters.add(queryBuilder.toString());
+                queryBuilder.setLength(0);
+                inValue = true;
+            } else {
+                queryBuilder.append(ch);
             }
+        }
+
+        if (queryBuilder.length() > 0) {
+            queryParameters.add(queryBuilder.toString());
+            queryBuilder.setLength(0);
+        }
+        if (queryParameters.size() % 2 != 0) {
+            queryParameters.add(StringPool.EMPTY);
         }
         return queryParameters;
     }
