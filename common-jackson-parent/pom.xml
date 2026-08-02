@@ -14,7 +14,8 @@
     <packaging>pom</packaging>
 
     <modules>
-        <module>common-jackson-v2</module>
+        <!--<module>common-jackson-v2</module>-->
+        <module>common-jackson-v3</module>
     </modules>
 
     <dependencies>

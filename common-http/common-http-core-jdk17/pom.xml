@@ -10,7 +10,7 @@
         <version>1.0.0</version>
     </parent>
 
-    <artifactId>common-http-core</artifactId>
+    <artifactId>common-http-core-jdk17</artifactId>
     <packaging>jar</packaging>
 
     <dependencies>

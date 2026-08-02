@@ -10,7 +10,7 @@
         <version>1.0.0</version>
     </parent>
 
-    <artifactId>common-all</artifactId>
+    <artifactId>common-all-jdk17</artifactId>
     <packaging>jar</packaging>
 
     <properties>
@@ -22,20 +22,44 @@
     <dependencies>
         <dependency>
             <groupId>io.github.rmy-20</groupId>
+            <artifactId>common-http-core-jdk17</artifactId>
+            <version>${project.parent.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>io.github.rmy-20</groupId>
             <artifactId>common-okhttp</artifactId>
             <version>${project.parent.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>io.github.rmy-20</groupId>
+                    <artifactId>common-http-core</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <dependency>
             <groupId>io.github.rmy-20</groupId>
             <artifactId>common-httpclient4</artifactId>
             <version>${project.parent.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>io.github.rmy-20</groupId>
+                    <artifactId>common-http-core</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <dependency>
             <groupId>io.github.rmy-20</groupId>
             <artifactId>common-httpclient5</artifactId>
             <version>${project.parent.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>io.github.rmy-20</groupId>
+                    <artifactId>common-http-core</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <dependency>
@@ -47,6 +71,12 @@
         <dependency>
             <groupId>io.github.rmy-20</groupId>
             <artifactId>common-jackson-v2</artifactId>
+            <version>${project.parent.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>io.github.rmy-20</groupId>
+            <artifactId>common-jackson-v3</artifactId>
             <version>${project.parent.version}</version>
         </dependency>
     </dependencies>

@@ -10,17 +10,17 @@
     <packaging>pom</packaging>
 
     <modules>
-        <module>common-log</module>
-        <module>common-core</module>
+        <!--<module>common-log</module>-->
+        <!--<module>common-core</module>-->
         <module>common-jackson-parent</module>
         <module>common-http</module>
-        <module>common-crypto</module>
-        <module>common-all</module>
+        <!--<module>common-crypto</module>-->
+        <module>common-all-jdk17</module>
     </modules>
 
     <properties>
-        <maven.compiler.source>8</maven.compiler.source>
-        <maven.compiler.target>8</maven.compiler.target>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
         <!-- 依赖版本 -->
@@ -29,6 +29,7 @@
         <httpclient4.version>4.5.14</httpclient4.version>
         <commons-codec.version>1.22.1</commons-codec.version>
         <jackson.version>2.22.1</jackson.version>
+        <jackson3.version>3.2.1</jackson3.version>
         <bc.version>1.84</bc.version>
         <junit.jupiter.version>5.8.2</junit.jupiter.version>
         <lombok.version>1.18.42</lombok.version>
@@ -112,6 +113,20 @@
                 <version>${jackson.version}</version>
             </dependency>
             <!-- jackson -->
+
+            <!-- jackson3 -->
+            <dependency>
+                <groupId>tools.jackson.core</groupId>
+                <artifactId>jackson-databind</artifactId>
+                <version>${jackson3.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>tools.jackson.dataformat</groupId>
+                <artifactId>jackson-dataformat-xml</artifactId>
+                <version>${jackson3.version}</version>
+            </dependency>
+            <!-- jackson3 -->
 
             <!-- 加密 -->
             <dependency>
