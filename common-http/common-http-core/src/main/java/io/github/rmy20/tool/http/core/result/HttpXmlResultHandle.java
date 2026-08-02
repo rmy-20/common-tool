@@ -1,7 +1,7 @@
 package io.github.rmy20.tool.http.core.result;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import io.github.rmy20.tool.jackson.XmlTool;
+import io.github.rmy20.tool.jackson.v2.XmlTool;
 
 /**
  * xml 结果处理器
