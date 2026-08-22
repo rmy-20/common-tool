@@ -27,7 +27,7 @@ import java.util.concurrent.TimeUnit;
  * @author sheng
  */
 class JdkClientRequestTest {
-    private static final boolean skip = false;
+    private static final boolean skip = true;
     private static final String uri = "http://127.0.0.1:6021/";
     private static final BaseRequestTool tool = JdkClientRequestTool.create().timeout(30, ChronoUnit.SECONDS);
 

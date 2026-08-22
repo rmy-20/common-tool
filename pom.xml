@@ -5,15 +5,15 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>io.github.rmy-20</groupId>
-    <artifactId>common-tool</artifactId>
+    <artifactId>common-tool-jdk17</artifactId>
     <version>1.0.0</version>
     <packaging>pom</packaging>
 
     <modules>
         <!--<module>common-log</module>-->
         <!--<module>common-core</module>-->
-        <module>common-jackson-parent</module>
-        <module>common-http</module>
+        <module>common-jackson-parent-jdk17</module>
+        <module>common-http-jdk17</module>
         <!--<module>common-crypto</module>-->
         <module>common-all-jdk17</module>
     </modules>
