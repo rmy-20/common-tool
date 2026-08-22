@@ -11,27 +11,7 @@ import java.util.concurrent.Flow;
  *
  * @author sheng
  */
-public class StrictDemandOutputStreamPublisher implements Flow.Publisher<ByteBuffer> {
-    /**
-     * 默认缓冲区大小
-     */
-    private static final int CHUNK_SIZE = 8192;
-
-    /**
-     * 实际待发布数据
-     */
-    private final OutputStreamProducer outputStreamProducer;
-
-    /**
-     * 缓冲区大小
-     */
-    private final int chunkSize;
-
-    /**
-     * 生产数据线程池
-     */
-    private final Executor executor;
-
+public class StrictDemandOutputStreamPublisher extends AbstractProducerPublisher<ByteBuffer> {
     /**
      * 创建#{@link StrictDemandOutputStreamPublisher}
      */
@@ -51,12 +31,7 @@ public class StrictDemandOutputStreamPublisher implements Flow.Publisher<ByteBuf
     }
 
     public StrictDemandOutputStreamPublisher(Executor executor, OutputStreamProducer outputStreamProducer, int chunkSize) {
-        this.executor = Objects.requireNonNull(executor, "executor must not be null");
-        this.outputStreamProducer = Objects.requireNonNull(outputStreamProducer, "outputStreamProducer must not be null");
-        if (chunkSize < 1024) {
-            throw new IllegalArgumentException("chunkSize must be greater than 1024");
-        }
-        this.chunkSize = chunkSize;
+        super(executor, outputStreamProducer, chunkSize);
     }
 
     @Override

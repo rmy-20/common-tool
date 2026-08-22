@@ -15,7 +15,7 @@ import java.util.concurrent.atomic.AtomicIntegerFieldUpdater;
  *
  * @author sheng
  */
-public class BoundedQueueOutputStreamPublisher implements Flow.Publisher<ByteBuffer> {
+public class BoundedQueueOutputStreamPublisher extends AbstractProducerPublisher<ByteBuffer> {
     /**
      * 默认高水位
      */
@@ -27,21 +27,6 @@ public class BoundedQueueOutputStreamPublisher implements Flow.Publisher<ByteBuf
     private static final int LOW_WATER_MARK = 30;
 
     /**
-     * 默认内部缓冲区大小
-     */
-    private static final int CHUNK_SIZE = 8192;
-
-    /**
-     * 实际待发布数据
-     */
-    private final OutputStreamProducer outputStreamProducer;
-
-    /**
-     * 内部缓冲区大小
-     */
-    private final int chunkSize;
-
-    /**
      * 低水位
      */
     private final int lowWaterMark;
@@ -50,11 +35,6 @@ public class BoundedQueueOutputStreamPublisher implements Flow.Publisher<ByteBuf
      * 高水位
      */
     private final int highWaterMark;
-
-    /**
-     * 生产者线程池
-     */
-    private final Executor executor;
 
     /**
      * 创建#{@link BoundedQueueOutputStreamPublisher}
@@ -77,18 +57,13 @@ public class BoundedQueueOutputStreamPublisher implements Flow.Publisher<ByteBuf
 
     public BoundedQueueOutputStreamPublisher(Executor executor, OutputStreamProducer outputStreamProducer, int chunkSize, int lowWaterMark,
                                              int highWaterMark) {
-        this.executor = Objects.requireNonNull(executor, "executor must not be null");
-        this.outputStreamProducer = Objects.requireNonNull(outputStreamProducer, "outputStreamProducer must not be null");
-        if (chunkSize < 1024) {
-            throw new IllegalArgumentException("chunkSize must be greater than 1024");
-        }
+        super(executor, outputStreamProducer, chunkSize);
         if (lowWaterMark < 5) {
             throw new IllegalArgumentException("lowWaterMark must be greater than 5");
         }
         if (highWaterMark < (lowWaterMark << 1)) {
             throw new IllegalArgumentException("highWaterMark must be greater than 2 * lowWater");
         }
-        this.chunkSize = chunkSize;
         this.lowWaterMark = lowWaterMark;
         this.highWaterMark = highWaterMark;
     }

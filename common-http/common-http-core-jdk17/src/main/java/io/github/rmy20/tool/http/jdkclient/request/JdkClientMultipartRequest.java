@@ -1,16 +1,20 @@
 package io.github.rmy20.tool.http.jdkclient.request;
 
-import io.github.rmy20.tool.core.constant.CommonConstant;
 import io.github.rmy20.tool.http.core.MediaType;
 import io.github.rmy20.tool.http.core.body.MultipartFormBody;
 import io.github.rmy20.tool.http.core.body.multipart.BaseMultipart;
 import io.github.rmy20.tool.http.core.constant.HttpMethodEnum;
 import io.github.rmy20.tool.http.core.request.BaseMultipartRequest;
+import io.github.rmy20.tool.http.jdkclient.constant.JdkClientConstant;
+import io.github.rmy20.tool.http.jdkclient.publisher.AbstractProducerPublisher;
 import io.github.rmy20.tool.http.jdkclient.publisher.BoundedQueueOutputStreamPublisher;
+import io.github.rmy20.tool.http.jdkclient.publisher.OutputStreamProducer;
+import io.github.rmy20.tool.http.jdkclient.publisher.StrictDemandOutputStreamPublisher;
 
 import java.io.File;
 import java.io.InputStream;
 import java.net.http.HttpRequest;
+import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.util.Objects;
 import java.util.concurrent.Executor;
@@ -31,6 +35,16 @@ public class JdkClientMultipartRequest extends JdkClientBaseRequest<JdkClientMul
      * 发布订阅数据的线程池
      */
     private Executor executor;
+
+    /**
+     * 传入的
+     */
+    private AbstractProducerPublisher<ByteBuffer> producerPublisher;
+
+    /**
+     * 默认严格背压
+     */
+    private PublisherEnum publisherType = PublisherEnum.STRICT_DEMAND;
 
     /**
      * 创建#{@link JdkClientMultipartRequest}
@@ -72,7 +86,17 @@ public class JdkClientMultipartRequest extends JdkClientBaseRequest<JdkClientMul
     }
 
     public Executor getExecutor() {
-        return Objects.nonNull(executor) ? executor : CommonConstant.EXECUTOR_SERVICE;
+        return Objects.nonNull(executor) ? executor : JdkClientConstant.MULTIPART_WORK_EXECUTOR;
+    }
+
+    public JdkClientMultipartRequest producerPublisher(AbstractProducerPublisher<ByteBuffer> producerPublisher) {
+        this.producerPublisher = producerPublisher;
+        return this;
+    }
+
+    public JdkClientMultipartRequest publisherType(PublisherEnum publisherType) {
+        this.publisherType = Objects.requireNonNull(publisherType, "publisherType must not be null");
+        return this;
     }
 
     @Override
@@ -134,11 +158,43 @@ public class JdkClientMultipartRequest extends JdkClientBaseRequest<JdkClientMul
     @Override
     protected void executeBefore() {
         getHeaders().setContentType(formBody.getContentType());
-        this.bodyPublisher = HttpRequest.BodyPublishers.fromPublisher(BoundedQueueOutputStreamPublisher.create(getExecutor(), formBody::writeTo));
+        AbstractProducerPublisher<ByteBuffer> producerPublisher = this.producerPublisher;
+        if (Objects.isNull(producerPublisher)) {
+            producerPublisher = publisherType.create(getExecutor(), formBody::writeTo);
+        }
+        this.bodyPublisher = HttpRequest.BodyPublishers.fromPublisher(producerPublisher);
     }
 
     @Override
     public JdkClientMultipartRequest self() {
         return this;
+    }
+
+    /**
+     * 发布器构造类型
+     */
+    public enum PublisherEnum {
+        /**
+         * 有界队列
+         */
+        BOUNDED_QUEUE() {
+            @Override
+            protected AbstractProducerPublisher<ByteBuffer> create(Executor executor, OutputStreamProducer outputStreamProducer) {
+                return BoundedQueueOutputStreamPublisher.create(executor, outputStreamProducer);
+            }
+        },
+
+        /**
+         * 严格背压
+         */
+        STRICT_DEMAND() {
+            @Override
+            protected AbstractProducerPublisher<ByteBuffer> create(Executor executor, OutputStreamProducer outputStreamProducer) {
+                return StrictDemandOutputStreamPublisher.create(executor, outputStreamProducer);
+            }
+        },
+        ;
+
+        protected abstract AbstractProducerPublisher<ByteBuffer> create(Executor executor, OutputStreamProducer outputStreamProducer);
     }
 }

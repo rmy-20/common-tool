@@ -4,9 +4,11 @@ import io.github.rmy20.tool.http.core.MediaType;
 import io.github.rmy20.tool.http.core.constant.HttpMethodEnum;
 import io.github.rmy20.tool.http.core.exception.HttpException;
 import io.github.rmy20.tool.http.core.request.BaseHttpRequest;
+import io.github.rmy20.tool.http.jdkclient.publisher.AbstractProducerPublisher;
 
 import java.io.File;
 import java.net.http.HttpRequest;
+import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 
 /**
@@ -48,6 +50,13 @@ public class JdkClientRequest extends JdkClientBaseRequest<JdkClientRequest> imp
         } catch (Exception e) {
             throw new HttpException("Failed to create file request body", e);
         }
+    }
+
+    /**
+     * 设置请求体
+     */
+    public JdkClientRequest body(AbstractProducerPublisher<ByteBuffer> producerPublisher) {
+        return body(HttpRequest.BodyPublishers.fromPublisher(producerPublisher));
     }
 
     /**
